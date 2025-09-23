@@ -142,7 +142,7 @@ body { margin: 0; background: #222;
   position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:30;
 }
 .store-panel{
-  position:fixed; inset:auto 50% 10vh auto; transform:translateX(50%);
+  position:fixed; inset:auto 50% 30vh auto; transform:translateX(50%);
   width:min(980px, 92vw); max-height:78vh; overflow:auto;
   border-radius:28px; z-index:31;
   border:2px solid rgba(224,162,51,.85);
@@ -217,3 +217,5 @@ body { margin: 0; background: #222;
   .store-content{ grid-template-columns: 1fr; }
   .inventory-column{ border-left:none; padding-left:0; }
 }
+
+

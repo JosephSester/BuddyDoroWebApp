@@ -160,6 +160,81 @@ body { margin: 0; background: #222;
   position:absolute; width:1px; height:1px; padding:0; margin:-1px;
   overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
 }
+.task-create{
+  flex-direction:column;
+  align-items:stretch;
+  gap:10px;
+}
+.task-create-fields{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:flex-end;
+}
+.task-create-field{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-size:12px;
+  font-weight:700;
+  color:#2b2213;
+}
+.task-create-label{ letter-spacing:.3px; }
+.task-create-input{
+  appearance:none;
+  border:1px solid rgba(43,34,19,.35);
+  border-radius:12px;
+  padding:8px 10px;
+  background:rgba(255,255,255,.9);
+  font-weight:700;
+  font-size:14px;
+  color:#2b2213;
+  box-shadow:0 4px 10px rgba(0,0,0,.12) inset;
+}
+.task-create-input:focus-visible{ outline:2px solid #ffb400; outline-offset:2px; }
+.task-create-name{ min-width:180px; }
+.task-create-estimate{ width:5ch; text-align:center; }
+.task-create-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.task-create-save,
+.task-create-cancel{
+  appearance:none;
+  border-radius:999px;
+  padding:8px 18px;
+  font-weight:700;
+  line-height:1;
+  cursor:pointer;
+  transition:filter .15s ease, transform .05s ease;
+}
+.task-create-save{
+  border:2px solid #e0a233;
+  background:linear-gradient(#ffd36b,#f2b942);
+  color:#2b2213;
+  box-shadow:0 6px 14px rgba(0,0,0,.16);
+}
+.task-create-save:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+  filter:none;
+  transform:none;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+}
+.task-create-save:hover:not(:disabled){ filter:brightness(1.03); }
+.task-create-save:active:not(:disabled){ transform:translateY(1px); }
+.task-create-cancel{
+  border:2px solid rgba(43,34,19,.35);
+  background:rgba(255,255,255,.75);
+  color:#2b2213;
+  box-shadow:0 4px 10px rgba(0,0,0,.12);
+}
+.task-create-cancel:hover{ filter:brightness(1.02); }
+.task-create-cancel:active{ transform:translateY(1px); }
+.task-create-save:focus-visible,
+.task-create-cancel:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }
+.task-create .field-error{ margin-top:0; }
 .task-del{
   width:36px; height:36px; display:grid; place-items:center; border-radius:999px;
   border:2px solid #e0a233; background:linear-gradient(#ffd36b,#f2b942); color:#2b2213;
@@ -181,6 +256,9 @@ body { margin: 0; background: #222;
 .tasks-panel .task-add:hover, button.task-add:hover{ filter:brightness(1.03); }
 .tasks-panel .task-add:active, button.task-add:active{ transform:translateY(1px); }
 .tasks-panel .task-add:focus-visible, button.task-add:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }
+.tasks-panel .task-add:disabled, button.task-add:disabled{
+  opacity:.6; cursor:not-allowed; filter:none;
+}
 
 /* ---------- Store dialog (window) ---------- */
 .backdrop{

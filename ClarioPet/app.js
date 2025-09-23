@@ -240,11 +240,19 @@ const addTaskBtn = document.getElementById('addTaskBtn');
 const tasksList  = document.getElementById('tasksList');
 const tasks = []; let nextTaskId=1;
 let sessionEditor=null;
+let createTaskCtx=null;
 const SESSION_MAX = 999;
+const CREATE_NAME_MAX = 80;
+const CREATE_DEFAULT_ESTIMATE = 50;
 
 function onUpdateTask(taskId, payload){
   // TODO: Wire up persistence/API when available.
   return Promise.resolve({ taskId, ...payload });
+}
+
+function onCreateTask(payload){
+  // TODO: Replace with persistence/API call when available.
+  return Promise.resolve({ id: `task-${Date.now()}`, ...payload });
 }
 
 const isEditingSessions = () => sessionEditor!=null;
@@ -323,18 +331,20 @@ function ensureActiveTaskIsValid(){
 }
 function renderAllTasks(){
   cancelSessionEdit({ restoreOriginal:false });
+  const createNode = createTaskCtx?.container || null;
   tasksList.innerHTML='';
+  if(createNode) tasksList.appendChild(createNode);
   tasks.forEach(t=>tasksList.appendChild(createTaskCard(t)));
   ensureActiveTaskIsValid();
   updateActiveTaskVisuals();
   updateTimerAvailability();
 }
-function addTask(name,total){
+function addTask(name,total,{ atTop=false }={}){
   const t={id:nextTaskId++, name, total, done:0};
-  tasks.push(t);
-  tasksList.appendChild(createTaskCard(t));
-  updateActiveTaskVisuals();
-  updateTimerAvailability();
+  if(atTop) tasks.unshift(t);
+  else tasks.push(t);
+  renderAllTasks();
+  return t;
 }
 function deleteTask(id){
   const i=tasks.findIndex(t=>t.id===id);
@@ -350,6 +360,261 @@ function setActiveTask(taskId){
   if(activeTaskId==null && anyRunning()) stop();
   updateActiveTaskVisuals();
   updateTimerAvailability();
+}
+
+function startCreateTask(initial={}){
+  if(createTaskCtx){
+    if(typeof initial.title==='string'){
+      createTaskCtx.nameInput.value=initial.title.trim().slice(0, CREATE_NAME_MAX);
+    }
+    if(initial.estimate!==undefined){
+      let estValue=Number(initial.estimate);
+      if(!Number.isInteger(estValue) || estValue<1 || estValue>SESSION_MAX){
+        estValue=CREATE_DEFAULT_ESTIMATE;
+      }
+      createTaskCtx.estimateInput.value=String(estValue);
+    }
+    if(initial.error){
+      createTaskCtx.shouldShowErrors=true;
+      showCreateTaskError(initial.error, createTaskCtx);
+    }
+    validateCreateTask(createTaskCtx);
+    if(initial.error){ showCreateTaskError(initial.error, createTaskCtx); }
+    createTaskCtx.nameInput.focus({ preventScroll:true });
+    createTaskCtx.nameInput.select();
+    return;
+  }
+
+  cancelSessionEdit();
+
+  const initialTitle = (initial.title ?? '').trim().slice(0, CREATE_NAME_MAX);
+  let initialEstimate = Number(initial.estimate);
+  if(!Number.isInteger(initialEstimate) || initialEstimate<1 || initialEstimate>SESSION_MAX){
+    initialEstimate = CREATE_DEFAULT_ESTIMATE;
+  }
+
+  const container=document.createElement('div');
+  container.className='task-card task-create';
+  const labelId=`createTaskLabel-${Date.now()}`;
+  container.setAttribute('role','form');
+  container.setAttribute('aria-labelledby', labelId);
+
+  const heading=document.createElement('div');
+  heading.id=labelId;
+  heading.className='sr-only';
+  heading.textContent='Create task';
+  container.appendChild(heading);
+
+  const fields=document.createElement('div');
+  fields.className='task-create-fields';
+
+  const nameField=document.createElement('label');
+  nameField.className='task-create-field';
+  const nameLabel=document.createElement('span');
+  nameLabel.className='task-create-label';
+  nameLabel.textContent='Name';
+  const nameInput=document.createElement('input');
+  nameInput.type='text';
+  nameInput.className='task-create-input task-create-name';
+  nameInput.placeholder='Task name...';
+  nameInput.maxLength=CREATE_NAME_MAX;
+  nameInput.value=initialTitle;
+  nameInput.required=true;
+  nameInput.setAttribute('aria-label','Task name');
+  nameField.append(nameLabel, nameInput);
+
+  const estimateField=document.createElement('label');
+  estimateField.className='task-create-field';
+  const estimateLabel=document.createElement('span');
+  estimateLabel.className='task-create-label';
+  estimateLabel.textContent='Estimate';
+  const estimateInput=document.createElement('input');
+  estimateInput.type='number';
+  estimateInput.className='task-create-input task-create-estimate';
+  estimateInput.min='1';
+  estimateInput.max=String(SESSION_MAX);
+  estimateInput.step='1';
+  estimateInput.inputMode='numeric';
+  estimateInput.value=String(initialEstimate);
+  estimateInput.setAttribute('aria-label','Estimated sessions');
+  estimateField.append(estimateLabel, estimateInput);
+
+  fields.append(nameField, estimateField);
+  container.appendChild(fields);
+
+  const actions=document.createElement('div');
+  actions.className='task-create-actions';
+  const saveBtn=document.createElement('button');
+  saveBtn.type='button';
+  saveBtn.className='task-create-save';
+  saveBtn.textContent='Save';
+  const cancelBtn=document.createElement('button');
+  cancelBtn.type='button';
+  cancelBtn.className='task-create-cancel';
+  cancelBtn.textContent='Cancel';
+  actions.append(saveBtn, cancelBtn);
+  container.appendChild(actions);
+
+  const errorEl=document.createElement('div');
+  errorEl.className='field-error';
+  errorEl.setAttribute('aria-live','polite');
+  errorEl.hidden=true;
+  container.appendChild(errorEl);
+
+  const stopPropagation = evt => evt.stopPropagation();
+  [container, nameInput, estimateInput, saveBtn, cancelBtn].forEach(el=>{
+    ['click','mousedown','mouseup','dblclick'].forEach(evtName=>el.addEventListener(evtName, stopPropagation));
+  });
+
+  const ctx={
+    container,
+    nameInput,
+    estimateInput,
+    saveBtn,
+    cancelBtn,
+    errorEl,
+    shouldShowErrors: Boolean(initial.error),
+    cleanupFns:[]
+  };
+
+  const handleInput=()=>{ ctx.shouldShowErrors=true; validateCreateTask(ctx); };
+  nameInput.addEventListener('input', handleInput);
+  estimateInput.addEventListener('input', handleInput);
+  ctx.cleanupFns.push(()=>nameInput.removeEventListener('input', handleInput));
+  ctx.cleanupFns.push(()=>estimateInput.removeEventListener('input', handleInput));
+
+  const handleNameKey=evt=>{
+    if(evt.key==='Enter'){ evt.preventDefault(); ctx.shouldShowErrors=true; attemptCreateTaskSave(); }
+    else if(evt.key==='Escape'){ evt.preventDefault(); cancelCreateTask(); }
+  };
+  const handleEstimateKey=evt=>{
+    if(evt.key==='Enter'){ evt.preventDefault(); ctx.shouldShowErrors=true; attemptCreateTaskSave(); }
+    else if(evt.key==='Escape'){ evt.preventDefault(); cancelCreateTask(); }
+  };
+  nameInput.addEventListener('keydown', handleNameKey);
+  estimateInput.addEventListener('keydown', handleEstimateKey);
+  ctx.cleanupFns.push(()=>nameInput.removeEventListener('keydown', handleNameKey));
+  ctx.cleanupFns.push(()=>estimateInput.removeEventListener('keydown', handleEstimateKey));
+
+  const handleButtonKey=evt=>{
+    if(evt.key==='Escape'){ evt.preventDefault(); cancelCreateTask(); }
+  };
+  saveBtn.addEventListener('keydown', handleButtonKey);
+  cancelBtn.addEventListener('keydown', handleButtonKey);
+  ctx.cleanupFns.push(()=>saveBtn.removeEventListener('keydown', handleButtonKey));
+  ctx.cleanupFns.push(()=>cancelBtn.removeEventListener('keydown', handleButtonKey));
+
+  const onSaveClick=()=>{ ctx.shouldShowErrors=true; attemptCreateTaskSave(); };
+  const onCancelClick=()=>cancelCreateTask();
+  saveBtn.addEventListener('click', onSaveClick);
+  cancelBtn.addEventListener('click', onCancelClick);
+  ctx.cleanupFns.push(()=>saveBtn.removeEventListener('click', onSaveClick));
+  ctx.cleanupFns.push(()=>cancelBtn.removeEventListener('click', onCancelClick));
+
+  const onContainerKeydown=evt=>{
+    if(evt.key==='Escape'){ evt.preventDefault(); cancelCreateTask(); }
+  };
+  container.addEventListener('keydown', onContainerKeydown);
+  ctx.cleanupFns.push(()=>container.removeEventListener('keydown', onContainerKeydown));
+
+  tasksList.prepend(container);
+  createTaskCtx=ctx;
+  setCreateButtonDisabled(true);
+
+  validateCreateTask(ctx);
+  if(initial.error){
+    showCreateTaskError(initial.error, ctx);
+  }
+  nameInput.focus();
+  nameInput.select();
+}
+
+function validateCreateTask(ctx,{ forceShow=false }={}){
+  if(!ctx) return { valid:false };
+  if(forceShow) ctx.shouldShowErrors=true;
+  const title=ctx.nameInput.value.trim();
+  let message='';
+  if(!title) message='Name is required.';
+  else if(title.length>CREATE_NAME_MAX) message=`Name must be ${CREATE_NAME_MAX} characters or fewer.`;
+
+  const rawEstimate=ctx.estimateInput.value.trim();
+  let estimateValue=null;
+  if(!message){
+    if(rawEstimate===''){ message='Estimate is required.'; }
+    else{
+      const estNumber=Number(rawEstimate);
+      if(!Number.isFinite(estNumber)) message='Estimate must be a number.';
+      else if(!Number.isInteger(estNumber)) message='Estimate must be a whole number.';
+      else if(estNumber<1) message='Estimate must be at least 1.';
+      else if(estNumber>SESSION_MAX) message=`Estimate must be ${SESSION_MAX} or less.`;
+      else estimateValue=estNumber;
+    }
+  }
+
+  if(!message){
+    ctx.nameInput.value=title;
+    ctx.estimateInput.value=String(estimateValue);
+  }
+
+  ctx.saveBtn.disabled=Boolean(message);
+  const shouldShow = ctx.shouldShowErrors || forceShow;
+  showCreateTaskError(shouldShow ? message : '', ctx);
+  return { valid: !message, title, estimate: estimateValue };
+}
+
+function attemptCreateTaskSave(){
+  if(!createTaskCtx) return;
+  const ctx=createTaskCtx;
+  const result=validateCreateTask(ctx,{ forceShow:true });
+  if(!result.valid) return;
+
+  const { title, estimate } = result;
+  if(tasks.length>=50){
+    showCreateTaskError('You can create up to 50 tasks.', ctx);
+    ctx.saveBtn.disabled=true;
+    return;
+  }
+  const optimisticTask = addTask(title, estimate, { atTop:true });
+  const optimisticId = optimisticTask.id;
+  teardownCreateTaskEditor({ focusButton:false });
+
+  onCreateTask({ title, estimate }).catch(err=>{
+    const idx=tasks.findIndex(t=>t.id===optimisticId);
+    if(idx!==-1){ tasks.splice(idx,1); renderAllTasks(); }
+    startCreateTask({ title, estimate, error: err?.message || 'Unable to create task. Please try again.' });
+  });
+}
+
+function cancelCreateTask({ focusButton=true }={}){
+  if(!createTaskCtx) return;
+  teardownCreateTaskEditor({ focusButton });
+}
+
+function teardownCreateTaskEditor({ focusButton=true }={}){
+  if(!createTaskCtx) return;
+  const ctx=createTaskCtx;
+  ctx.cleanupFns.forEach(fn=>{ try{ fn(); }catch(_e){ /* noop */ } });
+  ctx.cleanupFns.length=0;
+  if(ctx.container.parentElement){ ctx.container.parentElement.removeChild(ctx.container); }
+  createTaskCtx=null;
+  setCreateButtonDisabled(false);
+  if(focusButton && addTaskBtn){ addTaskBtn.focus({ preventScroll:true }); }
+}
+
+function showCreateTaskError(message, ctx=createTaskCtx){
+  if(!ctx || !ctx.errorEl) return;
+  if(message){
+    ctx.errorEl.hidden=false;
+    ctx.errorEl.textContent=message;
+  }else{
+    ctx.errorEl.hidden=true;
+    ctx.errorEl.textContent='';
+  }
+}
+
+function setCreateButtonDisabled(disabled){
+  if(!addTaskBtn) return;
+  addTaskBtn.disabled=!!disabled;
 }
 
 function createSessionField(labelText, initialValue){
@@ -567,8 +832,14 @@ function flashSessionError(taskId, message){
 }
 
 addTaskBtn?.addEventListener('click', ()=>{
-  if (tasks.length>=50) return alert('You can create up to 50 tasks.');
-  let name=prompt('Task name?'); if(!name) return;
-  let total=parseInt(prompt('How many sections in this task?'),10); if(!Number.isFinite(total)||total<=0) total=1;
-  addTask(name.trim(), total);
+  if(createTaskCtx){
+    createTaskCtx.nameInput.focus({ preventScroll:true });
+    createTaskCtx.nameInput.select();
+    return;
+  }
+  if (tasks.length>=50){
+    alert('You can create up to 50 tasks.');
+    return;
+  }
+  startCreateTask();
 });

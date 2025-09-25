@@ -58,6 +58,40 @@ if (greetTextEl) greetTextEl.textContent = `Hello, ${USER_NAME}`;
 function paintDoros(){ if (dorosAmountEl) dorosAmountEl.textContent = dorosBalance.toLocaleString(); }
 paintDoros();
 
+// ---------- Profile Menu ----------
+const profileChip = document.getElementById('profileChip');
+const profileMenu = document.getElementById('profileMenu');
+
+function toggleProfileMenu(show) {
+  if (!profileChip || !profileMenu) return;
+  const isVisible = !profileMenu.hidden;
+  const shouldShow = typeof show === 'boolean' ? show : !isVisible;
+
+  profileMenu.hidden = !shouldShow;
+  profileChip.setAttribute('aria-expanded', shouldShow ? 'true' : 'false');
+
+  if (shouldShow) {
+    document.addEventListener('click', handleOutsideProfileClick, { once: true });
+    document.addEventListener('keydown', handleProfileMenuKey);
+  } else {
+    document.removeEventListener('click', handleOutsideProfileClick);
+    document.removeEventListener('keydown', handleProfileMenuKey);
+  }
+}
+
+function handleOutsideProfileClick(e) {
+  if (!profileMenu.contains(e.target) && e.target !== profileChip) {
+    toggleProfileMenu(false);
+  } else {
+    // Re-add listener if click was inside but didn't close
+    document.addEventListener('click', handleOutsideProfileClick, { once: true });
+  }
+}
+
+function handleProfileMenuKey(e) {
+  if (e.key === 'Escape') toggleProfileMenu(false);
+}
+
 // ---------- Store window ----------
 const storeChip    = document.getElementById('storeChip');
 const storeDialog  = document.getElementById('storeDialog');
@@ -124,6 +158,24 @@ storeChip.addEventListener('click', openStore);
 storeBackdrop.addEventListener('click', closeStore);
 storeClose.addEventListener('click', closeStore);
 storeCloseBottom.addEventListener('click', closeStore);
+
+profileChip?.addEventListener('click', (e) => {
+  e.stopPropagation(); // prevent immediate close from document click listener
+  toggleProfileMenu();
+});
+
+profileMenu?.addEventListener('click', (e) => {
+  if (e.target.classList.contains('profile-menu-item')) {
+    const action = e.target.textContent.trim();
+    // Placeholder actions
+    if (action === 'Delete Account') {
+      if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) alert('Account deleted.');
+    } else {
+      alert(`${action} clicked! (Not implemented yet)`);
+    }
+    toggleProfileMenu(false);
+  }
+});
 
 // Tabs switching
 tabs.forEach(tab=>{

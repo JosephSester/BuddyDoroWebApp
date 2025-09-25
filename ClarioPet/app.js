@@ -58,6 +58,86 @@ if (greetTextEl) greetTextEl.textContent = `Hello, ${USER_NAME}`;
 function paintDoros(){ if (dorosAmountEl) dorosAmountEl.textContent = dorosBalance.toLocaleString(); }
 paintDoros();
 
+const dorosChipBtn = document.getElementById('dorosChip');
+const dorosMenuEl = document.getElementById('dorosMenu');
+const dorosDropdownEl = dorosChipBtn ? dorosChipBtn.closest('.doros-dropdown') : null;
+let dorosMenuOpen = false;
+let dorosMenuCleanupFns = [];
+function openDorosMenu(){
+  if(!dorosChipBtn || !dorosMenuEl || dorosMenuOpen) return;
+  dorosMenuOpen=true;
+  dorosChipBtn.setAttribute('aria-expanded','true');
+  if(dorosDropdownEl) dorosDropdownEl.setAttribute('data-open','true');
+  dorosMenuEl.hidden=false;
+  const onPointerDown=evt=>{
+    if(!dorosDropdownEl) return;
+    if(evt.target instanceof Node && dorosDropdownEl.contains(evt.target)) return;
+    closeDorosMenu();
+  };
+  const onKeyDown=evt=>{
+    if(evt.key==='Escape'){
+      evt.preventDefault();
+      closeDorosMenu({ focusChip:true });
+    }
+  };
+  const onFocusIn=evt=>{
+    if(!dorosDropdownEl) return;
+    if(evt.target instanceof Node && dorosDropdownEl.contains(evt.target)) return;
+    closeDorosMenu();
+  };
+  document.addEventListener('pointerdown', onPointerDown, true);
+  document.addEventListener('keydown', onKeyDown, true);
+  document.addEventListener('focusin', onFocusIn, true);
+  dorosMenuCleanupFns=[
+    ()=>document.removeEventListener('pointerdown', onPointerDown, true),
+    ()=>document.removeEventListener('keydown', onKeyDown, true),
+    ()=>document.removeEventListener('focusin', onFocusIn, true)
+  ];
+  window.requestAnimationFrame(()=>{
+    const firstItem=dorosMenuEl.querySelector('.doros-menu-item');
+    if(firstItem) firstItem.focus({ preventScroll:true });
+  });
+}
+function closeDorosMenu({ focusChip=false }={}){
+  if(!dorosChipBtn || !dorosMenuOpen) return;
+  dorosMenuOpen=false;
+  dorosChipBtn.setAttribute('aria-expanded','false');
+  if(dorosDropdownEl) dorosDropdownEl.removeAttribute('data-open');
+  if(dorosMenuEl) dorosMenuEl.hidden=true;
+  dorosMenuCleanupFns.forEach(fn=>{ try{ fn(); }catch(_err){} });
+  dorosMenuCleanupFns=[];
+  if(focusChip) dorosChipBtn.focus({ preventScroll:true });
+}
+function toggleDorosMenu(){ dorosMenuOpen?closeDorosMenu():openDorosMenu(); }
+if(dorosChipBtn && dorosMenuEl){
+  dorosChipBtn.addEventListener('click', evt=>{
+    evt.preventDefault();
+    toggleDorosMenu();
+  });
+  dorosChipBtn.addEventListener('keydown', evt=>{
+    if(evt.key==='ArrowDown' || evt.key==='Enter' || evt.key===' '){
+      evt.preventDefault();
+      openDorosMenu();
+    }else if(evt.key==='Escape' && dorosMenuOpen){
+      evt.preventDefault();
+      closeDorosMenu();
+    }
+  });
+  dorosMenuEl.addEventListener('keydown', evt=>{
+    if(evt.key==='Escape'){
+      evt.preventDefault();
+      closeDorosMenu({ focusChip:true });
+    }
+  });
+  dorosMenuEl.addEventListener('click', evt=>{
+    const item=evt.target instanceof Element ? evt.target.closest('.doros-menu-item') : null;
+    if(!item) return;
+    evt.preventDefault();
+    const action=item.dataset.menuAction;
+    closeDorosMenu({ focusChip:true });
+    if(action==='buy-doros' && typeof openStore==='function') openStore();
+  });
+}
 // ---------- Store window ----------
 const storeChip    = document.getElementById('storeChip');
 const storeDialog  = document.getElementById('storeDialog');
@@ -843,3 +923,5 @@ addTaskBtn?.addEventListener('click', ()=>{
   }
   startCreateTask();
 });
+
+

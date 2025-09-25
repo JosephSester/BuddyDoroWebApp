@@ -136,8 +136,15 @@ body { margin: 0; background: #222;
 }
 .session-bubble:focus-visible{ outline:3px solid rgba(43,34,19,.7); outline-offset:2px; }
 .session-bubble.editing{
-  cursor:auto; display:flex; align-items:flex-start; gap:8px; padding:8px 10px;
-  background:rgba(255,247,210,.92); border-color:#ffb400; box-shadow:0 8px 16px rgba(0,0,0,.12);
+  cursor:auto;
+  display:flex;
+  align-items:flex-start;
+  flex-wrap:wrap;
+  gap:12px;
+  padding:8px 12px;
+  background:rgba(255,247,210,.92);
+  border-color:#ffb400;
+  box-shadow:0 8px 16px rgba(0,0,0,.12);
   min-width:auto;
 }
 .session-field{
@@ -146,9 +153,17 @@ body { margin: 0; background: #222;
 }
 .session-field-label{ font-weight:700; letter-spacing:.3px; }
 .session-input{
-  width:3.5ch; padding:4px 6px; border-radius:10px; border:1px solid rgba(43,34,19,.35);
-  background:rgba(255,255,255,.9); font-weight:700; text-align:center;
+  min-width:6ch;
+  padding:6px 10px;
+  border-radius:10px;
+  border:1px solid rgba(43,34,19,.35);
+  background:rgba(255,255,255,.9);
+  font-weight:700;
+  text-align:center;
 }
+.session-input::-webkit-outer-spin-button,
+.session-input::-webkit-inner-spin-button{ margin:0; }
+.session-input[type=number]{ -moz-appearance:textfield; }
 .session-input:focus-visible{ outline:2px solid #ffb400; outline-offset:1px; }
 .field-error{
   margin-top:4px; font-size:12px; font-weight:600; color:#b22f1e;
@@ -193,7 +208,16 @@ body { margin: 0; background: #222;
 }
 .task-create-input:focus-visible{ outline:2px solid #ffb400; outline-offset:2px; }
 .task-create-name{ min-width:180px; }
-.task-create-estimate{ width:5ch; text-align:center; }
+.task-create-estimate{
+  min-width:6ch;
+  padding:8px 12px;
+  text-align:center;
+}
+
+@media (min-width:768px){
+  .session-input{ min-width:8ch; }
+  .task-create-estimate{ min-width:8ch; }
+}
 .task-create-actions{
   display:flex;
   flex-wrap:wrap;

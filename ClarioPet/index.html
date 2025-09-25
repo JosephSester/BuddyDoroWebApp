@@ -47,22 +47,27 @@
         </button>
 
         <!-- Doros chip -->
-        <button class="chip glass-chip doros-chip" id="dorosChip" type="button" aria-label="Doros balance">
-          <svg class="doros-icon" viewBox="0 0 64 64" aria-hidden="true">
-            <defs>
-              <radialGradient id="gemGlow" cx="35%" cy="30%" r="70%">
-                <stop offset="0%"  stop-color="#fff9d1"/><stop offset="45%" stop-color="#ffd979"/><stop offset="100%" stop-color="#f2b942"/>
-              </radialGradient>
-              <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f7d073"/><stop offset="100%" stop-color="#d39b2d"/></linearGradient>
-            </defs>
-            <circle cx="32" cy="32" r="29" fill="url(#ring)"/>
-            <circle cx="32" cy="32" r="25" fill="url(#gemGlow)" stroke="#b98627" stroke-width="2"/>
-            <ellipse cx="26" cy="22" rx="14" ry="9" fill="#fff" opacity=".35"/>
-            <text x="32" y="39" text-anchor="middle" font-family="DejaVu Sans, Arial" font-weight="700" font-size="24" fill="#2b2213">D</text>
-          </svg>
-          <span id="dorosAmount" class="doros-amount">1,250</span>
-          <span class="doros-label">Doros</span>
-        </button>
+        <div class="doros-dropdown">
+          <button class="chip glass-chip doros-chip" id="dorosChip" type="button" aria-label="Doros balance" aria-haspopup="true" aria-expanded="false" aria-controls="dorosMenu">
+            <svg class="doros-icon" viewBox="0 0 64 64" aria-hidden="true">
+              <defs>
+                <radialGradient id="gemGlow" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%"  stop-color="#fff9d1"/><stop offset="45%" stop-color="#ffd979"/><stop offset="100%" stop-color="#f2b942"/>
+                </radialGradient>
+                <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#f7d073"/><stop offset="100%" stop-color="#d39b2d"/></linearGradient>
+              </defs>
+              <circle cx="32" cy="32" r="29" fill="url(#ring)"/>
+              <circle cx="32" cy="32" r="25" fill="url(#gemGlow)" stroke="#b98627" stroke-width="2"/>
+              <ellipse cx="26" cy="22" rx="14" ry="9" fill="#fff" opacity=".35"/>
+              <text x="32" y="39" text-anchor="middle" font-family="DejaVu Sans, Arial" font-weight="700" font-size="24" fill="#2b2213">D</text>
+            </svg>
+            <span id="dorosAmount" class="doros-amount">1,250</span>
+            <span class="doros-label">Doros</span>
+          </button>
+          <div class="doros-menu" id="dorosMenu" role="menu" hidden>
+            <button type="button" class="doros-menu-item" role="menuitem" data-menu-action="buy-doros">Buy Doros</button>
+          </div>
+        </div>
 
         <!-- Profile chip & menu -->
         <div class="profile-container">
@@ -96,7 +101,7 @@
     <!-- Tasks panel (bottom-left) -->
     <div class="tasks-panel" aria-label="Tasks">
       <div class="tasks-header">Tasks</div>
-      <div id="tasksList" class="tasks-list" role="listbox"></div>
+      <div id="tasksList" class="tasks-list" role="listbox" aria-activedescendant=""></div>
       <button id="addTaskBtn" class="task-add" type="button">＋ Create a Task</button>
     </div>
 
@@ -158,3 +163,4 @@
   <script type="module" src="app.js"></script>
 </body>
 </html>
+

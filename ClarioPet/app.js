@@ -92,6 +92,86 @@ function handleProfileMenuKey(e) {
   if (e.key === 'Escape') toggleProfileMenu(false);
 }
 
+const dorosChipBtn = document.getElementById('dorosChip');
+const dorosMenuEl = document.getElementById('dorosMenu');
+const dorosDropdownEl = dorosChipBtn ? dorosChipBtn.closest('.doros-dropdown') : null;
+let dorosMenuOpen = false;
+let dorosMenuCleanupFns = [];
+function openDorosMenu(){
+  if(!dorosChipBtn || !dorosMenuEl || dorosMenuOpen) return;
+  dorosMenuOpen=true;
+  dorosChipBtn.setAttribute('aria-expanded','true');
+  if(dorosDropdownEl) dorosDropdownEl.setAttribute('data-open','true');
+  dorosMenuEl.hidden=false;
+  const onPointerDown=evt=>{
+    if(!dorosDropdownEl) return;
+    if(evt.target instanceof Node && dorosDropdownEl.contains(evt.target)) return;
+    closeDorosMenu();
+  };
+  const onKeyDown=evt=>{
+    if(evt.key==='Escape'){
+      evt.preventDefault();
+      closeDorosMenu({ focusChip:true });
+    }
+  };
+  const onFocusIn=evt=>{
+    if(!dorosDropdownEl) return;
+    if(evt.target instanceof Node && dorosDropdownEl.contains(evt.target)) return;
+    closeDorosMenu();
+  };
+  document.addEventListener('pointerdown', onPointerDown, true);
+  document.addEventListener('keydown', onKeyDown, true);
+  document.addEventListener('focusin', onFocusIn, true);
+  dorosMenuCleanupFns=[
+    ()=>document.removeEventListener('pointerdown', onPointerDown, true),
+    ()=>document.removeEventListener('keydown', onKeyDown, true),
+    ()=>document.removeEventListener('focusin', onFocusIn, true)
+  ];
+  window.requestAnimationFrame(()=>{
+    const firstItem=dorosMenuEl.querySelector('.doros-menu-item');
+    if(firstItem) firstItem.focus({ preventScroll:true });
+  });
+}
+function closeDorosMenu({ focusChip=false }={}){
+  if(!dorosChipBtn || !dorosMenuOpen) return;
+  dorosMenuOpen=false;
+  dorosChipBtn.setAttribute('aria-expanded','false');
+  if(dorosDropdownEl) dorosDropdownEl.removeAttribute('data-open');
+  if(dorosMenuEl) dorosMenuEl.hidden=true;
+  dorosMenuCleanupFns.forEach(fn=>{ try{ fn(); }catch(_err){} });
+  dorosMenuCleanupFns=[];
+  if(focusChip) dorosChipBtn.focus({ preventScroll:true });
+}
+function toggleDorosMenu(){ dorosMenuOpen?closeDorosMenu():openDorosMenu(); }
+if(dorosChipBtn && dorosMenuEl){
+  dorosChipBtn.addEventListener('click', evt=>{
+    evt.preventDefault();
+    toggleDorosMenu();
+  });
+  dorosChipBtn.addEventListener('keydown', evt=>{
+    if(evt.key==='ArrowDown' || evt.key==='Enter' || evt.key===' '){
+      evt.preventDefault();
+      openDorosMenu();
+    }else if(evt.key==='Escape' && dorosMenuOpen){
+      evt.preventDefault();
+      closeDorosMenu();
+    }
+  });
+  dorosMenuEl.addEventListener('keydown', evt=>{
+    if(evt.key==='Escape'){
+      evt.preventDefault();
+      closeDorosMenu({ focusChip:true });
+    }
+  });
+  dorosMenuEl.addEventListener('click', evt=>{
+    const item=evt.target instanceof Element ? evt.target.closest('.doros-menu-item') : null;
+    if(!item) return;
+    evt.preventDefault();
+    const action=item.dataset.menuAction;
+    closeDorosMenu({ focusChip:true });
+    if(action==='buy-doros' && typeof openStore==='function') openStore();
+  });
+}
 // ---------- Store window ----------
 const storeChip    = document.getElementById('storeChip');
 const storeDialog  = document.getElementById('storeDialog');
@@ -296,6 +376,19 @@ let createTaskCtx=null;
 const SESSION_MAX = 999;
 const CREATE_NAME_MAX = 80;
 const CREATE_DEFAULT_ESTIMATE = 50;
+let domIdCounter = 0;
+const makeDomId = (prefix='id') => {
+  domIdCounter += 1;
+  return `${prefix}-${Date.now()}-${domIdCounter}`;
+};
+
+let TASK_NAME_PATTERN;
+try {
+  TASK_NAME_PATTERN = new RegExp("^[\\p{L}\\p{N}][\\p{L}\\p{N}\\s'-]{0,79}$", 'u');
+} catch (_err) {
+  TASK_NAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9\s'-]{0,79}$/;
+}
+const TASK_NAME_ALLOWED_MESSAGE = 'Name can include letters, numbers, spaces, apostrophes, or hyphens.';
 
 function onUpdateTask(taskId, payload){
   // TODO: Wire up persistence/API when available.
@@ -447,7 +540,7 @@ function startCreateTask(initial={}){
 
   const container=document.createElement('div');
   container.className='task-card task-create';
-  const labelId=`createTaskLabel-${Date.now()}`;
+  const labelId=makeDomId('createTaskLabel');
   container.setAttribute('role','form');
   container.setAttribute('aria-labelledby', labelId);
 
@@ -460,11 +553,13 @@ function startCreateTask(initial={}){
   const fields=document.createElement('div');
   fields.className='task-create-fields';
 
-  const nameField=document.createElement('label');
+  const nameField=document.createElement('div');
   nameField.className='task-create-field';
-  const nameLabel=document.createElement('span');
+  const nameInputId = makeDomId('createTaskName');
+  const nameLabel=document.createElement('label');
   nameLabel.className='task-create-label';
   nameLabel.textContent='Name';
+  nameLabel.setAttribute('for', nameInputId);
   const nameInput=document.createElement('input');
   nameInput.type='text';
   nameInput.className='task-create-input task-create-name';
@@ -473,13 +568,16 @@ function startCreateTask(initial={}){
   nameInput.value=initialTitle;
   nameInput.required=true;
   nameInput.setAttribute('aria-label','Task name');
+  nameInput.id=nameInputId;
   nameField.append(nameLabel, nameInput);
 
-  const estimateField=document.createElement('label');
+  const estimateField=document.createElement('div');
   estimateField.className='task-create-field';
-  const estimateLabel=document.createElement('span');
+  const estimateInputId = makeDomId('createTaskEstimate');
+  const estimateLabel=document.createElement('label');
   estimateLabel.className='task-create-label';
   estimateLabel.textContent='Estimate';
+  estimateLabel.setAttribute('for', estimateInputId);
   const estimateInput=document.createElement('input');
   estimateInput.type='number';
   estimateInput.className='task-create-input task-create-estimate';
@@ -489,6 +587,7 @@ function startCreateTask(initial={}){
   estimateInput.inputMode='numeric';
   estimateInput.value=String(initialEstimate);
   estimateInput.setAttribute('aria-label','Estimated sessions');
+  estimateInput.id=estimateInputId;
   estimateField.append(estimateLabel, estimateInput);
 
   fields.append(nameField, estimateField);
@@ -588,6 +687,7 @@ function validateCreateTask(ctx,{ forceShow=false }={}){
   let message='';
   if(!title) message='Name is required.';
   else if(title.length>CREATE_NAME_MAX) message=`Name must be ${CREATE_NAME_MAX} characters or fewer.`;
+  else if(!TASK_NAME_PATTERN.test(title)) message=TASK_NAME_ALLOWED_MESSAGE;
 
   const rawEstimate=ctx.estimateInput.value.trim();
   let estimateValue=null;
@@ -670,12 +770,16 @@ function setCreateButtonDisabled(disabled){
 }
 
 function createSessionField(labelText, initialValue){
-  const wrapper=document.createElement('label');
+  const wrapper=document.createElement('div');
   wrapper.className='session-field';
 
-  const label=document.createElement('span');
+  const safeSuffix = labelText.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  const inputId = makeDomId(`sessionField-${safeSuffix}`);
+
+  const label=document.createElement('label');
   label.className='session-field-label';
   label.textContent=labelText;
+  label.setAttribute('for', inputId);
 
   const input=document.createElement('input');
   input.type='number';
@@ -683,9 +787,11 @@ function createSessionField(labelText, initialValue){
   input.inputMode='numeric';
   input.min='0';
   input.max=String(SESSION_MAX);
+  input.step='1';
   input.value=String(initialValue);
   input.setAttribute('aria-label', labelText);
   input.setAttribute('role','spinbutton');
+  input.id=inputId;
 
   wrapper.append(label, input);
   return { wrapper, input };
@@ -895,3 +1001,5 @@ addTaskBtn?.addEventListener('click', ()=>{
   }
   startCreateTask();
 });
+
+

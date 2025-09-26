@@ -5,9 +5,35 @@ const resetBtn  = document.getElementById('resetBtn');
 const modeLabel = document.getElementById('modeLabel');
 
 const chipEls = Array.from(document.querySelectorAll('.mode-chips .chip'));
+
+const DEFAULT_MINUTES = { focus: 25, break: 5 };
+const DEFAULT_LIMITS = { min: 1, max: 180 };
+const STORAGE_KEYS = { focus: 'focusDefaultMinutes', break: 'breakDefaultMinutes' };
+
+function readStoredMinutes(key, fallback){
+  try{
+    const raw = window.localStorage?.getItem(key);
+    if(raw==null) return fallback;
+    const parsed = Number.parseInt(raw, 10);
+    if(Number.isInteger(parsed) && parsed>=DEFAULT_LIMITS.min && parsed<=DEFAULT_LIMITS.max){
+      return parsed;
+    }
+  }catch(_err){ /* ignore storage errors */ }
+  return fallback;
+}
+
+function writeStoredMinutes(key, value){
+  try{
+    window.localStorage?.setItem(key, String(value));
+  }catch(_err){ /* ignore quota errors */ }
+}
+
+let focusDefaultMinutes = readStoredMinutes(STORAGE_KEYS.focus, DEFAULT_MINUTES.focus);
+let breakDefaultMinutes = readStoredMinutes(STORAGE_KEYS.break, DEFAULT_MINUTES.break);
+
 const MODES = {
-  study: { label: 'Study Timer',  duration: 25 * 60 },
-  short: { label: 'Short Break',  duration:  5 * 60 },
+  study: { label: 'Study Timer',  duration: focusDefaultMinutes * 60 },
+  short: { label: 'Short Break',  duration:  breakDefaultMinutes * 60 },
   long:  { label: 'Long Break',   duration: 15 * 60 }
 };
 function makeModeState(key){ const d=MODES[key].duration; return {key, duration:d, remaining:d, running:false, lastUpdated:null}; }
@@ -58,38 +84,171 @@ if (greetTextEl) greetTextEl.textContent = `Hello, ${USER_NAME}`;
 function paintDoros(){ if (dorosAmountEl) dorosAmountEl.textContent = dorosBalance.toLocaleString(); }
 paintDoros();
 
-// ---------- Profile Menu ----------
-const profileChip = document.getElementById('profileChip');
-const profileMenu = document.getElementById('profileMenu');
+function applyTimerDefaults({ focusMinutes, breakMinutes }){
+  const focusSeconds = focusMinutes * 60;
+  const breakSeconds = breakMinutes * 60;
 
-function toggleProfileMenu(show) {
-  if (!profileChip || !profileMenu) return;
-  const isVisible = !profileMenu.hidden;
-  const shouldShow = typeof show === 'boolean' ? show : !isVisible;
+  const prevFocusDuration = state.study.duration;
+  const prevBreakDuration = state.short.duration;
 
-  profileMenu.hidden = !shouldShow;
-  profileChip.setAttribute('aria-expanded', shouldShow ? 'true' : 'false');
+  MODES.study.duration = focusSeconds;
+  state.study.duration = focusSeconds;
+  if(!state.study.running && state.study.remaining === prevFocusDuration){
+    state.study.remaining = focusSeconds;
+  }
 
-  if (shouldShow) {
-    document.addEventListener('click', handleOutsideProfileClick, { once: true });
-    document.addEventListener('keydown', handleProfileMenuKey);
-  } else {
-    document.removeEventListener('click', handleOutsideProfileClick);
-    document.removeEventListener('keydown', handleProfileMenuKey);
+  MODES.short.duration = breakSeconds;
+  state.short.duration = breakSeconds;
+  if(!state.short.running && state.short.remaining === prevBreakDuration){
+    state.short.remaining = breakSeconds;
+  }
+
+  if(!anyRunning()) paint();
+  else if(!state[currentMode].running) paint();
+}
+
+const greetChip = document.getElementById('greetChip');
+const greetMenu = document.getElementById('greetMenu');
+const defaultsForm = document.getElementById('defaultsForm');
+const focusDefaultInput = document.getElementById('focusDefaultInput');
+const breakDefaultInput = document.getElementById('breakDefaultInput');
+const defaultsErrorEl = document.getElementById('defaultsError');
+
+let greetMenuOpen = false;
+let greetMenuCleanupFns = [];
+
+function hideDefaultsError(){
+  if(!defaultsErrorEl) return;
+  defaultsErrorEl.hidden = true;
+  defaultsErrorEl.textContent = '';
+}
+
+function showDefaultsError(message){
+  if(!defaultsErrorEl) return;
+  defaultsErrorEl.hidden = false;
+  defaultsErrorEl.textContent = message;
+}
+
+function hydrateDefaultsForm(){
+  if(focusDefaultInput) focusDefaultInput.value = String(focusDefaultMinutes);
+  if(breakDefaultInput) breakDefaultInput.value = String(breakDefaultMinutes);
+  hideDefaultsError();
+}
+
+function getGreetFocusableElements(){
+  if(!greetMenu) return [];
+  return Array.from(greetMenu.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+    .filter(el=>!el.hasAttribute('disabled') && el.getAttribute('aria-hidden')!=='true' && el.offsetParent!==null);
+}
+
+function handleGreetMenuKeydown(evt){
+  if(evt.key==='Escape'){
+    evt.preventDefault();
+    closeGreetMenu({ focusTrigger:true });
+    return;
+  }
+  if(evt.key!=='Tab') return;
+  const focusables = getGreetFocusableElements();
+  if(focusables.length===0) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length-1];
+  const active = document.activeElement;
+  if(evt.shiftKey){
+    if(active===first || !greetMenu.contains(active)){
+      evt.preventDefault();
+      last.focus({ preventScroll:true });
+    }
+  }else{
+    if(active===last){
+      evt.preventDefault();
+      first.focus({ preventScroll:true });
+    }
   }
 }
 
-function handleOutsideProfileClick(e) {
-  if (!profileMenu.contains(e.target) && e.target !== profileChip) {
-    toggleProfileMenu(false);
-  } else {
-    // Re-add listener if click was inside but didn't close
-    document.addEventListener('click', handleOutsideProfileClick, { once: true });
+function openGreetMenu(){
+  if(!greetChip || !greetMenu || greetMenuOpen) return;
+  greetMenuOpen = true;
+  hydrateDefaultsForm();
+  greetMenu.hidden = false;
+  greetChip.setAttribute('aria-expanded','true');
+
+  const onPointerDown = evt => {
+    if(!greetMenu) return;
+    if(evt.target instanceof Node && (greetMenu.contains(evt.target) || evt.target === greetChip)) return;
+    closeGreetMenu({ focusTrigger:false });
+  };
+
+  const onKeyDown = evt => handleGreetMenuKeydown(evt);
+
+  document.addEventListener('pointerdown', onPointerDown, true);
+  document.addEventListener('keydown', onKeyDown, true);
+  greetMenuCleanupFns = [
+    ()=>document.removeEventListener('pointerdown', onPointerDown, true),
+    ()=>document.removeEventListener('keydown', onKeyDown, true)
+  ];
+
+  window.requestAnimationFrame(()=>{
+    const focusables = getGreetFocusableElements();
+    if(focusables.length>0) focusables[0].focus({ preventScroll:true });
+  });
+}
+
+function closeGreetMenu({ focusTrigger=true }={}){
+  if(!greetMenu || !greetMenuOpen) return;
+  greetMenuOpen = false;
+  greetMenu.hidden = true;
+  greetChip?.setAttribute('aria-expanded','false');
+  greetMenuCleanupFns.forEach(fn=>{ try{ fn(); }catch(_err){} });
+  greetMenuCleanupFns.length=0;
+  if(focusTrigger && greetChip){
+    greetChip.focus({ preventScroll:true });
   }
 }
 
-function handleProfileMenuKey(e) {
-  if (e.key === 'Escape') toggleProfileMenu(false);
+function toggleGreetMenu(){ greetMenuOpen ? closeGreetMenu() : openGreetMenu(); }
+
+function validateDefaultValue(value, label){
+  const trimmed = String(value ?? '').trim();
+  if(trimmed==='') return { error: `${label} is required.` };
+  const parsed = Number(trimmed);
+  if(!Number.isFinite(parsed) || !Number.isInteger(parsed)) return { error: `${label} must be a whole number.` };
+  if(parsed<DEFAULT_LIMITS.min || parsed>DEFAULT_LIMITS.max){
+    return { error: `${label} must be between ${DEFAULT_LIMITS.min} and ${DEFAULT_LIMITS.max}.` };
+  }
+  return { value: parsed };
+}
+
+function handleDefaultsSubmit(evt){
+  evt.preventDefault();
+  if(!focusDefaultInput || !breakDefaultInput) return;
+
+  const focusResult = validateDefaultValue(focusDefaultInput.value, 'Focus session');
+  if(focusResult.error){ showDefaultsError(focusResult.error); focusDefaultInput.focus({ preventScroll:true }); return; }
+  const breakResult = validateDefaultValue(breakDefaultInput.value, 'Break session');
+  if(breakResult.error){ showDefaultsError(breakResult.error); breakDefaultInput.focus({ preventScroll:true }); return; }
+
+  hideDefaultsError();
+
+  focusDefaultMinutes = focusResult.value;
+  breakDefaultMinutes = breakResult.value;
+  writeStoredMinutes(STORAGE_KEYS.focus, focusDefaultMinutes);
+  writeStoredMinutes(STORAGE_KEYS.break, breakDefaultMinutes);
+  applyTimerDefaults({ focusMinutes: focusDefaultMinutes, breakMinutes: breakDefaultMinutes });
+  closeGreetMenu();
+}
+
+function handleGreetMenuClick(evt){
+  const target = evt.target instanceof Element ? evt.target.closest('.greet-menu-item[data-nav]') : null;
+  if(!target) return;
+  const destination = target.getAttribute('data-nav');
+  if(!destination) return;
+  try{
+    window.location.href = destination;
+  }catch(_err){
+    console.warn('Unable to navigate to settings:', destination);
+  }
+  closeGreetMenu({ focusTrigger:false });
 }
 
 const dorosChipBtn = document.getElementById('dorosChip');
@@ -239,23 +398,14 @@ storeBackdrop.addEventListener('click', closeStore);
 storeClose.addEventListener('click', closeStore);
 storeCloseBottom.addEventListener('click', closeStore);
 
-profileChip?.addEventListener('click', (e) => {
-  e.stopPropagation(); // prevent immediate close from document click listener
-  toggleProfileMenu();
+greetChip?.addEventListener('click', ()=>{
+  toggleGreetMenu();
 });
 
-profileMenu?.addEventListener('click', (e) => {
-  if (e.target.classList.contains('profile-menu-item')) {
-    const action = e.target.textContent.trim();
-    // Placeholder actions
-    if (action === 'Delete Account') {
-      if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) alert('Account deleted.');
-    } else {
-      alert(`${action} clicked! (Not implemented yet)`);
-    }
-    toggleProfileMenu(false);
-  }
-});
+defaultsForm?.addEventListener('submit', handleDefaultsSubmit);
+focusDefaultInput?.addEventListener('input', hideDefaultsError);
+breakDefaultInput?.addEventListener('input', hideDefaultsError);
+greetMenu?.addEventListener('click', handleGreetMenuClick);
 
 // Tabs switching
 tabs.forEach(tab=>{

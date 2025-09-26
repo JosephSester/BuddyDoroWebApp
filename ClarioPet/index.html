@@ -71,7 +71,7 @@
 
         <!-- Profile chip & menu -->
         <div class="profile-container">
-          <button class="chip glass-chip profile-chip" id="profileChip" type="button" aria-label="Profile" aria-haspopup="true" aria-expanded="false" aria-controls="profileMenu">
+          <button class="chip glass-chip profile-chip" id="profileChip" type="button" aria-label="Profile">
             <svg class="profile-svg" viewBox="0 0 64 64" aria-label="Profile J">
               <defs>
                 <radialGradient id="gm_glow" cx="35%" cy="30%" r="70%">
@@ -85,16 +85,30 @@
               <text x="32" y="41" text-anchor="middle" font-family="Arial, Segoe UI, ui-sans-serif" font-weight="700" font-size="28" fill="#2b2213">J</text>
             </svg>
           </button>
-          <div id="profileMenu" class="profile-menu" role="menu" hidden>
-            <button role="menuitem" class="profile-menu-item">Settings</button>
-            <button role="menuitem" class="profile-menu-item">Sign Out</button>
-            <hr class="profile-menu-divider">
-            <button role="menuitem" class="profile-menu-item is-destructive">Delete Account</button>
-          </div>
         </div>
 
         <!-- Greeting chip -->
-        <div class="chip glass-chip greet-chip" id="greetChip"><span id="greetText">Hello, Joe</span></div>
+        <div class="greet-container">
+          <button class="chip glass-chip greet-chip" id="greetChip" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="greetMenu">
+            <span id="greetText">Hello, Joe</span>
+          </button>
+          <div id="greetMenu" class="greet-menu" role="menu" hidden>
+            <div class="greet-menu-section" role="none">
+              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/account">Account Settings</button>
+              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/profile">Profile Settings</button>
+            </div>
+            <hr class="greet-menu-divider" />
+            <form id="defaultsForm" class="greet-defaults" novalidate>
+              <div class="greet-defaults-heading">Defaults</div>
+              <label class="greet-defaults-label" for="focusDefaultInput">Focus session (min)</label>
+              <input id="focusDefaultInput" name="focusDefault" type="number" inputmode="numeric" min="1" max="180" step="1" class="greet-defaults-input" />
+              <label class="greet-defaults-label" for="breakDefaultInput">Break session (min)</label>
+              <input id="breakDefaultInput" name="breakDefault" type="number" inputmode="numeric" min="1" max="180" step="1" class="greet-defaults-input" />
+              <div id="defaultsError" class="greet-defaults-error" role="alert" hidden></div>
+              <button type="submit" class="greet-defaults-save">Save</button>
+            </form>
+          </div>
+        </div>
       </div>
     </header>
 

@@ -684,6 +684,7 @@ function validateCreateTask(ctx,{ forceShow=false }={}){
   if(!ctx) return { valid:false };
   if(forceShow) ctx.shouldShowErrors=true;
   const title=ctx.nameInput.value.trim();
+  // Keep the input as typed during validation so space keystrokes persist until save.
   let message='';
   if(!title) message='Name is required.';
   else if(title.length>CREATE_NAME_MAX) message=`Name must be ${CREATE_NAME_MAX} characters or fewer.`;
@@ -704,7 +705,6 @@ function validateCreateTask(ctx,{ forceShow=false }={}){
   }
 
   if(!message){
-    ctx.nameInput.value=title;
     ctx.estimateInput.value=String(estimateValue);
   }
 
@@ -1001,5 +1001,3 @@ addTaskBtn?.addEventListener('click', ()=>{
   }
   startCreateTask();
 });
-
-

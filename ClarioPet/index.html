@@ -20,6 +20,9 @@
 
   <!-- UI overlay -->
   <div class="ui-layer">
+    <div class="brand-logo" role="img" aria-label="BuddyDoro brand">
+      <img src="artwork/BuddyDoroName.png" alt="BuddyDoro" />
+    </div>
 
     <!-- Top-right header (RIGHT → LEFT: Greeting, Profile, Doros, Store) -->
     <header class="topbar" aria-label="User header">
@@ -124,6 +127,44 @@
       <div class="timer-card" aria-live="polite">
         <div id="modeLabel" class="timer-label">Study Timer</div>
         <div id="timerDisplay" class="timer-value">25:00</div>
+
+        <!-- 3-dot trigger on the bottom of the circle -->
+        <button
+          id="timerMenuBtn"
+          class="btn-primary timer-menu-trigger"
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="timerMenu"
+          aria-label="Timer options"
+        >
+          <span class="timer-menu-dots" aria-hidden="true"></span>
+        </button>
+
+        <!-- Dropdown panel -->
+        <div id="timerMenu" class="timer-menu-panel" role="menu" hidden>
+          <form id="timerMenuForm" class="timer-menu-form">
+            <div class="timer-menu-field">
+              <label class="timer-menu-label" for="timerStudyInput">Study (min)</label>
+              <input id="timerStudyInput" class="timer-menu-input" type="number" min="1" max="180" step="1" inputmode="numeric" />
+            </div>
+            <div class="timer-menu-field">
+              <label class="timer-menu-label" for="timerShortInput">Short Break (min)</label>
+              <input id="timerShortInput" class="timer-menu-input" type="number" min="1" max="180" step="1" inputmode="numeric" />
+            </div>
+            <div class="timer-menu-field">
+              <label class="timer-menu-label" for="timerLongInput">Long Break (min)</label>
+              <input id="timerLongInput" class="timer-menu-input" type="number" min="1" max="180" step="1" inputmode="numeric" />
+            </div>
+
+            <div id="timerMenuError" class="timer-menu-error" hidden></div>
+
+            <div class="timer-menu-actions">
+              <button type="submit" class="btn-primary">Save</button>
+              <button type="button" id="timerMenuCancel" class="btn-secondary">Cancel</button>
+            </div>
+          </form>
+        </div>
       </div>
 
       <div class="btn-row">
@@ -177,4 +218,3 @@
   <script type="module" src="app.js"></script>
 </body>
 </html>
-

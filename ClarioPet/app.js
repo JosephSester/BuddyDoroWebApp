@@ -3,12 +3,20 @@ const display   = document.getElementById('timerDisplay');
 const startBtn  = document.getElementById('startBtn');
 const resetBtn  = document.getElementById('resetBtn');
 const modeLabel = document.getElementById('modeLabel');
+const timerMenuBtn = document.getElementById('timerMenuBtn');
+const timerMenu = document.getElementById('timerMenu');
+const timerMenuForm = document.getElementById('timerMenuForm');
+const timerMenuCancel = document.getElementById('timerMenuCancel');
+const timerMenuError = document.getElementById('timerMenuError');
+const timerStudyInput = document.getElementById('timerStudyInput');
+const timerShortInput = document.getElementById('timerShortInput');
+const timerLongInput = document.getElementById('timerLongInput');
 
 const chipEls = Array.from(document.querySelectorAll('.mode-chips .chip'));
 
-const DEFAULT_MINUTES = { focus: 25, break: 5 };
+const DEFAULT_MINUTES = { focus: 25, break: 5, long: 15 };
 const DEFAULT_LIMITS = { min: 1, max: 180 };
-const STORAGE_KEYS = { focus: 'focusDefaultMinutes', break: 'breakDefaultMinutes' };
+const STORAGE_KEYS = { focus: 'focusDefaultMinutes', break: 'breakDefaultMinutes', long: 'longDefaultMinutes' };
 
 function readStoredMinutes(key, fallback){
   try{
@@ -30,11 +38,12 @@ function writeStoredMinutes(key, value){
 
 let focusDefaultMinutes = readStoredMinutes(STORAGE_KEYS.focus, DEFAULT_MINUTES.focus);
 let breakDefaultMinutes = readStoredMinutes(STORAGE_KEYS.break, DEFAULT_MINUTES.break);
+let longDefaultMinutes = readStoredMinutes(STORAGE_KEYS.long, DEFAULT_MINUTES.long);
 
 const MODES = {
   study: { label: 'Study Timer',  duration: focusDefaultMinutes * 60 },
   short: { label: 'Short Break',  duration:  breakDefaultMinutes * 60 },
-  long:  { label: 'Long Break',   duration: 15 * 60 }
+  long:  { label: 'Long Break',   duration: longDefaultMinutes * 60 }
 };
 function makeModeState(key){ const d=MODES[key].duration; return {key, duration:d, remaining:d, running:false, lastUpdated:null}; }
 const state = { study:makeModeState('study'), short:makeModeState('short'), long:makeModeState('long') };
@@ -73,6 +82,106 @@ function setMode(modeKey){
 chipEls.forEach(ch=>ch.addEventListener('click', ()=>setMode(ch.dataset.mode)));
 setMode(currentMode);
 
+if (timerMenuBtn && timerMenu && timerMenuForm && timerStudyInput && timerShortInput && timerLongInput) {
+  let handleDocumentClick;
+  let handleKeydown;
+
+  const clearTimerMenuError = () => {
+    if(!timerMenuError) return;
+    timerMenuError.hidden = true;
+    timerMenuError.textContent = '';
+  };
+
+  const showTimerMenuError = (message) => {
+    if(!timerMenuError) return;
+    timerMenuError.hidden = false;
+    timerMenuError.textContent = message;
+  };
+
+  const hydrateTimerMenu = () => {
+    timerStudyInput.value = String(focusDefaultMinutes);
+    timerShortInput.value = String(breakDefaultMinutes);
+    timerLongInput.value = String(longDefaultMinutes);
+    clearTimerMenuError();
+  };
+
+  const closeTimerMenu = ({ focusTrigger = false } = {}) => {
+    if (timerMenu.hidden) return;
+    timerMenu.hidden = true;
+    timerMenu.classList.remove('is-open');
+    timerMenu.style.display = 'none';
+    timerMenuBtn.setAttribute('aria-expanded','false');
+    document.removeEventListener('click', handleDocumentClick);
+    document.removeEventListener('keydown', handleKeydown);
+    if(focusTrigger) timerMenuBtn.focus({ preventScroll:true });
+  };
+
+  handleDocumentClick = (event) => {
+    if (timerMenu.contains(event.target) || timerMenuBtn.contains(event.target)) return;
+    closeTimerMenu();
+  };
+
+  handleKeydown = (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeTimerMenu({ focusTrigger:true });
+    }
+  };
+
+  const openTimerMenu = () => {
+    if (!timerMenu.hidden) return;
+    hydrateTimerMenu();
+    timerMenu.hidden = false;
+    timerMenu.classList.add('is-open');
+    timerMenu.style.display = '';
+    timerMenuBtn.setAttribute('aria-expanded','true');
+    document.addEventListener('click', handleDocumentClick);
+    document.addEventListener('keydown', handleKeydown);
+    window.requestAnimationFrame(() => {
+      timerStudyInput.focus({ preventScroll:true });
+    });
+  };
+
+  timerMenuBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    timerMenu.hidden ? openTimerMenu() : closeTimerMenu();
+  });
+
+  timerMenuBtn.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      event.stopPropagation();
+      timerMenu.hidden ? openTimerMenu() : closeTimerMenu();
+    }
+  });
+
+  timerMenuCancel?.addEventListener('click', () => closeTimerMenu({ focusTrigger:true }));
+
+  timerMenuForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const focusResult = validateDefaultValue(timerStudyInput.value, 'Study session');
+    if(focusResult.error){ showTimerMenuError(focusResult.error); timerStudyInput.focus({ preventScroll:true }); return; }
+    const shortResult = validateDefaultValue(timerShortInput.value, 'Short break');
+    if(shortResult.error){ showTimerMenuError(shortResult.error); timerShortInput.focus({ preventScroll:true }); return; }
+    const longResult = validateDefaultValue(timerLongInput.value, 'Long break');
+    if(longResult.error){ showTimerMenuError(longResult.error); timerLongInput.focus({ preventScroll:true }); return; }
+
+    clearTimerMenuError();
+
+    focusDefaultMinutes = focusResult.value;
+    breakDefaultMinutes = shortResult.value;
+    longDefaultMinutes = longResult.value;
+    writeStoredMinutes(STORAGE_KEYS.focus, focusDefaultMinutes);
+    writeStoredMinutes(STORAGE_KEYS.break, breakDefaultMinutes);
+    writeStoredMinutes(STORAGE_KEYS.long, longDefaultMinutes);
+    applyTimerDefaults({
+      focusMinutes: focusDefaultMinutes,
+      breakMinutes: breakDefaultMinutes,
+      longMinutes: longDefaultMinutes
+    });
+    closeTimerMenu({ focusTrigger:true });
+  });
+}
 function updateTimerAvailability(){ startBtn.disabled = activeTaskId==null; }
 
 // ---------- Topbar data ----------
@@ -84,12 +193,18 @@ if (greetTextEl) greetTextEl.textContent = `Hello, ${USER_NAME}`;
 function paintDoros(){ if (dorosAmountEl) dorosAmountEl.textContent = dorosBalance.toLocaleString(); }
 paintDoros();
 
-function applyTimerDefaults({ focusMinutes, breakMinutes }){
-  const focusSeconds = focusMinutes * 60;
-  const breakSeconds = breakMinutes * 60;
+function applyTimerDefaults({ focusMinutes, breakMinutes, longMinutes }){
+  const nextFocusMinutes = focusMinutes ?? focusDefaultMinutes;
+  const nextBreakMinutes = breakMinutes ?? breakDefaultMinutes;
+  const nextLongMinutes = longMinutes ?? longDefaultMinutes;
+
+  const focusSeconds = nextFocusMinutes * 60;
+  const breakSeconds = nextBreakMinutes * 60;
+  const longSeconds = nextLongMinutes * 60;
 
   const prevFocusDuration = state.study.duration;
   const prevBreakDuration = state.short.duration;
+  const prevLongDuration = state.long.duration;
 
   MODES.study.duration = focusSeconds;
   state.study.duration = focusSeconds;
@@ -101,6 +216,12 @@ function applyTimerDefaults({ focusMinutes, breakMinutes }){
   state.short.duration = breakSeconds;
   if(!state.short.running && state.short.remaining === prevBreakDuration){
     state.short.remaining = breakSeconds;
+  }
+
+  MODES.long.duration = longSeconds;
+  state.long.duration = longSeconds;
+  if(!state.long.running && state.long.remaining === prevLongDuration){
+    state.long.remaining = longSeconds;
   }
 
   if(!anyRunning()) paint();
@@ -234,7 +355,7 @@ function handleDefaultsSubmit(evt){
   breakDefaultMinutes = breakResult.value;
   writeStoredMinutes(STORAGE_KEYS.focus, focusDefaultMinutes);
   writeStoredMinutes(STORAGE_KEYS.break, breakDefaultMinutes);
-  applyTimerDefaults({ focusMinutes: focusDefaultMinutes, breakMinutes: breakDefaultMinutes });
+  applyTimerDefaults({ focusMinutes: focusDefaultMinutes, breakMinutes: breakDefaultMinutes, longMinutes: longDefaultMinutes });
   closeGreetMenu();
 }
 

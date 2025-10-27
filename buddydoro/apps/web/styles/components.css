@@ -1,0 +1,15 @@
+/* Brand word-mark */
+.brand-logo{
+  position:absolute;
+  left:48px;                    /* change to right:48px; if you want it top-right */
+  top:24px;
+  width:clamp(180px, 22vw, 340px);
+  z-index:3;                    /* above timer/tasks */
+  pointer-events:none;
+}
+.brand-logo img{
+  display:block;
+  width:100%;
+  height:auto;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,.25));
+}

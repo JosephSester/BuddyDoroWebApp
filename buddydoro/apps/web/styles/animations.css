@@ -1,0 +1,11 @@
+/* dragon wiggle animation */
+@keyframes dragon-wiggle-key {
+  0%   { transform: translateX(-50%) rotate(0deg); }
+  25%  { transform: translateX(-50%) rotate(2deg); }
+  50%  { transform: translateX(-50%) rotate(0deg); }
+  75%  { transform: translateX(-50%) rotate(-2deg); }
+  100% { transform: translateX(-50%) rotate(0deg); }
+}
+.dragon-wiggle {
+  animation: dragon-wiggle-key 0.7s ease-in-out;
+}

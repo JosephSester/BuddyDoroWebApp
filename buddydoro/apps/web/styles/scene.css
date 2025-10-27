@@ -1,0 +1,7 @@
+/* ---------- background ---------- */
+.scene {
+  position: fixed; inset: 0;
+  /* JS now sets the background image; leave a fallback color only */
+  background: #222;
+  z-index: 0;
+}

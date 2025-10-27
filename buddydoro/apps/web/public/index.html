@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BuddyDoro</title>
+
+  <!-- Preload artwork (paths are relative to the web root served from /apps/web/public) -->
+  <link rel="preload" as="image" href="/assets/artwork/BackgroundDay.jpg" />
+  <link rel="preload" as="image" href="/assets/artwork/Dragon.png" />
+
+  <!-- Core styles (order matters: base → layout → components → feature CSS → themes) -->
+  <link rel="stylesheet" href="../styles/base.css" />
+  <link rel="stylesheet" href="../styles/layout.css" />
+  <link rel="stylesheet" href="../styles/components.css" />
+
+  <!-- Feature-specific CSS -->
+  <link rel="stylesheet" href="../styles/scene.css" />
+  <link rel="stylesheet" href="../styles/dragon.css" />
+  <link rel="stylesheet" href="../styles/topbar.css" />
+  <link rel="stylesheet" href="../styles/timer.css" />
+  <link rel="stylesheet" href="../styles/tasks.css" />
+  <link rel="stylesheet" href="../styles/store.css" />
+  <link rel="stylesheet" href="../styles/animations.css" />
+
+  <!-- Theme last so it can override colors if needed -->
+  <link rel="stylesheet" href="../styles/themes.css" />
+</head>
+<body>
+  <!-- Background scene -->
+  <div id="scene" class="scene" role="img" aria-label="Sunny forest clearing with a tree stump">
+    <div id="dragon" class="sprite dragon">
+      <img src="./assets/artwork/Dragon.png" alt="Friendly dragon" class="dragon-img" />
+    </div>
+  </div>
+
+  <!-- UI overlay -->
+  <div class="ui-layer">
+    <div class="brand-logo" role="img" aria-label="BuddyDoro brand">
+      <img src="/assets/artwork/BuddyDoroName.png" alt="BuddyDoro" />
+    </div>
+
+    <!-- Top-right header (RIGHT → LEFT: Greeting, Profile, Doros, Store) -->
+    <header class="topbar" aria-label="User header">
+      <div class="top-chips">
+
+        <!-- Store chip (opens window) -->
+        <button class="chip glass-chip store-chip" id="storeChip" type="button"
+                aria-haspopup="dialog" aria-controls="storeDialog">
+          <svg class="store-icon" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f7d073"/>
+                <stop offset="100%" stop-color="#d39b2d"/>
+              </linearGradient>
+              <radialGradient id="goldFill" cx="35%" cy="30%" r="70%">
+                <stop offset="0%"  stop-color="#fff6c3"/>
+                <stop offset="55%" stop-color="#ffd36b"/>
+                <stop offset="100%" stop-color="#f0b13a"/>
+              </radialGradient>
+            </defs>
+            <circle cx="32" cy="32" r="29" fill="url(#goldRing)"/>
+            <circle cx="32" cy="32" r="25" fill="url(#goldFill)" stroke="#b98627" stroke-width="2"/>
+            <path d="M22 28h20l2 20a3 3 0 0 1-3 3H23a3 3 0 0 1-3-3l2-20zm4-6a6 6 0 0 1 12 0v6h-4v-6a2 2 0 0 0-4 0v6h-4v-6z" fill="#2b2213"/>
+          </svg>
+          <span class="store-label">Store</span>
+        </button>
+
+        <!-- Doros chip -->
+        <div class="doros-dropdown">
+          <button class="chip glass-chip doros-chip" id="dorosChip" type="button"
+                  aria-label="Doros balance" aria-haspopup="true" aria-expanded="false"
+                  aria-controls="dorosMenu">
+            <svg class="doros-icon" viewBox="0 0 64 64" aria-hidden="true">
+              <defs>
+                <radialGradient id="gemGlow" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%"  stop-color="#fff9d1"/>
+                  <stop offset="45%" stop-color="#ffd979"/>
+                  <stop offset="100%" stop-color="#f2b942"/>
+                </radialGradient>
+                <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f7d073"/>
+                  <stop offset="100%" stop-color="#d39b2d"/>
+                </linearGradient>
+              </defs>
+              <circle cx="32" cy="32" r="29" fill="url(#ring)"/>
+              <circle cx="32" cy="32" r="25" fill="url(#gemGlow)" stroke="#b98627" stroke-width="2"/>
+              <ellipse cx="26" cy="22" rx="14" ry="9" fill="#fff" opacity=".35"/>
+              <text x="32" y="39" text-anchor="middle"
+                    font-family="DejaVu Sans, Arial" font-weight="700" font-size="24" fill="#2b2213">D</text>
+            </svg>
+            <span id="dorosAmount" class="doros-amount">1,250</span>
+            <span class="doros-label">Doros</span>
+          </button>
+          <div class="doros-menu" id="dorosMenu" role="menu" hidden>
+            <button type="button" class="doros-menu-item" role="menuitem" data-menu-action="buy-doros">Buy Doros</button>
+          </div>
+        </div>
+
+        <!-- Profile chip -->
+        <div class="profile-container">
+          <button class="chip glass-chip profile-chip" id="profileChip" type="button" aria-label="Profile">
+            <svg class="profile-svg" viewBox="0 0 64 64" aria-label="Profile J">
+              <defs>
+                <radialGradient id="gm_glow" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%"  stop-color="#fff6c3"/>
+                  <stop offset="55%" stop-color="#ffd36b"/>
+                  <stop offset="100%" stop-color="#f0b13a"/>
+                </radialGradient>
+                <linearGradient id="gm_ring" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f7d073"/>
+                  <stop offset="100%" stop-color="#d39b2d"/>
+                </linearGradient>
+              </defs>
+              <circle cx="32" cy="32" r="29" fill="url(#gm_ring)"/>
+              <circle cx="32" cy="32" r="25" fill="url(#gm_glow)" stroke="#b98627" stroke-width="2"/>
+              <circle cx="19" cy="17" r="6" fill="#fff" opacity=".9"/>
+              <text x="32" y="41" text-anchor="middle"
+                    font-family="Arial, Segoe UI, ui-sans-serif" font-weight="700" font-size="28" fill="#2b2213">J</text>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Greeting chip -->
+        <div class="greet-container">
+          <button class="chip glass-chip greet-chip" id="greetChip" type="button"
+                  aria-haspopup="menu" aria-expanded="false" aria-controls="greetMenu">
+            <span id="greetText">Hello, Joe</span>
+          </button>
+          <div id="greetMenu" class="greet-menu" role="menu" hidden>
+            <div class="greet-menu-section" role="none">
+              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/account">Account Settings</button>
+              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/profile">Profile Settings</button>
+            </div>
+            <hr class="greet-menu-divider" />
+            <form id="defaultsForm" class="greet-defaults" novalidate>
+              <div class="greet-defaults-heading">Defaults</div>
+              <label class="greet-defaults-label" for="focusDefaultInput">Focus session (min)</label>
+              <input id="focusDefaultInput" name="focusDefault" type="number" inputmode="numeric" min="1" max="180" step="1" class="greet-defaults-input" />
+              <label class="greet-defaults-label" for="breakDefaultInput">Break session (min)</label>
+              <input id="breakDefaultInput" name="breakDefault" type="number" inputmode="numeric" min="1" max="180" step="1" class="greet-defaults-input" />
+              <div id="defaultsError" class="greet-defaults-error" role="alert" hidden></div>
+              <button type="submit" class="greet-defaults-save">Save</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Tasks panel (bottom-left) -->
+    <div class="tasks-panel" aria-label="Tasks">
+      <div class="tasks-header">Tasks</div>
+      <div id="tasksList" class="tasks-list" role="listbox" aria-activedescendant=""></div>
+      <button id="addTaskBtn" class="task-add" type="button">＋ Create a Task</button>
+    </div>
+
+    <!-- Timer & controls (right) -->
+    <div class="right-ui">
+      <div class="timer-card" aria-live="polite">
+        <div id="modeLabel" class="timer-label">Study Timer</div>
+        <div id="timerDisplay" class="timer-value">25:00</div>
+
+        <!-- 3-dot trigger on the bottom of the circle -->
+        <button
+          id="timerMenuBtn"
+          class="btn-primary timer-menu-trigger"
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="timerMenu"
+          aria-label="Timer options">
+          <span class="timer-menu-dots" aria-hidden="true"></span>
+        </button>
+
+        <!-- Dropdown panel -->
+        <div id="timerMenu" class="timer-menu-panel" role="menu" hidden>
+          <form id="timerMenuForm" class="timer-menu-form">
+            <div class="timer-menu-field">
+              <label class="timer-menu-label" for="timerStudyInput">Study (min)</label>
+              <input id="timerStudyInput" class="timer-menu-input" type="number" min="1" max="180" step="1" inputmode="numeric" />
+            </div>
+            <div class="timer-menu-field">
+              <label class="timer-menu-label" for="timerShortInput">Short Break (min)</label>
+              <input id="timerShortInput" class="timer-menu-input" type="number" min="1" max="180" step="1" inputmode="numeric" />
+            </div>
+            <div class="timer-menu-field">
+              <label class="timer-menu-label" for="timerLongInput">Long Break (min)</label>
+              <input id="timerLongInput" class="timer-menu-input" type="number" min="1" max="180" step="1" inputmode="numeric" />
+            </div>
+
+            <div id="timerMenuError" class="timer-menu-error" hidden></div>
+
+            <div class="timer-menu-actions">
+              <button type="submit" class="btn-primary">Save</button>
+              <button type="button" id="timerMenuCancel" class="btn-secondary">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button id="startBtn" class="btn-primary" type="button">Start Timer</button>
+        <button id="resetBtn" class="btn-secondary" type="button" disabled>Reset</button>
+      </div>
+
+      <div class="mode-chips" role="group" aria-label="Timer mode">
+        <button class="chip is-active" data-mode="study" aria-pressed="true">Study</button>
+        <button class="chip" data-mode="short" aria-pressed="false">Short Break</button>
+        <button class="chip" data-mode="long" aria-pressed="false">Long Break</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Store dialog (window) -->
+  <div id="storeBackdrop" class="backdrop" hidden></div>
+
+  <section id="storeDialog" class="store-panel" role="dialog" aria-modal="true" aria-labelledby="storeTitle" hidden>
+    <div class="store-header">
+      <h2 id="storeTitle">Companion Store</h2>
+      <button id="storeClose" class="icon-btn" aria-label="Close store">&times;</button>
+    </div>
+
+    <div class="store-content">
+      <!-- Left: catalog -->
+      <div class="catalog-column">
+        <div class="category-tabs" role="tablist" aria-label="Store categories">
+          <button class="tab is-active" role="tab" aria-selected="true" data-cat="food">Food</button>
+          <button class="tab" role="tab" aria-selected="false" data-cat="play">Play</button>
+          <button class="tab" role="tab" aria-selected="false" data-cat="water">Water</button>
+          <button class="tab" role="tab" aria-selected="false" data-cat="medicine">Medicine</button>
+        </div>
+
+        <div id="catalogGrid" class="catalog-grid" aria-live="polite"></div>
+      </div>
+
+      <!-- Right: inventory -->
+      <aside class="inventory-column" aria-label="Your Inventory">
+        <h3>Inventory</h3>
+        <ul id="inventoryList" class="inventory-list" aria-live="polite"></ul>
+      </aside>
+    </div>
+
+    <div class="store-footer">
+      <button id="useSelectedBtn" class="btn-primary" type="button">Use Selected</button>
+      <button id="storeCloseBottom" class="btn-secondary" type="button">Close</button>
+    </div>
+  </section>
+
+  <!-- Entry script: lives in apps/web/js/main.js -->
+  <script type="module" src="../js/main.js"></script>
+</body>
+</html>

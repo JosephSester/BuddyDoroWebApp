@@ -1,0 +1,193 @@
+/* ---------- Left timer column ---------- */
+.right-ui{ position:absolute; left:3vw; top:14vh; width:clamp(260px, 28vw, 420px);
+  display:flex; flex-direction:column; align-items:center; gap:14px; pointer-events:auto; }
+.timer-card{ width:clamp(170px, 22vw, 260px); aspect-ratio:1; border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#2b2213;
+  background: radial-gradient(120px circle at 50% 42%, rgba(255,255,255,.55), rgba(255,255,255,.12) 70%), rgba(255,255,255,.08);
+  border:2px solid rgba(224,162,51,.85); box-shadow:0 10px 24px rgba(0,0,0,.25), inset 0 0 0 6px rgba(255,210,100,.22);
+  position:relative; padding-bottom:56px;
+}
+.timer-label{ font-weight:700; font-size:clamp(16px, 2.2vw, 20px); letter-spacing:.3px; margin-top:0; }
+.timer-value{ font-weight:800; font-size:clamp(40px, 6vw, 56px); letter-spacing:1px; line-height:1; transform:translateY(0); }
+
+.btn-row{ display:flex; gap:10px; justify-content:center; width:100%; }
+.btn-primary{ appearance:none; border:2px solid #e0a233; background:linear-gradient(#ffd36b,#f2b942); border-radius:999px;
+  padding:10px 18px; font-weight:700; color:#2b2213; box-shadow:0 8px 18px rgba(0,0,0,.2); cursor:pointer; }
+.btn-primary:disabled{ opacity:.55; cursor:not-allowed; filter:none; transform:none; box-shadow:0 4px 12px rgba(0,0,0,.12); }
+.btn-primary:hover{ filter:brightness(1.03); }
+.btn-primary:active{ transform:translateY(1px); }
+
+.timer-menu{ display:flex; flex-direction:column; align-items:center; gap:8px; position:relative; }
+.timer-menu-trigger.btn-primary{ position:absolute; bottom:12px; left:50%; transform:translateX(-50%); min-width:0; width:48px; height:48px;
+  padding:0; display:grid; place-items:center; line-height:1; }
+.timer-menu-trigger .timer-menu-dots{ display:inline-block; width:8px; height:8px; border-radius:50%; background:#2b2213; box-shadow:-12px 0 0 #2b2213, 12px 0 0 #2b2213; }
+
+.timer-menu-panel{ position:absolute; top:100%; left:50%; transform:translate(-50%, 28px); display:none; flex-direction:column; gap:12px;
+  padding:16px 18px; border-radius:22px; min-width:220px;
+  background: radial-gradient(180px circle at 28% 18%, rgba(255,255,255,.6), rgba(255,255,255,.14) 72%), rgba(255,235,160,.16);
+  border:2px solid rgba(224,162,51,.85); box-shadow:0 18px 36px rgba(0,0,0,.28), inset 0 0 0 6px rgba(255,210,100,.2);
+  pointer-events:auto; z-index:5;
+}
+.timer-menu-panel.is-open{ display:flex; }
+
+.timer-menu-form{ display:flex; flex-direction:column; gap:12px; }
+.timer-menu-field{ display:flex; flex-direction:column; gap:6px; }
+.timer-menu-label{ font-weight:800; font-size:14px; color:#2b2213; }
+.timer-menu-input{ appearance:none; border:2px solid rgba(224,162,51,.55); border-radius:14px; padding:8px 10px; font-weight:700; font-size:16px; text-align:center; background:#fff; color:#2b2213; box-shadow:0 6px 14px rgba(0,0,0,.16) inset; }
+.timer-menu-input:focus-visible{ outline:none; border-color:rgba(224,162,51,.85); box-shadow:0 0 0 2px rgba(224,162,51,.35), 0 6px 14px rgba(0,0,0,.16) inset; }
+.timer-menu-error{ font-size:13px; font-weight:600; color:#b22f1e; text-align:center; }
+.timer-menu-actions{ display:flex; gap:8px; justify-content:space-between; }
+.timer-menu-cancel{ background:rgba(255,255,255,.75); }
+
+.btn-secondary{ appearance:none; border:2px solid #e0a233; background:rgba(255,255,255,.7); color:#2b2213; border-radius:999px; padding:10px 18px; font-weight:700; box-shadow:0 8px 18px rgba(0,0,0,.12); cursor:pointer; }
+.btn-secondary:hover{ filter:brightness(1.02); }
+.btn-secondary:disabled{ opacity:.55; cursor:not-allowed; }
+
+.mode-chips{ display:flex; gap:8px; justify-content:center; width:100%; margin-top:8px; }
+.chip{ appearance:none; border:2px solid #e0a233; background:rgba(255,235,160,.75); color:#2b2213; padding:8px 14px; border-radius:999px; font-weight:700; font-size:14px; line-height:1; box-shadow:0 6px 14px rgba(0,0,0,.12); cursor:pointer; transition:filter .15s, transform .05s; }
+.chip:hover{ filter:brightness(1.03); }
+.chip:active{ transform:translateY(1px); }
+.chip.is-active{ background:linear-gradient(#ffd36b,#f2b942); box-shadow:0 8px 18px rgba(0,0,0,.18); }
+.chip:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }
+
+@media (max-width:640px){
+  .right-ui{ left:4vw; top:8vh; width:88vw; }
+}
+
+/* Timer text styles – restore original weight & sizes */
+.timer-label{
+  font-weight:700;
+  font-size:clamp(16px, 2.2vw, 20px);
+  letter-spacing:.3px;
+  margin-top:0;
+}
+.timer-value{
+  font-weight:800;
+  font-size:clamp(40px, 6vw, 56px);
+  letter-spacing:1px;
+  line-height:1;
+  transform:translateY(0);
+}
+
+.btn-row{ display:flex; gap:10px; justify-content:center; width:100%; }
+.btn-primary{
+  appearance:none; border:2px solid #e0a233; background:linear-gradient(#ffd36b,#f2b942);
+  border-radius:999px; padding:10px 18px; font-weight:700; color:#2b2213;
+  box-shadow:0 8px 18px rgba(0,0,0,.2); cursor:pointer;
+}
+.btn-primary:disabled{
+  opacity:.55; cursor:not-allowed; filter:none; transform:none;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+}
+.btn-primary:hover{ filter:brightness(1.03); }
+.btn-primary:active{ transform:translateY(1px); }
+
+/* --- Timer menu trigger & panel --- */
+/* (The wrapper .timer-menu isn’t used now, but keeping it is harmless.) */
+.timer-menu{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  position:relative;
+}
+
+/* Dot button anchored at the bottom of the circle */
+.timer-menu-trigger.btn-primary{
+  position:absolute;
+  bottom:12px;
+  left:50%;
+  transform:translateX(-50%);
+  min-width:0;
+  width:48px;
+  height:48px;
+  padding:0;
+  display:grid;
+  place-items:center;
+  line-height:1;
+}
+.timer-menu-trigger .timer-menu-dots{
+  display:inline-block;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#2b2213;
+  box-shadow:-12px 0 0 #2b2213, 12px 0 0 #2b2213;
+}
+
+/* Panel appears below the circle, centered */
+.timer-menu-panel{
+  position:absolute;
+  top:100%;
+  left:50%;
+  transform:translate(-50%, 28px);
+  display:none;
+  flex-direction:column;
+  gap:12px;
+  padding:16px 18px;
+  border-radius:22px;
+  min-width:220px;
+  background:
+    radial-gradient(180px circle at 28% 18%, rgba(255,255,255,.6), rgba(255,255,255,.14) 72%),
+    rgba(255,235,160,.16);
+  border:2px solid rgba(224,162,51,.85);
+  box-shadow:0 18px 36px rgba(0,0,0,.28), inset 0 0 0 6px rgba(255,210,100,.2);
+  pointer-events:auto;
+  z-index:5;
+}
+.timer-menu-panel.is-open{ display:flex; }
+
+.timer-menu-form{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.timer-menu-field{ display:flex; flex-direction:column; gap:6px; }
+.timer-menu-label{ font-weight:800; font-size:14px; color:#2b2213; }
+.timer-menu-input{
+  appearance:none;
+  border:2px solid rgba(224,162,51,.55);
+  border-radius:14px;
+  padding:8px 10px;
+  font-weight:700;
+  font-size:16px;
+  text-align:center;
+  background:#fff;
+  color:#2b2213;
+  box-shadow:0 6px 14px rgba(0,0,0,.16) inset;
+}
+.timer-menu-input:focus-visible{
+  outline:none;
+  border-color:rgba(224,162,51,.85);
+  box-shadow:0 0 0 2px rgba(224,162,51,.35), 0 6px 14px rgba(0,0,0,.16) inset;
+}
+.timer-menu-error{
+  font-size:13px;
+  font-weight:600;
+  color:#b22f1e;
+  text-align:center;
+}
+.timer-menu-actions{ display:flex; gap:8px; justify-content:space-between; }
+.timer-menu-actions .btn-primary,
+.timer-menu-actions .btn-secondary{ flex:1; }
+.timer-menu-cancel{ background:rgba(255,255,255,.75); }
+
+.btn-secondary{
+  appearance:none; border:2px solid #e0a233; background:rgba(255,255,255,.7);
+  color:#2b2213; border-radius:999px; padding:10px 18px; font-weight:700;
+  box-shadow:0 8px 18px rgba(0,0,0,.12); cursor:pointer;
+}
+.btn-secondary:hover{ filter:brightness(1.02); }
+.btn-secondary:disabled{ opacity:.55; cursor:not-allowed; }
+.btn-primary:focus-visible, .btn-secondary:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }
+
+.mode-chips{ display:flex; gap:8px; justify-content:center; width:100%; margin-top:8px; }
+.chip{
+  appearance:none; border:2px solid #e0a233; background:rgba(255,235,160,.75); color:#2b2213;
+  padding:8px 14px; border-radius:999px; font-weight:700; font-size:14px; line-height:1;
+  box-shadow:0 6px 14px rgba(0,0,0,.12); cursor:pointer; transition:filter .15s, transform .05s;
+}
+.chip:hover{ filter:brightness(1.03); }
+.chip:active{ transform:translateY(1px); }
+.chip.is-active{ background:linear-gradient(#ffd36b,#f2b942); box-shadow:0 8px 18px rgba(0,0,0,.18); }
+.chip:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }

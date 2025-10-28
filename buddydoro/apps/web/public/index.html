@@ -97,30 +97,6 @@
           </div>
         </div>
 
-        <!-- Profile chip -->
-        <div class="profile-container">
-          <button class="chip glass-chip profile-chip" id="profileChip" type="button" aria-label="Profile">
-            <svg class="profile-svg" viewBox="0 0 64 64" aria-label="Profile J">
-              <defs>
-                <radialGradient id="gm_glow" cx="35%" cy="30%" r="70%">
-                  <stop offset="0%"  stop-color="#fff6c3"/>
-                  <stop offset="55%" stop-color="#ffd36b"/>
-                  <stop offset="100%" stop-color="#f0b13a"/>
-                </radialGradient>
-                <linearGradient id="gm_ring" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#f7d073"/>
-                  <stop offset="100%" stop-color="#d39b2d"/>
-                </linearGradient>
-              </defs>
-              <circle cx="32" cy="32" r="29" fill="url(#gm_ring)"/>
-              <circle cx="32" cy="32" r="25" fill="url(#gm_glow)" stroke="#b98627" stroke-width="2"/>
-              <circle cx="19" cy="17" r="6" fill="#fff" opacity=".9"/>
-              <text x="32" y="41" text-anchor="middle"
-                    font-family="Arial, Segoe UI, ui-sans-serif" font-weight="700" font-size="28" fill="#2b2213">J</text>
-            </svg>
-          </button>
-        </div>
-
         <!-- Greeting chip -->
         <div class="greet-container">
           <button class="chip glass-chip greet-chip" id="greetChip" type="button"
@@ -147,12 +123,31 @@
       </div>
     </header>
 
-    <!-- Tasks panel (bottom-left) -->
-    <div class="tasks-panel" aria-label="Tasks">
+  <!-- Tasks stack -->
+<div class="tasks-wrap">                    <!-- ⬅️ NEW WRAPPER -->
+  <section id="tasksStack" class="tasks-stack">
+    <div id="tasksPanel-1" class="tasks-panel" aria-label="Tasks">
       <div class="tasks-header">Tasks</div>
       <div id="tasksList" class="tasks-list" role="listbox" aria-activedescendant=""></div>
       <button id="addTaskBtn" class="task-add" type="button">＋ Create a Task</button>
     </div>
+  </section>
+
+  <div class="tasks-chip-row">
+    <button id="addTasksPanel"
+            class="chip gold add-chip"
+            type="button"
+            aria-label="Add a Tasks box"
+            title="Add a Tasks box">
+      <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 5v14M5 12h14" fill="none" stroke="#2b2213" stroke-width="3.4"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>                                        <!-- ⬅️ END WRAPPER -->
+
+
 
     <!-- Timer & controls (right) -->
     <div class="right-ui">

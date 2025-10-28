@@ -173,19 +173,20 @@
 .task-del svg{ width:18px; height:18px; }
 
 /* Create button (gold pill) */
-.tasks-panel .task-add, button.task-add{
-  -webkit-appearance:none; appearance:none; display:block; width:100%;
-  padding:12px 18px; border-radius:999px; border:2px solid #e0a233;
-  background-image:linear-gradient(#ffd36b,#f2b942); background-color:#f2b942;
-  color:#2b2213; font-weight:800; font-size:18px; line-height:1; box-shadow:0 8px 18px rgba(0,0,0,.18);
-  cursor:pointer;
+.tasks-panel{
+  position: static;           /* was absolute */
+  width: 100%;                /* fill the .tasks-wrap width */
+  /* keep the visual styles below as-is */
+  padding:14px 14px 16px; border-radius:28px; color:#2b2213;
+  background:
+    radial-gradient(150px circle at 30% 20%, rgba(255,255,255,.55), rgba(255,255,255,.12) 70%),
+    rgba(255,255,255,.08);
+  border:2px solid rgba(224,162,51,.85);
+  box-shadow:0 10px 24px rgba(0,0,0,.25), inset 0 0 0 6px rgba(255,210,100,.22);
+  z-index:10; pointer-events:auto;
 }
-.tasks-panel .task-add:hover, button.task-add:hover{ filter:brightness(1.03); }
-.tasks-panel .task-add:active, button.task-add:active{ transform:translateY(1px); }
-.tasks-panel .task-add:focus-visible, button.task-add:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }
-.tasks-panel .task-add:disabled, button.task-add:disabled{
-  opacity:.6; cursor:not-allowed; filter:none;
-}
+
+
 
 /* Small screens — match the mobile Tasks panel */
 @media (max-width:640px){
@@ -195,10 +196,34 @@
     width:88vw;                              /* same width as .tasks-panel on mobile */
   }
 
-  .tasks-panel{ left:4vw; right:auto; bottom:4vh; width:88vw; }
   .mode-chips{ flex-wrap:wrap; justify-content:center; }
   .top-chips{ flex-wrap:wrap; gap:10px; }
   .store-panel{ inset:auto 50% 4vh auto; width:94vw; }
   .store-content{ grid-template-columns: 1fr; }
   .inventory-column{ border-left:none; padding-left:0; }
+}
+
+/* Make sure the Create button keeps the big gold pill look */
+.ui-layer .tasks-panel .task-add{
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 2px solid #e0a233;
+  background-image: linear-gradient(#ffd36b, #f2b942);
+  background-color: #f2b942;
+  color: #2b2213;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 1;
+  box-shadow: 0 8px 18px rgba(0,0,0,.18);
+  cursor: pointer;
+}
+.ui-layer .tasks-panel .task-add:hover{ filter: brightness(1.03); }
+.ui-layer .tasks-panel .task-add:active{ transform: translateY(1px); }
+.ui-layer .tasks-panel .task-add:focus-visible{ outline: 3px solid #2b2213; outline-offset: 2px; }
+.ui-layer .tasks-panel .task-add:disabled{
+  opacity: .6; cursor: not-allowed; filter: none;
 }

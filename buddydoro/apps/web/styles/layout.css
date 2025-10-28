@@ -49,8 +49,8 @@
   justify-content: flex-end;
 }
 
-/* Tasks panel placement (container only) */
-.tasks-panel{
+/* Tasks container (wraps the panel + the + chip row) */
+.tasks-wrap{
   position: absolute;
   right: 3vw;
   top: 12vh;
@@ -58,6 +58,13 @@
   z-index: 10;
   pointer-events: auto;
 }
+
+/* Inside the wrap, let the panel use normal flow so the chip can sit underneath */
+.tasks-wrap .tasks-panel{
+  position: static;
+  width: 100%;
+}
+
 
 /* Right column with timer + controls (container only) */
 .right-ui{
@@ -164,11 +171,17 @@
     width: 88vw;
   }
 
-  .tasks-panel{
+  .tasks-wrap{
     left: 4vw;
     right: auto;
     bottom: 4vh;
+    top: 8vh;                 /* optional: align with right-ui vertically */
     width: 88vw;
+  }
+
+  .tasks-wrap .tasks-panel{
+    position: static;
+    width: 100%;
   }
 
   .mode-chips{ flex-wrap: wrap; justify-content: center; }
@@ -181,6 +194,16 @@
 
   .store-content{ grid-template-columns: 1fr; }
   .inventory-column{ border-left: none; padding-left: 0; }
+}
+
+/* Holds up to 5 task panels */
+.tasks-stack {
+  display: grid;
+  gap: 20px;
+  /* Uncomment if you want just this region to scroll:
+  max-height: 65vh;
+  overflow-y: auto;
+  */
 }
 
 

@@ -719,3 +719,73 @@ function flashSessionError(taskId, message){
   container.hidden=false;
   setTimeout(()=>{ if(container && container.parentElement){ container.remove(); } }, 4000);
 }
+
+
+// -----------------------------------------------------------------------------
+// Tasks Panels (clone up to 5) — your requested adder script
+// -----------------------------------------------------------------------------
+(function mountTasksPanelAdder() {
+  const MAX_PANELS = 5;
+  const stack  = document.querySelector('#tasksStack');
+  const addBtn = document.querySelector('#addTasksPanel');
+  if (!stack || !addBtn) return;
+
+  // First panel is the template
+  const template = stack.querySelector('.tasks-panel');
+  if (!template) return;
+
+  function countPanels() {
+    return stack.querySelectorAll('.tasks-panel').length;
+  }
+
+  function uniquifyIds(panel, index) {
+    panel.id = `tasksPanel-${index}`;
+    const list = panel.querySelector('.tasks-list[id]');
+    if (list) list.id = `tasksList-${index}`;
+    const createBtn = panel.querySelector('.task-add[id]');
+    if (createBtn) createBtn.id = `addTaskBtn-${index}`;
+  }
+
+  function resetPanel(panel) {
+    // clear any tasks in the cloned panel
+    panel.querySelectorAll('.tasks-list').forEach(list => (list.innerHTML = ''));
+  }
+
+  function rebindPanelEvents(panel) {
+    // minimal hook so the inner “＋ Create a Task” works in each panel
+    panel.querySelector('.task-add')?.addEventListener('click', () => {
+      const list = panel.querySelector('.tasks-list');
+      if (!list) return;
+      const row = document.createElement('div');
+      row.className = 'task-row';
+      row.textContent = 'New task';
+      list.appendChild(row);
+    });
+  }
+
+  // Ensure the first panel has its local events
+  rebindPanelEvents(template);
+
+  addBtn.addEventListener('click', () => {
+    const current = countPanels();
+    if (current >= MAX_PANELS) {
+      addBtn.disabled = true;
+      addBtn.title = 'Maximum of 5 task boxes reached';
+      return;
+    }
+
+    const nextIndex = current + 1;
+    const clone = template.cloneNode(true);
+    uniquifyIds(clone, nextIndex);
+    resetPanel(clone);
+    rebindPanelEvents(clone);
+
+    stack.appendChild(clone);
+    clone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    if (nextIndex >= MAX_PANELS) {
+      addBtn.disabled = true;
+      addBtn.title = 'Maximum of 5 task boxes reached';
+    }
+  });
+})();

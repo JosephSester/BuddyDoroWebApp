@@ -16,15 +16,16 @@
 }
 .chip.glass-chip:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }
 
+/* ---------- Store chip + dropdown ---------- */
 .store-icon{ width:28px; height:28px; display:block; }
 .store-chip .store-label{ font-size:16px; }
 
+/* ---------- Doros chip + dropdown ---------- */
 .doros-chip .doros-icon{ width:28px; height:28px; display:block; }
 .doros-chip .doros-amount{ font-size:18px; font-weight:800; }
 .doros-chip .doros-label{ font-size:12px; opacity:.85; margin-left:2px; }
 
-.profile-chip{ padding:6px; width:auto; justify-content:center; }
-.profile-svg{ width:34px; height:34px; display:block; }
+/* ---------- Greeting chip + menu ---------- */
 .greet-chip span{ font-size:18px; }
 .greet-container{ position:relative; display:inline-block; }
 .greet-chip{ width:100%; }

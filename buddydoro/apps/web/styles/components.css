@@ -38,7 +38,6 @@
   transition:transform .05s ease, box-shadow .1s ease, filter .1s ease;
   position:relative;
 }
-
 .add-chip:hover{ filter:brightness(1.03); }
 .add-chip:active{
   transform:translateY(1px);
@@ -56,7 +55,7 @@
   display:block;
 }
 
-/* Soft inner highlight (to match the 3-dot vibe) */
+/* Soft inner highlight (to match other chips) */
 .add-chip::after{
   content:"";
   position:absolute;
@@ -72,7 +71,7 @@
    ================================ */
 .tasks-chip-row{
   display:flex;
-  justify-content:flex-end;   /* right-align under the Tasks panel; use center if preferred */
+  justify-content:flex-end;   /* right-align; change to center if you want */
   gap:12px;
   margin-top:12px;
 }

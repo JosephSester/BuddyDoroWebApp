@@ -75,6 +75,63 @@ function notifyActiveChange() {
   try { onActiveTaskChange(activeTaskId); } catch { /* noop */ }
 }
 
+// ▼▼▼ NEW: header rename wiring (title + pencil) ▼▼▼
+function wireHeaderRename(panel){
+  const titleEl = panel.querySelector('.tasks-title');
+  const btn     = panel.querySelector('.task-title-edit');
+  if(!titleEl || !btn) return;
+
+  const rename = () => {
+    const current = (titleEl.textContent || 'Tasks').trim();
+    const next = prompt('Rename this task group:', current);
+    if(next == null) return;                 // cancel
+    const clean = next.trim();
+    if(!clean) return;                       // ignore empty
+    titleEl.textContent = clean.slice(0, 40); // cap at 40 chars
+  };
+
+  btn.addEventListener('click', (e)=>{ e.stopPropagation(); rename(); });
+  btn.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); rename(); }
+  });
+}
+
+
+// ▼▼▼ Header delete wiring (trash button with confirm) ▼▼▼
+function wireHeaderDelete(panel){
+  const delBtn  = panel.querySelector('.task-title-delete');
+  if (!delBtn) return;
+
+  delBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+
+    const titleEl = panel.querySelector('.tasks-title');
+    const name = (titleEl?.textContent || 'this task').trim() || 'this task';
+
+    // prevent deleting the last remaining panel
+    const stack = panel.closest('#tasksStack') || document;
+    const total = stack.querySelectorAll('.tasks-panel').length;
+    if (total <= 1) {
+      alert('You must keep at least one task box.');
+      return;
+    }
+
+    const ok = confirm(`Are you sure you want to delete "${name}"?`);
+    if (!ok) return;
+
+    // remove the entire tasks panel
+    panel.remove();
+
+    // re-enable adder if it was disabled at limit
+    const addBtn = document.querySelector('#addTasksPanel');
+    if (addBtn) {
+      addBtn.disabled = false;
+      addBtn.title = '';
+    }
+  });
+}
+
+
 // -----------------------------------------------------------------------------
 // Rendering & interactions
 // -----------------------------------------------------------------------------
@@ -720,9 +777,8 @@ function flashSessionError(taskId, message){
   setTimeout(()=>{ if(container && container.parentElement){ container.remove(); } }, 4000);
 }
 
-
 // -----------------------------------------------------------------------------
-// Tasks Panels (clone up to 5) — your requested adder script
+// Tasks Panel Adder (outside the tasks box, below it)
 // -----------------------------------------------------------------------------
 (function mountTasksPanelAdder() {
   const MAX_PANELS = 5;
@@ -733,6 +789,29 @@ function flashSessionError(taskId, message){
   // First panel is the template
   const template = stack.querySelector('.tasks-panel');
   if (!template) return;
+
+  // <<< ADD: keep the outside "+" chip aligned under the stack >>>
+  const chipRow = document.querySelector('.tasks-chip-row');
+
+  function placeChipRow() {
+    if (!chipRow || !stack) return;
+    const r = stack.getBoundingClientRect();
+    chipRow.style.position = 'absolute';
+    chipRow.style.right = '3vw';
+    chipRow.style.top = `${Math.round(window.scrollY + r.bottom + 12)}px`;
+  }
+
+  // initial placement + keep in sync on resize/stack size changes
+  placeChipRow();
+  new ResizeObserver(() => placeChipRow()).observe(stack);
+  window.addEventListener('resize', placeChipRow);
+  // <<< /ADD >>>
+
+
+
+  // Make sure the header buttons work on the first panel
+  wireHeaderRename(template);
+  wireHeaderDelete(template);
 
   function countPanels() {
     return stack.querySelectorAll('.tasks-panel').length;
@@ -746,26 +825,35 @@ function flashSessionError(taskId, message){
     if (createBtn) createBtn.id = `addTaskBtn-${index}`;
   }
 
+  // One canonical reset that also prevents doubles/nesting
   function resetPanel(panel) {
-    // clear any tasks in the cloned panel
+    // 1) Clear any tasks in the cloned panel
     panel.querySelectorAll('.tasks-list').forEach(list => (list.innerHTML = ''));
+
+    // 2) Reset the header title
+    const titleEl = panel.querySelector('.tasks-title');
+    if (titleEl) titleEl.textContent = 'Task';
+
+    // 3) REMOVE any accidentally nested .tasks-panel inside this panel
+    const innerPanels = Array.from(panel.querySelectorAll('.tasks-panel'));
+    innerPanels.forEach(p => { if (p !== panel) p.remove(); });
+
+    // 4) Ensure there is only ONE "+ Create a Task" button in the panel
+    const addButtons = Array.from(panel.querySelectorAll('.task-add'));
+    addButtons.slice(1).forEach(btn => btn.remove());
   }
 
+    // Rebind header actions for a given panel (no placeholder rows)
   function rebindPanelEvents(panel) {
-    // minimal hook so the inner “＋ Create a Task” works in each panel
-    panel.querySelector('.task-add')?.addEventListener('click', () => {
-      const list = panel.querySelector('.tasks-list');
-      if (!list) return;
-      const row = document.createElement('div');
-      row.className = 'task-row';
-      row.textContent = 'New task';
-      list.appendChild(row);
-    });
-  }
+    // Wire the header buttons for this panel
+    wireHeaderRename(panel);
+    wireHeaderDelete(panel);
+  } // <-- close the function
 
-  // Ensure the first panel has its local events
+  // Ensure the first (template) panel has its local header actions wired
   rebindPanelEvents(template);
 
+  // Outside "+" button: add a brand-new Tasks panel (clone) up to MAX_PANELS
   addBtn.addEventListener('click', () => {
     const current = countPanels();
     if (current >= MAX_PANELS) {
@@ -775,17 +863,31 @@ function flashSessionError(taskId, message){
     }
 
     const nextIndex = current + 1;
+
+    // Clone the whole panel box
     const clone = template.cloneNode(true);
-    uniquifyIds(clone, nextIndex);
+
+    // Clear any inner tasks + normalize header + dedupe inner "Create a Task" buttons
     resetPanel(clone);
+
+    // Give the clone unique IDs (the original keeps the global IDs your initTasks uses)
+    uniquifyIds(clone, nextIndex);
+
+    // Wire header actions for this clone
     rebindPanelEvents(clone);
 
+    // Mount it
     stack.appendChild(clone);
+    placeChipRow(); // <<< ADD: reposition "+" after adding a panel
+
     clone.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+    // Cap at MAX_PANELS
     if (nextIndex >= MAX_PANELS) {
       addBtn.disabled = true;
       addBtn.title = 'Maximum of 5 task boxes reached';
     }
   });
+
+  // end IIFE
 })();

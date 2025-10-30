@@ -123,16 +123,38 @@
       </div>
     </header>
 
-  <!-- Tasks stack -->
-<div class="tasks-wrap">                    <!-- ⬅️ NEW WRAPPER -->
-  <section id="tasksStack" class="tasks-stack">
+
+<!-- Tasks stack (flow layout) — single top-level panel, no nesting >>> -->
+<section class="tasks-wrap" aria-label="Tasks section">
+  <div id="tasksStack" class="tasks-stack">
+    <!-- First panel (template) — top-level child of #tasksStack -->
     <div id="tasksPanel-1" class="tasks-panel" aria-label="Tasks">
-      <div class="tasks-header">Tasks</div>
+      <div class="tasks-header">
+        <div class="tasks-title">Task</div>
+        <div class="tasks-header-actions">
+          <button class="task-title-edit" type="button" aria-label="Rename task group">
+            <svg class="task-title-edit-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 14.5V19h4.5L18 9.5l-4.5-4.5L4 14.5zm11-11 4.5 4.5"
+                    fill="none" stroke="#2b2213" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="task-title-delete" type="button" aria-label="Delete task group">
+            <svg class="task-title-delete-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 7h12l-1 13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7zm3-3h6l1 2H8l1-2zm1 6v8m4-8v8"
+                    fill="none" stroke="#2b2213" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <div id="tasksList" class="tasks-list" role="listbox" aria-activedescendant=""></div>
       <button id="addTaskBtn" class="task-add" type="button">＋ Create a Task</button>
     </div>
-  </section>
+  </div>
 
+  <!-- “Add task box” chip must be a SIBLING of #tasksStack (not inside a .tasks-panel) -->
   <div class="tasks-chip-row">
     <button id="addTasksPanel"
             class="chip gold add-chip"
@@ -140,12 +162,19 @@
             aria-label="Add a Tasks box"
             title="Add a Tasks box">
       <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M12 5v14M5 12h14" fill="none" stroke="#2b2213" stroke-width="3.4"
-              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 5v14M5 12h14"
+              fill="none"
+              stroke="#2b2213"
+              stroke-width="3.4"
+              stroke-linecap="round"
+              stroke-linejoin="round"/>
       </svg>
     </button>
   </div>
-</div>                                        <!-- ⬅️ END WRAPPER -->
+</section>
+<!-- <<< REPLACEMENT END <<< -->
+
+
 
 
 

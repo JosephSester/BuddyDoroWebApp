@@ -1,20 +1,74 @@
-/* ---------- Tasks panel ---------- */
+/* >>> NEW: vertical stack container for all task panels >>> */
+#tasksStack{
+  position: absolute;           /* anchors the whole stack on the page */
+  right: 3vw;
+  top: 12vh;
+  width: clamp(260px, 28vw, 420px);
+
+  display: flex;                /* stack panels vertically */
+  flex-direction: column;
+  gap: 24px;                    /* space between panels */
+  z-index: 5;                   /* above background art */
+}
+
+/* FIX: let #tasksStack anchor to the page, not to .tasks-wrap */
+.tasks-wrap{
+  position: static;   /* or just remove this rule entirely */
+  width: 100%;
+}
+
+.tasks-chip-row{
+  width: clamp(260px, 28vw, 420px);  /* match #tasksStack width */
+  margin-top: 12px;
+
+  /* right-align using the same right gutter as #tasksStack */
+  margin-left: auto;
+  margin-right: 3vw;
+
+  display: flex;
+  justify-content: flex-end;         /* keep the round + chip on the right */
+
+/* NEW: nudge right so the chip aligns with the panel’s outer edge
+     14px panel padding + 2px border = 16px */
+  transform: translateX(50px);
+
+}
+
+/* ---------- Tasks panel (visuals only; no absolute positioning here) ---------- */
 .tasks-panel{
-  position:absolute; right:3vw; top:12vh; left:auto; width:clamp(260px, 28vw, 420px);
-  padding:14px 14px 16px; border-radius:28px; color:#2b2213;
+  position: static;           /* participates in flow under .tasks-wrap */
+  width: 100%;
+  padding:14px 14px 16px;
+  border-radius:28px;
+  color:#2b2213;
   background:
     radial-gradient(150px circle at 30% 20%, rgba(255,255,255,.55), rgba(255,255,255,.12) 70%),
     rgba(255,255,255,.08);
   border:2px solid rgba(224,162,51,.85);
   box-shadow:0 10px 24px rgba(0,0,0,.25), inset 0 0 0 6px rgba(255,210,100,.22);
-  z-index:10; pointer-events:auto;
+  z-index:10;
+  pointer-events:auto;
 }
-.tasks-header{ font-weight:800; font-size:clamp(18px,2vw,24px); letter-spacing:.2px; margin:4px 6px 10px; }
-.tasks-list{ max-height:clamp(160px,30vh,360px); overflow:auto; display:flex; flex-direction:column; gap:10px; padding:6px; }
+
+.tasks-list{
+  max-height:clamp(160px,30vh,360px);
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:6px;
+}
+
 .task-card{
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-  padding:10px 14px; border-radius:18px; border:2px solid #e0a233;
-  background:rgba(255,235,160,.40); box-shadow:0 6px 14px rgba(0,0,0,.12);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 14px;
+  border-radius:18px;
+  border:2px solid #e0a233;
+  background:rgba(255,235,160,.40);
+  box-shadow:0 6px 14px rgba(0,0,0,.12);
   transition:box-shadow .2s ease, transform .1s ease, background .2s ease;
 }
 .task-card:focus-visible{ outline:3px solid rgba(43,34,19,.7); outline-offset:2px; }
@@ -28,16 +82,29 @@
   background:rgba(255,238,180,.75);
   box-shadow:0 12px 22px rgba(0,0,0,.2);
 }
+
 .task-main{ display:flex; align-items:center; gap:8px; }
 .task-name{ font-weight:700; }
 .task-right{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
 .session-bubble{
-  font-weight:800; padding:6px 10px; border-radius:999px; border:2px solid #e0a233;
-  background:rgba(255,235,160,.75); min-width:64px; text-align:center; box-shadow:0 6px 14px rgba(0,0,0,.10);
-  cursor:pointer; user-select:none; display:inline-flex; align-items:center; justify-content:center;
+  font-weight:800;
+  padding:6px 10px;
+  border-radius:999px;
+  border:2px solid #e0a233;
+  background:rgba(255,235,160,.75);
+  min-width:64px;
+  text-align:center;
+  box-shadow:0 6px 14px rgba(0,0,0,.10);
+  cursor:pointer;
+  user-select:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
   transition:background .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
 .session-bubble:focus-visible{ outline:3px solid rgba(43,34,19,.7); outline-offset:2px; }
+
 .session-bubble.editing{
   cursor:auto;
   display:flex;
@@ -50,8 +117,13 @@
   box-shadow:0 8px 16px rgba(0,0,0,.12);
   min-width:auto;
 }
+
 .session-field{
-  display:flex; flex-direction:column; gap:4px; font-size:12px; color:#2b2213;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-size:12px;
+  color:#2b2213;
   align-items:flex-start;
 }
 .session-field-label{ font-weight:700; letter-spacing:.3px; }
@@ -68,35 +140,18 @@
 .session-input::-webkit-inner-spin-button{ margin:0; }
 .session-input[type=number]{ -moz-appearance:textfield; }
 .session-input:focus-visible{ outline:2px solid #ffb400; outline-offset:1px; }
-.field-error{
-  margin-top:4px; font-size:12px; font-weight:600; color:#b22f1e;
-}
-.session-error{
-  width:100%; margin-left:0; font-size:12px; font-weight:600; color:#b22f1e;
-}
+
+.field-error{ margin-top:4px; font-size:12px; font-weight:600; color:#b22f1e; }
+.session-error{ width:100%; margin-left:0; font-size:12px; font-weight:600; color:#b22f1e; }
 .sr-only{
   position:absolute; width:1px; height:1px; padding:0; margin:-1px;
   overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
 }
-.task-create{
-  flex-direction:column;
-  align-items:stretch;
-  gap:10px;
-}
-.task-create-fields{
-  display:flex;
-  flex-wrap:wrap;
-  gap:12px;
-  align-items:flex-end;
-}
-.task-create-field{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  font-size:12px;
-  font-weight:700;
-  color:#2b2213;
-}
+
+/* Create editor */
+.task-create{ flex-direction:column; align-items:stretch; gap:10px; }
+.task-create-fields{ display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; }
+.task-create-field{ display:flex; flex-direction:column; gap:4px; font-size:12px; font-weight:700; color:#2b2213; }
 .task-create-label{ letter-spacing:.3px; }
 .task-create-input{
   appearance:none;
@@ -111,21 +166,14 @@
 }
 .task-create-input:focus-visible{ outline:2px solid #ffb400; outline-offset:2px; }
 .task-create-name{ min-width:180px; }
-.task-create-estimate{
-  min-width:6ch;
-  padding:8px 12px;
-  text-align:center;
-}
+.task-create-estimate{ min-width:6ch; padding:8px 12px; text-align:center; }
 
 @media (min-width:768px){
   .session-input{ min-width:8ch; }
   .task-create-estimate{ min-width:8ch; }
 }
-.task-create-actions{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
+
+.task-create-actions{ display:flex; flex-wrap:wrap; gap:10px; }
 .task-create-save,
 .task-create-cancel{
   appearance:none;
@@ -162,6 +210,7 @@
 .task-create-save:focus-visible,
 .task-create-cancel:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }
 .task-create .field-error{ margin-top:0; }
+
 .task-del{
   width:36px; height:36px; display:grid; place-items:center; border-radius:999px;
   border:2px solid #e0a233; background:linear-gradient(#ffd36b,#f2b942); color:#2b2213;
@@ -173,57 +222,102 @@
 .task-del svg{ width:18px; height:18px; }
 
 /* Create button (gold pill) */
-.tasks-panel{
-  position: static;           /* was absolute */
-  width: 100%;                /* fill the .tasks-wrap width */
-  /* keep the visual styles below as-is */
-  padding:14px 14px 16px; border-radius:28px; color:#2b2213;
-  background:
-    radial-gradient(150px circle at 30% 20%, rgba(255,255,255,.55), rgba(255,255,255,.12) 70%),
-    rgba(255,255,255,.08);
-  border:2px solid rgba(224,162,51,.85);
-  box-shadow:0 10px 24px rgba(0,0,0,.25), inset 0 0 0 6px rgba(255,210,100,.22);
-  z-index:10; pointer-events:auto;
+.tasks-panel .task-add, button.task-add{
+  -webkit-appearance:none; appearance:none; display:block; width:100%;
+  padding:12px 18px; border-radius:999px; border:2px solid #e0a233;
+  background-image:linear-gradient(#ffd36b,#f2b942); background-color:#f2b942;
+  color:#2b2213; font-weight:800; font-size:18px; line-height:1; box-shadow:0 8px 18px rgba(0,0,0,.18);
+  cursor:pointer;
+}
+.tasks-panel .task-add:hover, button.task-add:hover{ filter:brightness(1.03); }
+.tasks-panel .task-add:active, button.task-add:active{ transform:translateY(1px); }
+.tasks-panel .task-add:focus-visible, button.task-add:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }
+.tasks-panel .task-add:disabled, button.task-add:disabled{
+  opacity:.6; cursor:not-allowed; filter:none;
 }
 
-
-
-/* Small screens — match the mobile Tasks panel */
+/* Small screens — match the mobile Tasks area width */
 @media (max-width:640px){
-  .right-ui{
-    left:4vw;                                /* same as .tasks-panel on mobile */
-    top:8vh;
-    width:88vw;                              /* same width as .tasks-panel on mobile */
-  }
-
-  .mode-chips{ flex-wrap:wrap; justify-content:center; }
-  .top-chips{ flex-wrap:wrap; gap:10px; }
-  .store-panel{ inset:auto 50% 4vh auto; width:94vw; }
-  .store-content{ grid-template-columns: 1fr; }
-  .inventory-column{ border-left:none; padding-left:0; }
+  .task-create-estimate{ min-width:7ch; }
 }
 
-/* Make sure the Create button keeps the big gold pill look */
-.ui-layer .tasks-panel .task-add{
-  -webkit-appearance: none;
-  appearance: none;
-  display: block;
-  width: 100%;
-  padding: 12px 18px;
-  border-radius: 999px;
-  border: 2px solid #e0a233;
-  background-image: linear-gradient(#ffd36b, #f2b942);
-  background-color: #f2b942;
-  color: #2b2213;
-  font-weight: 800;
-  font-size: 18px;
-  line-height: 1;
-  box-shadow: 0 8px 18px rgba(0,0,0,.18);
-  cursor: pointer;
+/* ▼▼▼ NEW: Tasks header + title + pencil button ▼▼▼ */
+.tasks-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:4px 6px 10px;
 }
-.ui-layer .tasks-panel .task-add:hover{ filter: brightness(1.03); }
-.ui-layer .tasks-panel .task-add:active{ transform: translateY(1px); }
-.ui-layer .tasks-panel .task-add:focus-visible{ outline: 3px solid #2b2213; outline-offset: 2px; }
-.ui-layer .tasks-panel .task-add:disabled{
-  opacity: .6; cursor: not-allowed; filter: none;
+.tasks-title{
+  font-weight:800;
+  font-size:clamp(18px,2vw,24px);
+  letter-spacing:.2px;
 }
+
+/* small round gold button with a pencil */
+.task-title-edit{
+  appearance:none;
+  width:36px;
+  height:36px;
+  min-width:36px;
+  border-radius:999px;
+  border:2px solid #e0a233;
+  background-image:linear-gradient(#ffd36b,#f2b942);
+  background-color:#f2b942;
+  color:#2b2213;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  box-shadow:0 8px 18px rgba(0,0,0,.18);
+  line-height:0;
+}
+.task-title-edit:hover{ filter:brightness(1.03); }
+.task-title-edit:active{ transform:translateY(1px); }
+.task-title-edit:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }
+
+.task-title-edit-icon{
+  width:18px;
+  height:18px;
+  display:block;
+}
+
+/* Header actions row + trash button (to the right of the pencil) ▼▼▼ */
+.tasks-header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;                 /* small gap between pencil and trash */
+}
+
+/* Gold circular delete (trash) button — matches pencil styling */
+.task-title-delete{
+  -webkit-appearance:none; appearance:none;
+  width:36px; height:36px; min-width:36px;
+  border-radius:999px;
+  display:grid; place-items:center;
+  border:2px solid #e0a233;
+  background:linear-gradient(#ffd36b,#f2b942);
+  color:#2b2213;
+  box-shadow:0 8px 18px rgba(0,0,0,.18);
+  cursor:pointer;
+  line-height:1;
+  padding:0;
+}
+.task-title-delete:hover{ filter:brightness(1.03); }
+.task-title-delete:active{ transform:translateY(1px); }
+.task-title-delete:focus-visible{ outline:3px solid #2b2213; outline-offset:2px; }
+
+.task-title-delete-icon{
+  width:18px; height:18px; display:block;
+}
+
+/* Safety: if a .tasks-panel ever gets nested inside another by mistake, neutralize it */
+.tasks-panel .tasks-panel{
+  border:0;
+  box-shadow:none;
+  background:transparent;
+  padding:0;
+}
+
+
+

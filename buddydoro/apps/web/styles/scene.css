@@ -1,0 +1,15 @@
+/* ---------- background ---------- */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+
+  /* Keep a fallback color, but don't use the shorthand that wipes image props */
+  background-color: #222;
+
+  /* Make day & night render the same way */
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: cover;  /* same scale/crop for both images */
+}
+

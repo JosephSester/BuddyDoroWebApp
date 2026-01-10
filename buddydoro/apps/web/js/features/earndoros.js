@@ -1,0 +1,260 @@
+// EarnDoros: awards Doros based on Study timer usage
+// - 50 Doros for every 5 full minutes that ELAPSE in a Study session
+// - Awards are given progressively during the countdown (every 5 minutes)
+// - Balance is persisted in localStorage
+
+(function () {
+  const STORAGE_KEY = "buddyDoro.dorosBalance";
+  const FIVE_MIN_BLOCK = 5;       // minutes
+  const DOROS_PER_BLOCK = 50;     // Doros per 5 minutes
+
+  // Earn Doros sound effect
+  // Use path relative to index.html (public/)
+  const earnDorosSound = new Audio('assets/soundeffects/EarnDoros.mp3');
+  earnDorosSound.volume = 0.45;
+
+
+  function playEarnDorosSound() {
+    try {
+      earnDorosSound.currentTime = 0;  // rewind so rapid repeats work
+      const playPromise = earnDorosSound.play();
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise.catch(() => {
+          // Ignore autoplay / user-gesture errors silently
+        });
+      }
+    } catch (e) {
+      // If audio can’t play, just fail silently.
+    }
+  }
+
+
+  const state = {
+    balance: 0,
+    sessionActive: false,
+    sessionMinutesPlanned: 0,     // length at Start (minutes)
+    awardedBlocks: 0              // how many 5-min blocks already rewarded this session
+  };
+
+  function $(selector) {
+    return document.querySelector(selector);
+  }
+
+  function getDorosDisplayEl() {
+    return document.getElementById("dorosAmount");
+  }
+
+  function readBalanceFromDOM() {
+    const el = getDorosDisplayEl();
+    if (!el) return 0;
+    const raw = (el.textContent || "").replace(/[^\d]/g, "");
+    const parsed = parseInt(raw, 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  function formatBalance(value) {
+    return Number(value).toLocaleString("en-US");
+  }
+
+  function syncBalanceToDOM() {
+    const el = getDorosDisplayEl();
+    if (!el) return;
+    el.textContent = formatBalance(state.balance);
+  }
+
+  function saveBalance() {
+    try {
+      localStorage.setItem(STORAGE_KEY, String(state.balance));
+    } catch (e) {
+      // storage might be unavailable; ignore
+    }
+  }
+
+  function loadBalance() {
+    let balance = NaN;
+
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored != null) {
+        const parsed = parseInt(stored, 10);
+        if (Number.isFinite(parsed)) {
+          balance = parsed;
+        }
+      }
+    } catch (e) {
+      // ignore, fall back to DOM
+    }
+
+    if (!Number.isFinite(balance)) {
+      balance = readBalanceFromDOM();
+    }
+
+    state.balance = balance;
+    syncBalanceToDOM();
+  }
+
+  function isStudyModeActive() {
+    const studyChip = document.querySelector(
+      ".mode-chips button[data-mode='study']"
+    );
+    if (!studyChip) return false;
+
+    return (
+      studyChip.classList.contains("is-active") ||
+      studyChip.getAttribute("aria-pressed") === "true"
+    );
+  }
+
+  function getTimerMinutes() {
+    const display = document.getElementById("timerDisplay");
+    if (!display) return 0;
+
+    const text = (display.textContent || "").trim(); // e.g., "25:00"
+    const [mm, ss] = text.split(":");
+    const min = parseInt(mm, 10);
+    const sec = parseInt(ss, 10);
+
+    if (!Number.isFinite(min) || !Number.isFinite(sec)) {
+      return 0;
+    }
+    return min + sec / 60;
+  }
+
+  function flashEarnedBadge(earned) {
+    const chip = document.getElementById("dorosChip");
+    if (!chip) return;
+
+    chip.setAttribute("data-earned-last", `+${earned}`);
+    chip.classList.add("doros-earned");
+
+    if (flashEarnedBadge._timerId) {
+      clearTimeout(flashEarnedBadge._timerId);
+    }
+    flashEarnedBadge._timerId = setTimeout(() => {
+      chip.classList.remove("doros-earned");
+      chip.removeAttribute("data-earned-last");
+    }, 2000);
+  }
+
+  function awardBlocks(newBlocks) {
+    if (newBlocks <= 0) return;
+    const earned = newBlocks * DOROS_PER_BLOCK;
+
+    state.balance += earned;
+    saveBalance();
+    syncBalanceToDOM();
+    flashEarnedBadge(earned);
+    playEarnDorosSound();       // 🔊 play coin / money sound
+  }
+
+  function handleTimerTick() {
+    if (!state.sessionActive) return;
+    if (!isStudyModeActive()) {
+      // If they left Study mode, stop this session
+      state.sessionActive = false;
+      return;
+    }
+
+    const remaining = getTimerMinutes(); // minutes left on timer
+    const elapsed = Math.max(
+      0,
+      state.sessionMinutesPlanned - remaining
+    );
+
+    // Total full 5-min blocks that have elapsed in THIS session
+    const completedBlocks = Math.floor(elapsed / FIVE_MIN_BLOCK);
+
+    if (completedBlocks > state.awardedBlocks) {
+      const newBlocks = completedBlocks - state.awardedBlocks;
+      state.awardedBlocks = completedBlocks;
+      awardBlocks(newBlocks);
+    }
+
+    // When timer hits / passes 0, end this session
+    if (remaining <= 0) {
+      state.sessionActive = false;
+    }
+  }
+
+  function setupListeners() {
+    const startBtn = document.getElementById("startBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const modeGroup = document.querySelector(".mode-chips");
+    const timerDisplay = document.getElementById("timerDisplay");
+
+    // Start button: begin a new Study earning session
+    if (startBtn) {
+      startBtn.addEventListener("click", () => {
+        if (isStudyModeActive()) {
+          state.sessionActive = true;
+          state.sessionMinutesPlanned = getTimerMinutes();
+          state.awardedBlocks = 0;
+        } else {
+          state.sessionActive = false;
+        }
+      });
+    }
+
+    // Reset cancels current earning session (but keeps already-earned Doros)
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        state.sessionActive = false;
+      });
+    }
+
+    // Changing away from Study cancels current earning session
+    if (modeGroup) {
+      modeGroup.addEventListener("click", (evt) => {
+        const btn = evt.target.closest("button[data-mode]");
+        if (!btn) return;
+        if (btn.dataset.mode !== "study") {
+          state.sessionActive = false;
+        }
+      });
+    }
+
+    // Watch timer display for changes; on each change, compute elapsed time
+    if (timerDisplay && "MutationObserver" in window) {
+      const observer = new MutationObserver(() => {
+        handleTimerTick();
+      });
+
+      observer.observe(timerDisplay, {
+        childList: true,
+        characterData: true,
+        subtree: true
+      });
+    }
+  }
+
+    function init() {
+    loadBalance();
+    setupListeners();
+  }
+
+  function spend(amount) {
+    amount = Math.max(0, amount | 0);
+    if (!amount) return;
+
+    state.balance = Math.max(0, state.balance - amount);
+    saveBalance();
+    syncBalanceToDOM();
+  }
+
+  function getBalance() {
+    return state.balance;
+  }
+
+  const EarnDoros = {
+    init,
+    getBalance,
+    spend,
+    _state: state
+  };
+
+  window.EarnDoros = EarnDoros;
+
+  window.addEventListener('DOMContentLoaded', () => {
+    EarnDoros.init();
+  });
+})();

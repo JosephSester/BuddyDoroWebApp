@@ -39,12 +39,38 @@ syncStartEnabled(); // initial state
 
 // ----- 4) Store ---------------------------------------------------------------
 initStore({
-  // Let the store read/update Doros and repaint the chip in the topbar.
-  getDoros: topbar.getDoros,
-  setDoros: (n) => { topbar.setDoros(n); topbar.paintDoros(); },
-  addDoros: (n) => { topbar.addDoros(n); topbar.paintDoros(); },
-  subDoros: (n) => { topbar.subDoros(n); topbar.paintDoros(); },
+  // Read Doros balance from EarnDoros (single source of truth)
+  getDoros: () => {
+    if (window.EarnDoros && typeof window.EarnDoros.getBalance === 'function') {
+      return window.EarnDoros.getBalance();
+    }
+
+    // Fallback: read from the pill if EarnDoros is missing
+    const el = document.getElementById('dorosAmount');
+    if (!el) return 0;
+    const raw = (el.textContent || '').replace(/[^\d]/g, '');
+    const parsed = parseInt(raw, 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+  },
+
+  // Spend Doros via EarnDoros
+  spendDoros: (amount) => {
+    if (window.EarnDoros && typeof window.EarnDoros.spend === 'function') {
+      window.EarnDoros.spend(amount);
+      return;
+    }
+
+    // Fallback: subtract directly from the pill if EarnDoros is missing
+    const el = document.getElementById('dorosAmount');
+    if (!el) return;
+    const raw = (el.textContent || '').replace(/[^\d]/g, '');
+    let bal = parseInt(raw, 10);
+    if (!Number.isFinite(bal)) bal = 0;
+    bal = Math.max(0, bal - Math.max(0, amount | 0));
+    el.textContent = bal.toLocaleString('en-US');
+  }
 });
+
 
 // ----- 5) Tasks ---------------------------------------------------------------
 initTasks({

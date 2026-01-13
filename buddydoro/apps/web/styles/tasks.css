@@ -28,8 +28,8 @@
   display: flex;
   justify-content: flex-end;         /* keep the round + chip on the right */
 
-/* NEW: nudge right so the chip aligns with the panel’s outer edge
-     14px panel padding + 2px border = 16px */
+/* Nudge so the + chip’s right edge visually matches the panel’s right edge.
+     50px = padding + border + shadow/glow compensation for this theme. */
   transform: translateX(50px);
 
 }

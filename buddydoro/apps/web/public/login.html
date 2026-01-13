@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BuddyDoro - Login</title>
+
+  <!-- Preload artwork for login page -->
+  <link rel="preload" as="image" href="./assets/artwork/BackgroundDay.jpg" />
+<link rel="preload" as="image" href="./assets/artwork/Dragon.png" />
+
+
+
+<link rel="stylesheet" href="../styles/base.css" />
+<link rel="stylesheet" href="../styles/scene.css" />
+<link rel="stylesheet" href="../styles/login.css" />
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+</head>
+<body>
+  <div id="scene" class="scene"></div>
+
+  <div class="ui-layer">
+    <div class="login-card">
+      <img src="./assets/artwork/Dragon.png" alt="BuddyDoro Dragon" class="login-dragon">
+
+
+      <h2 class="welcome-text">Welcome to BuddyDoro!</h2>
+
+      <form id="loginForm" class="login-form" novalidate>
+        
+        <div class="form-field">
+          <label for="emailInput" class="sr-only">Email Address</label>
+          <input type="email" id="emailInput" required placeholder="Email Address">
+        </div>
+
+        <div class="form-field password-field">
+          <label for="passwordInput" class="sr-only">Password</label>
+          <input type="password" id="passwordInput" required placeholder="Password">
+          <span class="password-toggle" id="passwordToggle">
+            <i class="fas fa-eye"></i>
+          </span>
+        </div>
+
+        <div id="loginError" class="login-error" hidden></div>
+
+        <div class="login-actions-top">
+          <button type="button" class="btn-secondary sign-up-btn">Sign Up</button>
+          <button type="submit" class="btn-primary log-in-btn">Log In</button>
+          <a href="#" class="forgot-password">Forgot Password?</a>
+        </div>
+
+        <div class="remember-me-social">
+          <label class="remember-me">
+            <input type="checkbox" id="rememberMe">
+            Remember Me
+          </label>
+          <div class="social-login">
+            <button type="button" class="social-btn google-btn"><i class="fab fa-google"></i></button>
+            <button type="button" class="social-btn facebook-btn"><i class="fab fa-facebook-f"></i></button>
+          </div>
+        </div>
+
+      </form>
+
+      <div class="footer-links">
+        <a href="#" class="footer-link">Privacy Policy</a>
+        <a href="#" class="footer-link">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/login.js"></script>
+
+</body>
+</html>

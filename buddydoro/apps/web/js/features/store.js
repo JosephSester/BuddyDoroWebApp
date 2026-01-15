@@ -89,12 +89,15 @@ export function initStore({ getDoros, spendDoros }){
         inventory.set(it.sku, (inventory.get(it.sku) || 0) + 1);
         renderInventory();
       });
+
       card.querySelector('.use-btn').addEventListener('click', ()=>{
         if ((inventory.get(it.sku) || 0) <= 0) { alert('You do not own this item yet.'); return; }
         inventory.set(it.sku, inventory.get(it.sku) - 1);
         renderInventory();
         alert(`${it.name} used! 🐉✨`);
+        emitItemUsed(it.sku); // Tell the rest of the app an item was used
       });
+
 
       card.addEventListener('click', (e)=>{
         if (e.target.tagName.toLowerCase() === 'button') return;
@@ -142,6 +145,25 @@ export function initStore({ getDoros, spendDoros }){
     return null;
   }
 
+  // --- Broadcast "item used" so other features (like LifeCircle) can react ---
+  function emitItemUsed(sku){
+    const meta = findItemBySku(sku);
+    const detail = {
+      sku,
+      name: meta?.name || sku,
+      emoji: meta?.emoji || '',
+      // Simple category guess from sku prefix
+      category: sku.startsWith('food-') ? 'food'
+               : sku.startsWith('water-') ? 'water'
+               : sku.startsWith('play-') ? 'play'
+               : sku.startsWith('med-')  ? 'medicine'
+               : 'other'
+    };
+
+    const evt = new CustomEvent('store:itemUsed', { detail });
+    window.dispatchEvent(evt);
+  }
+
   useBtn?.addEventListener('click', ()=>{
     if (!selectedSku){ alert('Select an item card first.'); return; }
     if ((inventory.get(selectedSku) || 0) <= 0){ alert('You do not own that item.'); return; }
@@ -149,7 +171,9 @@ export function initStore({ getDoros, spendDoros }){
     renderInventory();
     const meta = findItemBySku(selectedSku);
     alert(`${meta?.name || selectedSku} used! 🐉✨`);
+    emitItemUsed(selectedSku); // NEW: tell the rest of the app an item was used
   });
+
 
   return { openStore };
 }

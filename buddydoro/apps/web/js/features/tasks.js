@@ -14,27 +14,18 @@ export function initTasks(opts = {}) {
   onShouldStopTimer = typeof opts.onShouldStopTimer === 'function'
     ? opts.onShouldStopTimer : () => {};
 
+  // Default to first panel’s ids (keeps old behavior if present)
   els.addTaskBtn = document.getElementById('addTaskBtn');
   els.tasksList  = document.getElementById('tasksList');
 
-  if (!els.tasksList || !els.addTaskBtn) return;
-
-  els.addTaskBtn.addEventListener('click', () => {
-    if (createTaskCtx) {
-      createTaskCtx.nameInput.focus({ preventScroll:true });
-      createTaskCtx.nameInput.select();
-      return;
-    }
-    if (tasks.length >= 50) {
-      alert('You can create up to 50 tasks.');
-      return;
-    }
-    startCreateTask();
-  });
+  // === NEW: wire ALL existing "+ Create a Task" buttons ===
+  document.querySelectorAll('.tasks-panel .task-add')
+    .forEach(btn => btn.addEventListener('click', onAddTaskClick));
 
   renderAllTasks();
   notifyActiveChange();
 }
+
 
 export function getActiveTaskId() {
   return activeTaskId;
@@ -74,6 +65,31 @@ const TASK_NAME_ALLOWED_MESSAGE =
 function notifyActiveChange() {
   try { onActiveTaskChange(activeTaskId); } catch { /* noop */ }
 }
+
+// === NEW: handle clicks on ANY "+ Create a Task" button in ANY panel ===
+function onAddTaskClick(e) {
+  const button = e.currentTarget || e.target;
+  const panel  = button.closest('.tasks-panel');
+  const list   = panel?.querySelector('.tasks-list');
+  if (!panel || !list) return;
+
+  // Point the module at THIS panel's elements before opening the editor
+  els.addTaskBtn = button;
+  els.tasksList  = list;
+
+  if (createTaskCtx) {
+    createTaskCtx.nameInput.focus({ preventScroll:true });
+    createTaskCtx.nameInput.select();
+    return;
+  }
+  if (tasks.length >= 50) {
+    alert('You can create up to 50 tasks.');
+    return;
+  }
+  startCreateTask();
+}
+
+
 
 // ▼▼▼ NEW: header rename wiring (title + pencil) ▼▼▼
 function wireHeaderRename(panel){
@@ -853,6 +869,11 @@ function flashSessionError(taskId, message){
   // Ensure the first (template) panel has its local header actions wired
   rebindPanelEvents(template);
 
+// Wire the template panel's create button
+template.querySelectorAll('.task-add')
+  .forEach(btn => btn.addEventListener('click', onAddTaskClick));
+
+
   // Outside "+" button: add a brand-new Tasks panel (clone) up to MAX_PANELS
   addBtn.addEventListener('click', () => {
     const current = countPanels();
@@ -876,11 +897,15 @@ function flashSessionError(taskId, message){
     // Wire header actions for this clone
     rebindPanelEvents(clone);
 
-    // Mount it
-    stack.appendChild(clone);
-    placeChipRow(); // <<< ADD: reposition "+" after adding a panel
+    // === NEW: wire the "+ Create a Task" button inside the new panel ===
+    clone.querySelectorAll('.task-add')
+    .forEach(btn => btn.addEventListener('click', onAddTaskClick));
 
-    clone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+// Mount it
+stack.appendChild(clone);
+placeChipRow(); // <<< ADD: reposition "+" after adding a panel
+
+clone.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     // Cap at MAX_PANELS
     if (nextIndex >= MAX_PANELS) {

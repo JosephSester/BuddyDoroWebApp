@@ -1,14 +1,15 @@
 // apps/web/js/main.js
 
 // Scene / sprite
-import { initScene }             from './features/scene.js';
-import { initDragon }            from './features/dragon.js';
+import { initScene } from './features/scene.js';
+import { initDragon } from './features/dragon.js';
 
 // UI features
-import { initTopbar }            from './features/topbar.js';
-import { initTimer }             from './features/timer.js';
-import { initStore }             from './features/store.js';
+import { initTopbar } from './features/topbar.js';
+import { initTimer } from './features/timer.js';
+import { initStore } from './features/store.js';
 import { initTasks, getActiveTaskId } from './features/tasks.js';
+import { initOnboarding } from './features/onboarding.js';
 
 // ----- 1) Background & dragon -------------------------------------------------
 initScene({
@@ -83,6 +84,51 @@ initTasks({
     timer?.stop?.();
     syncStartEnabled();
   },
+});
+
+// ----- 6) Onboarding ----------------------------------------------------------
+// Initialize onboarding tutorial for first-time users
+const onboarding = initOnboarding();
+
+// Connect restart tour button in greeting menu
+const restartTourBtn = document.getElementById('restartTourBtn');
+if (restartTourBtn && onboarding) {
+  restartTourBtn.addEventListener('click', () => {
+    // Close the greeting menu first
+    const greetChip = document.getElementById('greetChip');
+    const greetMenu = document.getElementById('greetMenu');
+    if (greetMenu) greetMenu.hidden = true;
+    if (greetChip) greetChip.setAttribute('aria-expanded', 'false');
+
+    // Restart the onboarding tour
+    onboarding.restart();
+  });
+}
+
+// Dispatch custom events for onboarding to track progress
+// Listen for task creation
+document.addEventListener('DOMContentLoaded', () => {
+  const originalAddTaskFn = window.addTask;
+  if (originalAddTaskFn) {
+    window.addTask = function (...args) {
+      const result = originalAddTaskFn.apply(this, args);
+      document.dispatchEvent(new CustomEvent('buddydoro:task-created'));
+      return result;
+    };
+  }
+});
+
+// Listen for timer start
+startBtn?.addEventListener('click', () => {
+  if (!startBtn.disabled) {
+    document.dispatchEvent(new CustomEvent('buddydoro:timer-started'));
+  }
+});
+
+// Listen for store open
+const storeChip = document.getElementById('storeChip');
+storeChip?.addEventListener('click', () => {
+  document.dispatchEvent(new CustomEvent('buddydoro:store-opened'));
 });
 
 // Each feature owns its own DOM and logic.

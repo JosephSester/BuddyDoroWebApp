@@ -68,6 +68,17 @@ const STEPS = [
         action: 'wait'
     },
     {
+        id: 'select-task',
+        title: 'Select Your Task',
+        description: 'Great! Now click on the task you just created to select it. You need to select a task before starting the timer.',
+        target: '.task-card',
+        position: 'left',
+        requireInteraction: true,
+        waitFor: 'task-selected',
+        highlightElement: true,
+        action: 'wait'
+    },
+    {
         id: 'understand-timer',
         title: 'Meet the Timer ⏱️',
         description: 'Use Study mode to focus, then take Short or Long Breaks. You can customize the durations using the menu button (⋮) below.',
@@ -550,7 +561,7 @@ export function initOnboarding() {
         positionSpotlight(step);   // Glowing border around target
         positionTooltip(step);     // Instruction text box
         highlightElement(step);    // Pulsing highlight effect
-        updateProgressDots();      // Progress indicator at top
+        // updateProgressDots();      // Progress indicator at top - REMOVED
 
         // Activate tooltip with optional delay for better UX
         // Delay allows previous step to fully disappear before new one appears
@@ -598,6 +609,20 @@ export function initOnboarding() {
                     addTaskBtn.addEventListener('click', handleAddTaskClick);
                     eventListeners.push({ element: addTaskBtn, event: 'click', handler: handleAddTaskClick });
                 }
+                break;
+
+            case 'task-selected':
+                // Wait for user to select a task
+                const handleTaskSelected = () => {
+                    if (nextBtn) {
+                        nextBtn.disabled = false;
+                        const waitingIndicator = nextBtn.querySelector('.onboarding-waiting');
+                        waitingIndicator?.remove();
+                    }
+                    document.removeEventListener('buddydoro:task-selected', handleTaskSelected);
+                };
+                document.addEventListener('buddydoro:task-selected', handleTaskSelected);
+                eventListeners.push({ element: document, event: 'buddydoro:task-selected', handler: handleTaskSelected });
                 break;
 
             case 'timer-started':
@@ -716,12 +741,12 @@ export function initOnboarding() {
         if (isActive) return;
 
         isActive = true;
-        createProgressDots(); // Initialize progress indicator
+
 
         // Activate all UI overlay elements
         overlay?.classList.add('active');
         skipBtn?.classList.add('active');
-        progress?.classList.add('active');
+
 
         // Display the first step (or resume from saved progress)
         showStep(currentStepIndex);

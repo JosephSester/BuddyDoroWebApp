@@ -304,6 +304,13 @@ function setActiveTask(taskId) {
   }
   updateActiveTaskVisuals();
   notifyActiveChange();
+
+  // Dispatch event for onboarding system when a task is selected
+  if (activeTaskId != null) {
+    document.dispatchEvent(new CustomEvent('buddydoro:task-selected', {
+      detail: { taskId: activeTaskId }
+    }));
+  }
 }
 
 // -----------------------------------------------------------------------------

@@ -13,7 +13,7 @@
 
   <!-- Core styles (order matters: base → layout → components → feature CSS → themes) -->
   <link rel="stylesheet" href="../styles/base.css" />
-  <link rel="stylesheet" href="../styles/layout2.css" />
+  <link rel="stylesheet" href="../styles/layout.css" />
   <link rel="stylesheet" href="../styles/components.css" />
 
   <!-- Feature-specific CSS -->
@@ -22,9 +22,10 @@
   <!-- Moon overlay -->
    <link rel="preload" as="image" href="/assets/artwork/Moon.png" />  <!-- ✅ UPDATED -->
 
-  <link rel="styleshet" href="../styles/moon.css" />
+  <link rel="stylesheet" href="../styles/moon.css" />
 
   <link rel="stylesheet" href="../styles/earndoros.css" />
+  <link rel="stylesheet" href="../styles/diamond.css" /> 
 
   <link rel="stylesheet" href="../styles/dragon.css" />
   <link rel="stylesheet" href="../styles/topbar.css" />
@@ -88,6 +89,19 @@
           </svg>
           <span class="store-label">Store</span>
         </button>
+
+        <!-- Diamond chip -->
+<button class="chip glass-chip diamond-chip" id="diamondChip" type="button"
+        aria-label="Diamond balance">
+  <img
+    src="./assets/artwork/DiamondIcon.png"
+    alt="Diamonds"
+    class="diamond-icon"
+  />
+  <span id="diamondAmount" class="diamond-amount">0</span>
+  <span class="diamond-label">Diamonds</span>
+</button>
+
 
         <!-- Doros chip -->
         <div class="doros-dropdown">
@@ -332,6 +346,9 @@
 
   <!-- Earn Doros logic -->
   <script src="../js/features/earndoros.js"></script>
+
+  <!-- Diamond balance logic -->
+<script src="../js/diamond.js"></script>
 
   <!-- Entry script: lives in apps/web/js/main.js -->
   <script type="module" src="../js/main.js"></script>

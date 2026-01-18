@@ -2,25 +2,56 @@
 // Full-featured Tasks module (create/select/delete + session editing)
 // Exposes: initTasks({ onActiveTaskChange, onShouldStopTimer }), getActiveTaskId()
 
+// INTEGRATION: Import API service for backend communication
+import { fetchTasks, createTask, updateTask, deleteTask as apiDeleteTask } from '../api/taskService.js';
+
+// INTEGRATION: Import universal notification system
+import { showNotification, setBusy } from '../utils/notifications.js';
+
 // -----------------------------------------------------------------------------
 // Public API
 // -----------------------------------------------------------------------------
-let onActiveTaskChange = () => {};
-let onShouldStopTimer  = () => {};
+let onActiveTaskChange = () => { };
+let onShouldStopTimer = () => { };
 
-export function initTasks(opts = {}) {
+export async function initTasks(opts = {}) {
   onActiveTaskChange = typeof opts.onActiveTaskChange === 'function'
-    ? opts.onActiveTaskChange : () => {};
+    ? opts.onActiveTaskChange : () => { };
   onShouldStopTimer = typeof opts.onShouldStopTimer === 'function'
-    ? opts.onShouldStopTimer : () => {};
+    ? opts.onShouldStopTimer : () => { };
 
-  // Default to first panel’s ids (keeps old behavior if present)
+  // Default to first panel's ids (keeps old behavior if present)
   els.addTaskBtn = document.getElementById('addTaskBtn');
-  els.tasksList  = document.getElementById('tasksList');
+  els.tasksList = document.getElementById('tasksList');
 
   // === NEW: wire ALL existing "+ Create a Task" buttons ===
   document.querySelectorAll('.tasks-panel .task-add')
     .forEach(btn => btn.addEventListener('click', onAddTaskClick));
+
+  // INTEGRATION: Load tasks from API
+  try {
+    console.log('Loading tasks from API...');
+    const apiTasks = await fetchTasks();
+    tasks.length = 0; // Clear array
+    nextTaskId = 1;
+
+    apiTasks.forEach(t => {
+      tasks.push({
+        id: t.id,
+        name: t.text,
+        total: 1,
+        done: t.completed ? 1 : 0
+      });
+      // Track the highest ID to avoid collisions
+      const numId = Number(t.id);
+      if (numId >= nextTaskId) nextTaskId = numId + 1;
+    });
+
+    console.log(`Loaded ${tasks.length} tasks from API`);
+  } catch (error) {
+    console.error('Failed to load tasks from API:', error);
+    // Fall back to empty list, don't break the app
+  }
 
   renderAllTasks();
   notifyActiveChange();
@@ -48,8 +79,34 @@ const CREATE_NAME_MAX = 80;
 const CREATE_DEFAULT_ESTIMATE = 50;
 
 let domIdCounter = 0;
-const makeDomId = (prefix='id') => `${prefix}-${Date.now()}-${++domIdCounter}`;
+const makeDomId = (prefix = 'id') => `${prefix}-${Date.now()}-${++domIdCounter}`;
 
+// ============================================================================
+// Task-specific wrappers for universal notification system
+// ============================================================================
+/**
+ * Shows a task-related notification
+ * @param {string} message - The message to display
+ * @param {string} type - 'success', 'error', or 'info'
+ */
+function showTaskNotification(message, type = 'info') {
+  showNotification(message, type);
+}
+
+/**
+ * Shows or hides loading state for tasks panel
+ * @param {boolean} isBusy - Whether tasks are loading
+ * @param {string} message - Loading message
+ */
+function setTasksBusy(isBusy, message = 'Working...') {
+  setBusy(isBusy, message, els.tasksList);
+
+  // Also disable the add task button
+  if (els.addTaskBtn) {
+    els.addTaskBtn.disabled = !!isBusy;
+    els.addTaskBtn.setAttribute('aria-busy', isBusy ? 'true' : 'false');
+  }
+}
 let TASK_NAME_PATTERN;
 try {
   TASK_NAME_PATTERN = new RegExp("^[\\p{L}\\p{N}][\\p{L}\\p{N}\\s'-]{0,79}$", 'u');
@@ -69,16 +126,16 @@ function notifyActiveChange() {
 // === NEW: handle clicks on ANY "+ Create a Task" button in ANY panel ===
 function onAddTaskClick(e) {
   const button = e.currentTarget || e.target;
-  const panel  = button.closest('.tasks-panel');
-  const list   = panel?.querySelector('.tasks-list');
+  const panel = button.closest('.tasks-panel');
+  const list = panel?.querySelector('.tasks-list');
   if (!panel || !list) return;
 
   // Point the module at THIS panel's elements before opening the editor
   els.addTaskBtn = button;
-  els.tasksList  = list;
+  els.tasksList = list;
 
   if (createTaskCtx) {
-    createTaskCtx.nameInput.focus({ preventScroll:true });
+    createTaskCtx.nameInput.focus({ preventScroll: true });
     createTaskCtx.nameInput.select();
     return;
   }
@@ -92,30 +149,30 @@ function onAddTaskClick(e) {
 
 
 // ▼▼▼ NEW: header rename wiring (title + pencil) ▼▼▼
-function wireHeaderRename(panel){
+function wireHeaderRename(panel) {
   const titleEl = panel.querySelector('.tasks-title');
-  const btn     = panel.querySelector('.task-title-edit');
-  if(!titleEl || !btn) return;
+  const btn = panel.querySelector('.task-title-edit');
+  if (!titleEl || !btn) return;
 
   const rename = () => {
     const current = (titleEl.textContent || 'Tasks').trim();
     const next = prompt('Rename this task group:', current);
-    if(next == null) return;                 // cancel
+    if (next == null) return;                 // cancel
     const clean = next.trim();
-    if(!clean) return;                       // ignore empty
+    if (!clean) return;                       // ignore empty
     titleEl.textContent = clean.slice(0, 40); // cap at 40 chars
   };
 
-  btn.addEventListener('click', (e)=>{ e.stopPropagation(); rename(); });
-  btn.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); rename(); }
+  btn.addEventListener('click', (e) => { e.stopPropagation(); rename(); });
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); rename(); }
   });
 }
 
 
 // ▼▼▼ Header delete wiring (trash button with confirm) ▼▼▼
-function wireHeaderDelete(panel){
-  const delBtn  = panel.querySelector('.task-title-delete');
+function wireHeaderDelete(panel) {
+  const delBtn = panel.querySelector('.task-title-delete');
   if (!delBtn) return;
 
   delBtn.addEventListener('click', (e) => {
@@ -154,53 +211,53 @@ function wireHeaderDelete(panel){
 const isEditingSessions = () => sessionEditor != null;
 const formatSessions = task => `${task.done}/${task.total}`;
 
-function createTaskCard(task){
-  const card=document.createElement('div');
-  card.className='task-card';
-  card.setAttribute('role','option');
-  card.dataset.taskId=String(task.id);
-  card.id=`task-option-${task.id}`;
-  card.tabIndex=0;
+function createTaskCard(task) {
+  const card = document.createElement('div');
+  card.className = 'task-card';
+  card.setAttribute('role', 'option');
+  card.dataset.taskId = String(task.id);
+  card.id = `task-option-${task.id}`;
+  card.tabIndex = 0;
 
-  const main=document.createElement('div');
-  main.className='task-main';
-  const name=document.createElement('span');
-  name.className='task-name';
-  name.textContent=task.name;
+  const main = document.createElement('div');
+  main.className = 'task-main';
+  const name = document.createElement('span');
+  name.className = 'task-name';
+  name.textContent = task.name;
   main.append(name);
 
-  const right=document.createElement('div');
-  right.className='task-right';
+  const right = document.createElement('div');
+  right.className = 'task-right';
 
-  const bubble=document.createElement('div');
-  bubble.className='session-bubble';
-  bubble.tabIndex=0;
-  bubble.setAttribute('role','button');
-  bubble.setAttribute('aria-label',`Completed ${task.done} of ${task.total} sessions`);
-  bubble.textContent=formatSessions(task);
-  bubble.addEventListener('click', evt=>evt.stopPropagation());
-  bubble.addEventListener('mousedown', evt=>evt.stopPropagation());
-  bubble.addEventListener('dblclick', evt=>{
+  const bubble = document.createElement('div');
+  bubble.className = 'session-bubble';
+  bubble.tabIndex = 0;
+  bubble.setAttribute('role', 'button');
+  bubble.setAttribute('aria-label', `Completed ${task.done} of ${task.total} sessions`);
+  bubble.textContent = formatSessions(task);
+  bubble.addEventListener('click', evt => evt.stopPropagation());
+  bubble.addEventListener('mousedown', evt => evt.stopPropagation());
+  bubble.addEventListener('dblclick', evt => {
     evt.preventDefault(); evt.stopPropagation(); startSessionEdit(task, bubble);
   });
-  bubble.addEventListener('keydown', evt=>{
-    if(sessionEditor && sessionEditor.bubble===bubble) return;
-    if(evt.key==='Enter' || evt.key===' '){
+  bubble.addEventListener('keydown', evt => {
+    if (sessionEditor && sessionEditor.bubble === bubble) return;
+    if (evt.key === 'Enter' || evt.key === ' ') {
       evt.preventDefault(); evt.stopPropagation(); startSessionEdit(task, bubble);
     }
   });
 
-  const del=document.createElement('button');
-  del.className='task-del';
-  del.type='button';
-  del.setAttribute('aria-label',`Delete task: ${task.name}`);
-  del.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">
+  const del = document.createElement('button');
+  del.className = 'task-del';
+  del.type = 'button';
+  del.setAttribute('aria-label', `Delete task: ${task.name}`);
+  del.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M6 7h12l-1 13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7zm3-3h6l1 2H8l1-2zm1 6v8m4-8v8"
           fill="none" stroke="#2b2213" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  del.addEventListener('click', (ev)=>{
+  del.addEventListener('click', (ev) => {
     ev.stopPropagation();
-    if(confirm(`Delete "${task.name}"?`)) deleteTask(task.id);
+    if (confirm(`Delete "${task.name}"?`)) deleteTask(task.id);
   });
 
   right.append(bubble, del);
@@ -209,61 +266,61 @@ function createTaskCard(task){
   return card;
 }
 
-function wireTaskCardInteractions(card){
+function wireTaskCardInteractions(card) {
   const toggleHover = isOn => card.classList.toggle('is-hover', isOn);
-  card.addEventListener('mouseenter', ()=>toggleHover(true));
-  card.addEventListener('mouseleave', ()=>toggleHover(false));
-  card.addEventListener('focus', ()=>toggleHover(true));
-  card.addEventListener('blur',  ()=>toggleHover(false));
-  card.addEventListener('click', ()=>{
-    if(isEditingSessions()) return;
-    setActiveTask(Number(card.dataset.taskId));
+  card.addEventListener('mouseenter', () => toggleHover(true));
+  card.addEventListener('mouseleave', () => toggleHover(false));
+  card.addEventListener('focus', () => toggleHover(true));
+  card.addEventListener('blur', () => toggleHover(false));
+  card.addEventListener('click', () => {
+    if (isEditingSessions()) return;
+    setActiveTask(card.dataset.taskId); // Keep as string
   });
-  card.addEventListener('keydown', evt=>{
-    if(evt.key==='Enter' || evt.key===' '){
-      evt.preventDefault(); setActiveTask(Number(card.dataset.taskId)); return;
+  card.addEventListener('keydown', evt => {
+    if (evt.key === 'Enter' || evt.key === ' ') {
+      evt.preventDefault(); setActiveTask(card.dataset.taskId); return;
     }
-    if(evt.key==='ArrowDown' || evt.key==='ArrowUp'){
+    if (evt.key === 'ArrowDown' || evt.key === 'ArrowUp') {
       evt.preventDefault();
-      focusSiblingCard(card, evt.key==='ArrowDown'?1:-1);
+      focusSiblingCard(card, evt.key === 'ArrowDown' ? 1 : -1);
     }
   });
 }
 
-function focusSiblingCard(card, offset){
-  const cards=Array.from(els.tasksList.querySelectorAll('.task-card'));
-  const idx=cards.indexOf(card); if(idx===-1 || cards.length===0) return;
-  let next=idx+offset;
-  if(next<0) next=cards.length-1;
-  if(next>=cards.length) next=0;
+function focusSiblingCard(card, offset) {
+  const cards = Array.from(els.tasksList.querySelectorAll('.task-card'));
+  const idx = cards.indexOf(card); if (idx === -1 || cards.length === 0) return;
+  let next = idx + offset;
+  if (next < 0) next = cards.length - 1;
+  if (next >= cards.length) next = 0;
   cards[next]?.focus();
 }
 
-function updateActiveTaskVisuals(){
-  let activeCard=null;
-  els.tasksList.querySelectorAll('.task-card').forEach(card=>{
-    const isActive=Number(card.dataset.taskId)===activeTaskId;
+function updateActiveTaskVisuals() {
+  let activeCard = null;
+  els.tasksList.querySelectorAll('.task-card').forEach(card => {
+    const isActive = String(card.dataset.taskId) === String(activeTaskId);
     card.classList.toggle('is-active', isActive);
-    card.setAttribute('aria-selected', isActive?'true':'false');
-    if(isActive) activeCard=card;
+    card.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    if (isActive) activeCard = card;
   });
-  if(activeCard){ els.tasksList.setAttribute('aria-activedescendant', activeCard.id); }
+  if (activeCard) { els.tasksList.setAttribute('aria-activedescendant', activeCard.id); }
   else { els.tasksList.removeAttribute('aria-activedescendant'); }
 }
 
-function ensureActiveTaskIsValid(){
-  if(activeTaskId!=null && !tasks.some(t=>t.id===activeTaskId)){
-    activeTaskId=null;
+function ensureActiveTaskIsValid() {
+  if (activeTaskId != null && !tasks.some(t => String(t.id) === String(activeTaskId))) {
+    activeTaskId = null;
     try { onShouldStopTimer(); } catch { /* noop */ }
   }
 }
 
-function renderAllTasks(){
-  cancelSessionEdit({ restoreOriginal:false });
+function renderAllTasks() {
+  cancelSessionEdit({ restoreOriginal: false });
   const createNode = createTaskCtx?.container || null;
-  els.tasksList.innerHTML='';
-  if(createNode) els.tasksList.appendChild(createNode);
-  tasks.forEach(t=>els.tasksList.appendChild(createTaskCard(t)));
+  els.tasksList.innerHTML = '';
+  if (createNode) els.tasksList.appendChild(createNode);
+  tasks.forEach(t => els.tasksList.appendChild(createTaskCard(t)));
   ensureActiveTaskIsValid();
   updateActiveTaskVisuals();
   // consumer decides what to do with start button, etc.
@@ -273,29 +330,68 @@ function renderAllTasks(){
 // -----------------------------------------------------------------------------
 // CRUD
 // -----------------------------------------------------------------------------
-function addTask(name,total,{ atTop=false }={}){
-  const t={id:nextTaskId++, name, total, done:0};
-  if(atTop) tasks.unshift(t); else tasks.push(t);
-  renderAllTasks();
-  return t;
-}
+async function addTask(name, total, { atTop = false } = {}) {
+  setTasksBusy(true, 'Saving task...');
+  try {
+    // Create task on API first
+    const apiTask = await createTask(name);
 
-function deleteTask(id){
-  const i=tasks.findIndex(t=>t.id===id);
-  if(i===-1) return;
-  const [removed]=tasks.splice(i,1);
-  if(removed.id===activeTaskId){
-    activeTaskId=null;
-    try { onShouldStopTimer(); } catch { /* noop */ }
+    // Add to local state
+    const t = {
+      id: apiTask.id,
+      name: apiTask.text,
+      total: total || 1,
+      done: 0
+    };
+    if (atTop) tasks.unshift(t); else tasks.push(t);
+    renderAllTasks();
+    console.log('Task created:', t);
+    showTaskNotification('Task created successfully', 'success');
+    return t;
+  } catch (error) {
+    console.error('Failed to create task:', error);
+    const errorMsg = error.message || 'Could not save task. Please try again.';
+    showTaskNotification(errorMsg, 'error');
+    throw error;
+  } finally {
+    setTasksBusy(false);
   }
-  renderAllTasks();
 }
 
-function setActiveTask(taskId){
-  if(taskId!=null && !tasks.some(t=>t.id===taskId)) taskId=null;
-  if(activeTaskId===taskId) return;
-  activeTaskId=taskId;
-  if(activeTaskId==null){
+async function deleteTask(id) {
+  setTasksBusy(true, 'Deleting task...');
+  try {
+    // Delete from API first
+    await apiDeleteTask(id);
+
+    // Remove from local state
+    const i = tasks.findIndex(t => t.id === id);
+    if (i === -1) return;
+    const [removed] = tasks.splice(i, 1);
+    if (removed.id === activeTaskId) {
+      activeTaskId = null;
+      try { onShouldStopTimer(); } catch { /* noop */ }
+    }
+    renderAllTasks();
+    console.log('Task deleted:', id);
+    showTaskNotification('Task deleted', 'success');
+  } catch (error) {
+    console.error('Failed to delete task:', error);
+    const errorMsg = error.message || 'Could not delete task. Please try again.';
+    showTaskNotification(errorMsg, 'error');
+    throw error;
+  } finally {
+    setTasksBusy(false);
+  }
+}
+
+function setActiveTask(taskId) {
+  // Convert to string for comparison (MongoDB IDs are strings)
+  const taskIdStr = taskId != null ? String(taskId) : null;
+  if (taskIdStr != null && !tasks.some(t => String(t.id) === taskIdStr)) return; // Invalid ID
+  if (String(activeTaskId) === taskIdStr) return; // Already active
+  activeTaskId = taskIdStr;
+  if (activeTaskId == null) {
     try { onShouldStopTimer(); } catch { /* noop */ }
   }
   updateActiveTaskVisuals();
@@ -305,25 +401,25 @@ function setActiveTask(taskId){
 // -----------------------------------------------------------------------------
 // Create Task inline editor
 // -----------------------------------------------------------------------------
-function startCreateTask(initial={}){
-  if(createTaskCtx){
-    if(typeof initial.title==='string'){
-      createTaskCtx.nameInput.value=initial.title.trim().slice(0, CREATE_NAME_MAX);
+function startCreateTask(initial = {}) {
+  if (createTaskCtx) {
+    if (typeof initial.title === 'string') {
+      createTaskCtx.nameInput.value = initial.title.trim().slice(0, CREATE_NAME_MAX);
     }
-    if(initial.estimate!==undefined){
-      let estValue=Number(initial.estimate);
-      if(!Number.isInteger(estValue) || estValue<1 || estValue>SESSION_MAX){
-        estValue=CREATE_DEFAULT_ESTIMATE;
+    if (initial.estimate !== undefined) {
+      let estValue = Number(initial.estimate);
+      if (!Number.isInteger(estValue) || estValue < 1 || estValue > SESSION_MAX) {
+        estValue = CREATE_DEFAULT_ESTIMATE;
       }
-      createTaskCtx.estimateInput.value=String(estValue);
+      createTaskCtx.estimateInput.value = String(estValue);
     }
-    if(initial.error){
-      createTaskCtx.shouldShowErrors=true;
+    if (initial.error) {
+      createTaskCtx.shouldShowErrors = true;
       showCreateTaskError(initial.error, createTaskCtx);
     }
     validateCreateTask(createTaskCtx);
-    if(initial.error){ showCreateTaskError(initial.error, createTaskCtx); }
-    createTaskCtx.nameInput.focus({ preventScroll:true });
+    if (initial.error) { showCreateTaskError(initial.error, createTaskCtx); }
+    createTaskCtx.nameInput.focus({ preventScroll: true });
     createTaskCtx.nameInput.select();
     return;
   }
@@ -332,90 +428,90 @@ function startCreateTask(initial={}){
 
   const initialTitle = (initial.title ?? '').trim().slice(0, CREATE_NAME_MAX);
   let initialEstimate = Number(initial.estimate);
-  if(!Number.isInteger(initialEstimate) || initialEstimate<1 || initialEstimate>SESSION_MAX){
+  if (!Number.isInteger(initialEstimate) || initialEstimate < 1 || initialEstimate > SESSION_MAX) {
     initialEstimate = CREATE_DEFAULT_ESTIMATE;
   }
 
-  const container=document.createElement('div');
-  container.className='task-card task-create';
-  const labelId=makeDomId('createTaskLabel');
-  container.setAttribute('role','form');
+  const container = document.createElement('div');
+  container.className = 'task-card task-create';
+  const labelId = makeDomId('createTaskLabel');
+  container.setAttribute('role', 'form');
   container.setAttribute('aria-labelledby', labelId);
 
-  const heading=document.createElement('div');
-  heading.id=labelId;
-  heading.className='sr-only';
-  heading.textContent='Create task';
+  const heading = document.createElement('div');
+  heading.id = labelId;
+  heading.className = 'sr-only';
+  heading.textContent = 'Create task';
   container.appendChild(heading);
 
-  const fields=document.createElement('div');
-  fields.className='task-create-fields';
+  const fields = document.createElement('div');
+  fields.className = 'task-create-fields';
 
-  const nameField=document.createElement('div');
-  nameField.className='task-create-field';
+  const nameField = document.createElement('div');
+  nameField.className = 'task-create-field';
   const nameInputId = makeDomId('createTaskName');
-  const nameLabel=document.createElement('label');
-  nameLabel.className='task-create-label';
-  nameLabel.textContent='Name';
+  const nameLabel = document.createElement('label');
+  nameLabel.className = 'task-create-label';
+  nameLabel.textContent = 'Name';
   nameLabel.setAttribute('for', nameInputId);
-  const nameInput=document.createElement('input');
-  nameInput.type='text';
-  nameInput.className='task-create-input task-create-name';
-  nameInput.placeholder='Task name...';
-  nameInput.maxLength=CREATE_NAME_MAX;
-  nameInput.value=initialTitle;
-  nameInput.required=true;
-  nameInput.setAttribute('aria-label','Task name');
-  nameInput.id=nameInputId;
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.className = 'task-create-input task-create-name';
+  nameInput.placeholder = 'Task name...';
+  nameInput.maxLength = CREATE_NAME_MAX;
+  nameInput.value = initialTitle;
+  nameInput.required = true;
+  nameInput.setAttribute('aria-label', 'Task name');
+  nameInput.id = nameInputId;
   nameField.append(nameLabel, nameInput);
 
-  const estimateField=document.createElement('div');
-  estimateField.className='task-create-field';
+  const estimateField = document.createElement('div');
+  estimateField.className = 'task-create-field';
   const estimateInputId = makeDomId('createTaskEstimate');
-  const estimateLabel=document.createElement('label');
-  estimateLabel.className='task-create-label';
-  estimateLabel.textContent='Estimate';
+  const estimateLabel = document.createElement('label');
+  estimateLabel.className = 'task-create-label';
+  estimateLabel.textContent = 'Estimate';
   estimateLabel.setAttribute('for', estimateInputId);
-  const estimateInput=document.createElement('input');
-  estimateInput.type='number';
-  estimateInput.className='task-create-input task-create-estimate';
-  estimateInput.min='1';
-  estimateInput.max=String(SESSION_MAX);
-  estimateInput.step='1';
-  estimateInput.inputMode='numeric';
-  estimateInput.value=String(initialEstimate);
-  estimateInput.setAttribute('aria-label','Estimated sessions');
-  estimateInput.id=estimateInputId;
+  const estimateInput = document.createElement('input');
+  estimateInput.type = 'number';
+  estimateInput.className = 'task-create-input task-create-estimate';
+  estimateInput.min = '1';
+  estimateInput.max = String(SESSION_MAX);
+  estimateInput.step = '1';
+  estimateInput.inputMode = 'numeric';
+  estimateInput.value = String(initialEstimate);
+  estimateInput.setAttribute('aria-label', 'Estimated sessions');
+  estimateInput.id = estimateInputId;
   estimateField.append(estimateLabel, estimateInput);
 
   fields.append(nameField, estimateField);
   container.appendChild(fields);
 
-  const actions=document.createElement('div');
-  actions.className='task-create-actions';
-  const saveBtn=document.createElement('button');
-  saveBtn.type='button';
-  saveBtn.className='task-create-save';
-  saveBtn.textContent='Save';
-  const cancelBtn=document.createElement('button');
-  cancelBtn.type='button';
-  cancelBtn.className='task-create-cancel';
-  cancelBtn.textContent='Cancel';
+  const actions = document.createElement('div');
+  actions.className = 'task-create-actions';
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'task-create-save';
+  saveBtn.textContent = 'Save';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'task-create-cancel';
+  cancelBtn.textContent = 'Cancel';
   actions.append(saveBtn, cancelBtn);
   container.appendChild(actions);
 
-  const errorEl=document.createElement('div');
-  errorEl.className='field-error';
-  errorEl.setAttribute('aria-live','polite');
-  errorEl.hidden=true;
+  const errorEl = document.createElement('div');
+  errorEl.className = 'field-error';
+  errorEl.setAttribute('aria-live', 'polite');
+  errorEl.hidden = true;
   container.appendChild(errorEl);
 
   const stopPropagation = evt => evt.stopPropagation();
-  [container, nameInput, estimateInput, saveBtn, cancelBtn].forEach(el=>{
-    ['click','mousedown','mouseup','dblclick'].forEach(evtName=>el.addEventListener(evtName, stopPropagation));
+  [container, nameInput, estimateInput, saveBtn, cancelBtn].forEach(el => {
+    ['click', 'mousedown', 'mouseup', 'dblclick'].forEach(evtName => el.addEventListener(evtName, stopPropagation));
   });
 
-  const ctx={
+  const ctx = {
     container,
     nameInput,
     estimateInput,
@@ -423,374 +519,374 @@ function startCreateTask(initial={}){
     cancelBtn,
     errorEl,
     shouldShowErrors: Boolean(initial.error),
-    cleanupFns:[]
+    cleanupFns: []
   };
 
-  const handleInput=()=>{ ctx.shouldShowErrors=true; validateCreateTask(ctx); };
+  const handleInput = () => { ctx.shouldShowErrors = true; validateCreateTask(ctx); };
   nameInput.addEventListener('input', handleInput);
   estimateInput.addEventListener('input', handleInput);
-  ctx.cleanupFns.push(()=>nameInput.removeEventListener('input', handleInput));
-  ctx.cleanupFns.push(()=>estimateInput.removeEventListener('input', handleInput));
+  ctx.cleanupFns.push(() => nameInput.removeEventListener('input', handleInput));
+  ctx.cleanupFns.push(() => estimateInput.removeEventListener('input', handleInput));
 
-  const handleNameKey=evt=>{
-    if(evt.key==='Enter'){ evt.preventDefault(); ctx.shouldShowErrors=true; attemptCreateTaskSave(); }
-    else if(evt.key==='Escape'){ evt.preventDefault(); cancelCreateTask(); }
+  const handleNameKey = evt => {
+    if (evt.key === 'Enter') { evt.preventDefault(); ctx.shouldShowErrors = true; attemptCreateTaskSave(); }
+    else if (evt.key === 'Escape') { evt.preventDefault(); cancelCreateTask(); }
   };
-  const handleEstimateKey=evt=>{
-    if(evt.key==='Enter'){ evt.preventDefault(); ctx.shouldShowErrors=true; attemptCreateTaskSave(); }
-    else if(evt.key==='Escape'){ evt.preventDefault(); cancelCreateTask(); }
+  const handleEstimateKey = evt => {
+    if (evt.key === 'Enter') { evt.preventDefault(); ctx.shouldShowErrors = true; attemptCreateTaskSave(); }
+    else if (evt.key === 'Escape') { evt.preventDefault(); cancelCreateTask(); }
   };
   nameInput.addEventListener('keydown', handleNameKey);
   estimateInput.addEventListener('keydown', handleEstimateKey);
-  ctx.cleanupFns.push(()=>nameInput.removeEventListener('keydown', handleNameKey));
-  ctx.cleanupFns.push(()=>estimateInput.removeEventListener('keydown', handleEstimateKey));
+  ctx.cleanupFns.push(() => nameInput.removeEventListener('keydown', handleNameKey));
+  ctx.cleanupFns.push(() => estimateInput.removeEventListener('keydown', handleEstimateKey));
 
-  const handleButtonKey=evt=>{
-    if(evt.key==='Escape'){ evt.preventDefault(); cancelCreateTask(); }
+  const handleButtonKey = evt => {
+    if (evt.key === 'Escape') { evt.preventDefault(); cancelCreateTask(); }
   };
   saveBtn.addEventListener('keydown', handleButtonKey);
   cancelBtn.addEventListener('keydown', handleButtonKey);
-  ctx.cleanupFns.push(()=>saveBtn.removeEventListener('keydown', handleButtonKey));
-  ctx.cleanupFns.push(()=>cancelBtn.removeEventListener('keydown', handleButtonKey));
+  ctx.cleanupFns.push(() => saveBtn.removeEventListener('keydown', handleButtonKey));
+  ctx.cleanupFns.push(() => cancelBtn.removeEventListener('keydown', handleButtonKey));
 
-  const onSaveClick=()=>{ ctx.shouldShowErrors=true; attemptCreateTaskSave(); };
-  const onCancelClick=()=>cancelCreateTask();
+  const onSaveClick = () => { ctx.shouldShowErrors = true; attemptCreateTaskSave(); };
+  const onCancelClick = () => cancelCreateTask();
   saveBtn.addEventListener('click', onSaveClick);
   cancelBtn.addEventListener('click', onCancelClick);
-  ctx.cleanupFns.push(()=>saveBtn.removeEventListener('click', onSaveClick));
-  ctx.cleanupFns.push(()=>cancelBtn.removeEventListener('click', onCancelClick));
+  ctx.cleanupFns.push(() => saveBtn.removeEventListener('click', onSaveClick));
+  ctx.cleanupFns.push(() => cancelBtn.removeEventListener('click', onCancelClick));
 
-  const onContainerKeydown=evt=>{
-    if(evt.key==='Escape'){ evt.preventDefault(); cancelCreateTask(); }
+  const onContainerKeydown = evt => {
+    if (evt.key === 'Escape') { evt.preventDefault(); cancelCreateTask(); }
   };
   container.addEventListener('keydown', onContainerKeydown);
-  ctx.cleanupFns.push(()=>container.removeEventListener('keydown', onContainerKeydown));
+  ctx.cleanupFns.push(() => container.removeEventListener('keydown', onContainerKeydown));
 
   els.tasksList.prepend(container);
-  createTaskCtx=ctx;
+  createTaskCtx = ctx;
   setCreateButtonDisabled(true);
 
   validateCreateTask(ctx);
-  if(initial.error){ showCreateTaskError(initial.error, ctx); }
+  if (initial.error) { showCreateTaskError(initial.error, ctx); }
   nameInput.focus();
   nameInput.select();
 }
 
-function validateCreateTask(ctx,{ forceShow=false }={}){
-  if(!ctx) return { valid:false };
-  if(forceShow) ctx.shouldShowErrors=true;
-  const title=ctx.nameInput.value.trim();
+function validateCreateTask(ctx, { forceShow = false } = {}) {
+  if (!ctx) return { valid: false };
+  if (forceShow) ctx.shouldShowErrors = true;
+  const title = ctx.nameInput.value.trim();
 
-  let message='';
-  if(!title) message='Name is required.';
-  else if(title.length>CREATE_NAME_MAX) message=`Name must be ${CREATE_NAME_MAX} characters or fewer.`;
-  else if(!TASK_NAME_PATTERN.test(title)) message=TASK_NAME_ALLOWED_MESSAGE;
+  let message = '';
+  if (!title) message = 'Name is required.';
+  else if (title.length > CREATE_NAME_MAX) message = `Name must be ${CREATE_NAME_MAX} characters or fewer.`;
+  else if (!TASK_NAME_PATTERN.test(title)) message = TASK_NAME_ALLOWED_MESSAGE;
 
-  const rawEstimate=ctx.estimateInput.value.trim();
-  let estimateValue=null;
-  if(!message){
-    if(rawEstimate===''){ message='Estimate is required.'; }
-    else{
-      const estNumber=Number(rawEstimate);
-      if(!Number.isFinite(estNumber)) message='Estimate must be a number.';
-      else if(!Number.isInteger(estNumber)) message='Estimate must be a whole number.';
-      else if(estNumber<1) message='Estimate must be at least 1.';
-      else if(estNumber>SESSION_MAX) message=`Estimate must be ${SESSION_MAX} or less.`;
-      else estimateValue=estNumber;
+  const rawEstimate = ctx.estimateInput.value.trim();
+  let estimateValue = null;
+  if (!message) {
+    if (rawEstimate === '') { message = 'Estimate is required.'; }
+    else {
+      const estNumber = Number(rawEstimate);
+      if (!Number.isFinite(estNumber)) message = 'Estimate must be a number.';
+      else if (!Number.isInteger(estNumber)) message = 'Estimate must be a whole number.';
+      else if (estNumber < 1) message = 'Estimate must be at least 1.';
+      else if (estNumber > SESSION_MAX) message = `Estimate must be ${SESSION_MAX} or less.`;
+      else estimateValue = estNumber;
     }
   }
 
-  if(!message){
-    ctx.estimateInput.value=String(estimateValue);
+  if (!message) {
+    ctx.estimateInput.value = String(estimateValue);
   }
 
-  ctx.saveBtn.disabled=Boolean(message);
+  ctx.saveBtn.disabled = Boolean(message);
   const shouldShow = ctx.shouldShowErrors || forceShow;
   showCreateTaskError(shouldShow ? message : '', ctx);
   return { valid: !message, title, estimate: estimateValue };
 }
 
-function attemptCreateTaskSave(){
-  if(!createTaskCtx) return;
-  const ctx=createTaskCtx;
-  const result=validateCreateTask(ctx,{ forceShow:true });
-  if(!result.valid) return;
+function attemptCreateTaskSave() {
+  if (!createTaskCtx) return;
+  const ctx = createTaskCtx;
+  const result = validateCreateTask(ctx, { forceShow: true });
+  if (!result.valid) return;
 
   const { title, estimate } = result;
-  if(tasks.length>=50){
+  if (tasks.length >= 50) {
     showCreateTaskError('You can create up to 50 tasks.', ctx);
-    ctx.saveBtn.disabled=true;
+    ctx.saveBtn.disabled = true;
     return;
   }
-  const optimisticTask = addTask(title, estimate, { atTop:true });
+  const optimisticTask = addTask(title, estimate, { atTop: true });
   const optimisticId = optimisticTask.id;
-  teardownCreateTaskEditor({ focusButton:false });
+  teardownCreateTaskEditor({ focusButton: false });
 
   // Stubbed persistence hook; replace when you add backend:
-  Promise.resolve({ id: `task-${Date.now()}`, title, estimate }).catch(err=>{
-    const idx=tasks.findIndex(t=>t.id===optimisticId);
-    if(idx!==-1){ tasks.splice(idx,1); renderAllTasks(); }
+  Promise.resolve({ id: `task-${Date.now()}`, title, estimate }).catch(err => {
+    const idx = tasks.findIndex(t => t.id === optimisticId);
+    if (idx !== -1) { tasks.splice(idx, 1); renderAllTasks(); }
     startCreateTask({ title, estimate, error: err?.message || 'Unable to create task. Please try again.' });
   });
 }
 
-function cancelCreateTask({ focusButton=true }={}){
-  if(!createTaskCtx) return;
+function cancelCreateTask({ focusButton = true } = {}) {
+  if (!createTaskCtx) return;
   teardownCreateTaskEditor({ focusButton });
 }
 
-function teardownCreateTaskEditor({ focusButton=true }={}){
-  if(!createTaskCtx) return;
-  const ctx=createTaskCtx;
-  ctx.cleanupFns.forEach(fn=>{ try{ fn(); }catch{} });
-  ctx.cleanupFns.length=0;
-  if(ctx.container.parentElement){ ctx.container.parentElement.removeChild(ctx.container); }
-  createTaskCtx=null;
+function teardownCreateTaskEditor({ focusButton = true } = {}) {
+  if (!createTaskCtx) return;
+  const ctx = createTaskCtx;
+  ctx.cleanupFns.forEach(fn => { try { fn(); } catch { } });
+  ctx.cleanupFns.length = 0;
+  if (ctx.container.parentElement) { ctx.container.parentElement.removeChild(ctx.container); }
+  createTaskCtx = null;
   setCreateButtonDisabled(false);
-  if(focusButton && els.addTaskBtn){ els.addTaskBtn.focus({ preventScroll:true }); }
+  if (focusButton && els.addTaskBtn) { els.addTaskBtn.focus({ preventScroll: true }); }
 }
 
-function showCreateTaskError(message, ctx=createTaskCtx){
-  if(!ctx || !ctx.errorEl) return;
-  if(message){
-    ctx.errorEl.hidden=false;
-    ctx.errorEl.textContent=message;
-  }else{
-    ctx.errorEl.hidden=true;
-    ctx.errorEl.textContent='';
+function showCreateTaskError(message, ctx = createTaskCtx) {
+  if (!ctx || !ctx.errorEl) return;
+  if (message) {
+    ctx.errorEl.hidden = false;
+    ctx.errorEl.textContent = message;
+  } else {
+    ctx.errorEl.hidden = true;
+    ctx.errorEl.textContent = '';
   }
 }
 
-function setCreateButtonDisabled(disabled){
-  if(!els.addTaskBtn) return;
-  els.addTaskBtn.disabled=!!disabled;
+function setCreateButtonDisabled(disabled) {
+  if (!els.addTaskBtn) return;
+  els.addTaskBtn.disabled = !!disabled;
 }
 
 // -----------------------------------------------------------------------------
 // Session inline editor on the task bubble
 // -----------------------------------------------------------------------------
-function createSessionField(labelText, initialValue){
-  const wrapper=document.createElement('div');
-  wrapper.className='session-field';
+function createSessionField(labelText, initialValue) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'session-field';
 
-  const safeSuffix = labelText.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  const safeSuffix = labelText.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   const inputId = makeDomId(`sessionField-${safeSuffix}`);
 
-  const label=document.createElement('label');
-  label.className='session-field-label';
-  label.textContent=labelText;
+  const label = document.createElement('label');
+  label.className = 'session-field-label';
+  label.textContent = labelText;
   label.setAttribute('for', inputId);
 
-  const input=document.createElement('input');
-  input.type='number';
-  input.className='session-input';
-  input.inputMode='numeric';
-  input.min='0';
-  input.max=String(SESSION_MAX);
-  input.step='1';
-  input.value=String(initialValue);
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.className = 'session-input';
+  input.inputMode = 'numeric';
+  input.min = '0';
+  input.max = String(SESSION_MAX);
+  input.step = '1';
+  input.value = String(initialValue);
   input.setAttribute('aria-label', labelText);
-  input.setAttribute('role','spinbutton');
-  input.id=inputId;
+  input.setAttribute('role', 'spinbutton');
+  input.id = inputId;
 
   wrapper.append(label, input);
   return { wrapper, input };
 }
 
-function paintSessionBubble(task, bubble){
-  if(!bubble) return;
-  bubble.textContent=formatSessions(task);
-  bubble.setAttribute('aria-label',`Completed ${task.done} of ${task.total} sessions`);
+function paintSessionBubble(task, bubble) {
+  if (!bubble) return;
+  bubble.textContent = formatSessions(task);
+  bubble.setAttribute('aria-label', `Completed ${task.done} of ${task.total} sessions`);
 }
 
-function paintSessionBubbleFromTask(task){
-  const card=els.tasksList.querySelector(`.task-card[data-task-id="${task.id}"]`);
-  if(!card) return;
-  const bubble=card.querySelector('.session-bubble');
+function paintSessionBubbleFromTask(task) {
+  const card = els.tasksList.querySelector(`.task-card[data-task-id="${task.id}"]`);
+  if (!card) return;
+  const bubble = card.querySelector('.session-bubble');
   paintSessionBubble(task, bubble);
 }
 
-function startSessionEdit(task, bubble){
-  if(sessionEditor && sessionEditor.bubble===bubble) return;
-  if(sessionEditor) cancelSessionEdit({ restoreOriginal:false });
-  const card=bubble.closest('.task-card');
-  if(!card) return;
+function startSessionEdit(task, bubble) {
+  if (sessionEditor && sessionEditor.bubble === bubble) return;
+  if (sessionEditor) cancelSessionEdit({ restoreOriginal: false });
+  const card = bubble.closest('.task-card');
+  if (!card) return;
 
-  const ctx={
-    taskRef:task,
-    taskId:task.id,
+  const ctx = {
+    taskRef: task,
+    taskId: task.id,
     bubble,
     card,
-    originalDone:task.done,
-    originalTotal:task.total,
+    originalDone: task.done,
+    originalTotal: task.total,
   };
 
   bubble.classList.add('editing');
-  bubble.setAttribute('role','group');
-  bubble.setAttribute('aria-label',`Edit sessions for ${task.name}`);
-  bubble.innerHTML='';
+  bubble.setAttribute('role', 'group');
+  bubble.setAttribute('aria-label', `Edit sessions for ${task.name}`);
+  bubble.innerHTML = '';
 
-  const liveRegion=document.createElement('div');
-  liveRegion.className='sr-only';
-  liveRegion.setAttribute('aria-live','polite');
-  liveRegion.textContent=`Editing sessions for ${task.name}`;
+  const liveRegion = document.createElement('div');
+  liveRegion.className = 'sr-only';
+  liveRegion.setAttribute('aria-live', 'polite');
+  liveRegion.textContent = `Editing sessions for ${task.name}`;
   bubble.appendChild(liveRegion);
 
-  const completedField=createSessionField('Completed', task.done);
-  const estimateField=createSessionField('Estimate', task.total);
+  const completedField = createSessionField('Completed', task.done);
+  const estimateField = createSessionField('Estimate', task.total);
   bubble.append(completedField.wrapper, estimateField.wrapper);
 
-  const errorEl=document.createElement('div');
-  errorEl.className='field-error';
-  errorEl.setAttribute('aria-live','polite');
-  errorEl.hidden=true;
+  const errorEl = document.createElement('div');
+  errorEl.className = 'field-error';
+  errorEl.setAttribute('aria-live', 'polite');
+  errorEl.hidden = true;
   bubble.appendChild(errorEl);
 
-  const stopEvt=evt=>evt.stopPropagation();
-  ['click','mousedown','mouseup','dblclick','keydown'].forEach(evtName=>{
+  const stopEvt = evt => evt.stopPropagation();
+  ['click', 'mousedown', 'mouseup', 'dblclick', 'keydown'].forEach(evtName => {
     completedField.input.addEventListener(evtName, stopEvt);
     estimateField.input.addEventListener(evtName, stopEvt);
   });
 
-  const onKey=evt=>{
-    if(evt.key==='Enter'){ evt.preventDefault(); commitSessionEdit(); }
-    else if(evt.key==='Escape'){ evt.preventDefault(); cancelSessionEdit(); }
+  const onKey = evt => {
+    if (evt.key === 'Enter') { evt.preventDefault(); commitSessionEdit(); }
+    else if (evt.key === 'Escape') { evt.preventDefault(); cancelSessionEdit(); }
   };
   completedField.input.addEventListener('keydown', onKey);
   estimateField.input.addEventListener('keydown', onKey);
 
-  const onFocusOut=()=>{
-    setTimeout(()=>{
-      if(!sessionEditor || sessionEditor.bubble!==bubble) return;
-      if(!bubble.contains(document.activeElement)) commitSessionEdit();
+  const onFocusOut = () => {
+    setTimeout(() => {
+      if (!sessionEditor || sessionEditor.bubble !== bubble) return;
+      if (!bubble.contains(document.activeElement)) commitSessionEdit();
     }, 0);
   };
   bubble.addEventListener('focusout', onFocusOut);
 
-  ctx.completedInput=completedField.input;
-  ctx.estimateInput=estimateField.input;
-  ctx.errorEl=errorEl;
-  ctx.blurHandler=onFocusOut;
-  ctx.cleanupFns=[
-    ()=>completedField.input.removeEventListener('keydown', onKey),
-    ()=>estimateField.input.removeEventListener('keydown', onKey),
-    ()=>bubble.removeEventListener('focusout', onFocusOut)
+  ctx.completedInput = completedField.input;
+  ctx.estimateInput = estimateField.input;
+  ctx.errorEl = errorEl;
+  ctx.blurHandler = onFocusOut;
+  ctx.cleanupFns = [
+    () => completedField.input.removeEventListener('keydown', onKey),
+    () => estimateField.input.removeEventListener('keydown', onKey),
+    () => bubble.removeEventListener('focusout', onFocusOut)
   ];
 
-  sessionEditor=ctx;
+  sessionEditor = ctx;
   completedField.input.focus();
   completedField.input.select();
 }
 
-function cancelSessionEdit({ restoreOriginal=true }={}){
-  if(!sessionEditor) return;
-  const ctx=sessionEditor;
-  if(restoreOriginal){
-    ctx.taskRef.done=ctx.originalDone;
-    ctx.taskRef.total=ctx.originalTotal;
+function cancelSessionEdit({ restoreOriginal = true } = {}) {
+  if (!sessionEditor) return;
+  const ctx = sessionEditor;
+  if (restoreOriginal) {
+    ctx.taskRef.done = ctx.originalDone;
+    ctx.taskRef.total = ctx.originalTotal;
   }
   teardownSessionEditor(ctx);
-  if(ctx.bubble.isConnected) ctx.bubble.focus({ preventScroll:true });
+  if (ctx.bubble.isConnected) ctx.bubble.focus({ preventScroll: true });
 }
 
-function commitSessionEdit(){
-  if(!sessionEditor) return;
-  const ctx=sessionEditor;
+function commitSessionEdit() {
+  if (!sessionEditor) return;
+  const ctx = sessionEditor;
   const { completedInput, estimateInput, taskRef } = ctx;
 
-  const completedResult=readSessionValue(completedInput, 'Completed');
-  if(completedResult.error){
+  const completedResult = readSessionValue(completedInput, 'Completed');
+  if (completedResult.error) {
     showSessionError(completedResult.error, ctx);
     completedInput.focus(); completedInput.select(); return;
   }
-  const estimateResult=readSessionValue(estimateInput, 'Estimate');
-  if(estimateResult.error){
+  const estimateResult = readSessionValue(estimateInput, 'Estimate');
+  if (estimateResult.error) {
     showSessionError(estimateResult.error, ctx);
     estimateInput.focus(); estimateInput.select(); return;
   }
 
-  const completedVal=completedResult.value;
-  const estimateVal=estimateResult.value;
+  const completedVal = completedResult.value;
+  const estimateVal = estimateResult.value;
 
-  if(completedVal>estimateVal){
+  if (completedVal > estimateVal) {
     showSessionError('Completed cannot exceed estimate.', ctx);
     completedInput.focus(); completedInput.select(); return;
   }
 
   showSessionError('', ctx);
 
-  if(completedVal===taskRef.done && estimateVal===taskRef.total){
+  if (completedVal === taskRef.done && estimateVal === taskRef.total) {
     teardownSessionEditor(ctx);
-    ctx.bubble.focus({ preventScroll:true });
+    ctx.bubble.focus({ preventScroll: true });
     return;
   }
 
-  const prevDone=taskRef.done;
-  const prevTotal=taskRef.total;
+  const prevDone = taskRef.done;
+  const prevTotal = taskRef.total;
 
-  taskRef.done=completedVal;
-  taskRef.total=estimateVal;
+  taskRef.done = completedVal;
+  taskRef.total = estimateVal;
 
   teardownSessionEditor(ctx);
-  if(ctx.bubble.isConnected) ctx.bubble.focus({ preventScroll:true });
+  if (ctx.bubble.isConnected) ctx.bubble.focus({ preventScroll: true });
 
   // Stubbed persistence update:
-  Promise.resolve({ ok: true }).catch(err=>{
-    taskRef.done=prevDone;
-    taskRef.total=prevTotal;
+  Promise.resolve({ ok: true }).catch(err => {
+    taskRef.done = prevDone;
+    taskRef.total = prevTotal;
     paintSessionBubbleFromTask(taskRef);
     flashSessionError(ctx.taskId, err?.message || 'Unable to save changes');
   });
 }
 
-function teardownSessionEditor(providedCtx){
-  const ctx=providedCtx || sessionEditor;
-  if(!ctx) return;
-  const { bubble, taskRef, cleanupFns=[] } = ctx;
-  cleanupFns.forEach(fn=>{ try{ fn(); }catch{} });
+function teardownSessionEditor(providedCtx) {
+  const ctx = providedCtx || sessionEditor;
+  if (!ctx) return;
+  const { bubble, taskRef, cleanupFns = [] } = ctx;
+  cleanupFns.forEach(fn => { try { fn(); } catch { } });
   bubble.classList.remove('editing');
-  bubble.innerHTML='';
-  bubble.setAttribute('role','button');
+  bubble.innerHTML = '';
+  bubble.setAttribute('role', 'button');
   paintSessionBubble(taskRef, bubble);
-  sessionEditor=null;
+  sessionEditor = null;
 }
 
-function readSessionValue(input, label){
-  const raw=String(input.value ?? '').trim();
-  if(raw==='') return { error: `${label} is required.` };
-  const num=Number(raw);
-  if(!Number.isFinite(num)) return { error: `${label} must be a number.` };
-  if(!Number.isInteger(num)) return { error: `${label} must be a whole number.` };
-  if(num<0) return { error: `${label} must be 0 or greater.` };
-  if(num>SESSION_MAX) return { error: `${label} must be ${SESSION_MAX} or less.` };
-  input.value=String(num);
-  return { value:num };
+function readSessionValue(input, label) {
+  const raw = String(input.value ?? '').trim();
+  if (raw === '') return { error: `${label} is required.` };
+  const num = Number(raw);
+  if (!Number.isFinite(num)) return { error: `${label} must be a number.` };
+  if (!Number.isInteger(num)) return { error: `${label} must be a whole number.` };
+  if (num < 0) return { error: `${label} must be 0 or greater.` };
+  if (num > SESSION_MAX) return { error: `${label} must be ${SESSION_MAX} or less.` };
+  input.value = String(num);
+  return { value: num };
 }
 
-function showSessionError(message, ctx=sessionEditor){
-  if(!ctx || !ctx.errorEl) return;
-  if(message){
-    ctx.errorEl.hidden=false;
-    ctx.errorEl.textContent=message;
-  }else{
-    ctx.errorEl.hidden=true;
-    ctx.errorEl.textContent='';
+function showSessionError(message, ctx = sessionEditor) {
+  if (!ctx || !ctx.errorEl) return;
+  if (message) {
+    ctx.errorEl.hidden = false;
+    ctx.errorEl.textContent = message;
+  } else {
+    ctx.errorEl.hidden = true;
+    ctx.errorEl.textContent = '';
   }
 }
 
-function flashSessionError(taskId, message){
-  const card=els.tasksList.querySelector(`.task-card[data-task-id="${taskId}"]`);
-  if(!card) return;
-  let container=card.querySelector('.session-error');
-  if(!container){
-    container=document.createElement('div');
-    container.className='field-error session-error';
-    container.setAttribute('role','alert');
+function flashSessionError(taskId, message) {
+  const card = els.tasksList.querySelector(`.task-card[data-task-id="${taskId}"]`);
+  if (!card) return;
+  let container = card.querySelector('.session-error');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'field-error session-error';
+    container.setAttribute('role', 'alert');
     card.querySelector('.task-right')?.appendChild(container);
   }
-  container.textContent=message;
-  container.hidden=false;
-  setTimeout(()=>{ if(container && container.parentElement){ container.remove(); } }, 4000);
+  container.textContent = message;
+  container.hidden = false;
+  setTimeout(() => { if (container && container.parentElement) { container.remove(); } }, 4000);
 }
 
 // -----------------------------------------------------------------------------
@@ -798,7 +894,7 @@ function flashSessionError(taskId, message){
 // -----------------------------------------------------------------------------
 (function mountTasksPanelAdder() {
   const MAX_PANELS = 5;
-  const stack  = document.querySelector('#tasksStack');
+  const stack = document.querySelector('#tasksStack');
   const addBtn = document.querySelector('#addTasksPanel');
   if (!stack || !addBtn) return;
 
@@ -859,7 +955,7 @@ function flashSessionError(taskId, message){
     addButtons.slice(1).forEach(btn => btn.remove());
   }
 
-    // Rebind header actions for a given panel (no placeholder rows)
+  // Rebind header actions for a given panel (no placeholder rows)
   function rebindPanelEvents(panel) {
     // Wire the header buttons for this panel
     wireHeaderRename(panel);
@@ -869,9 +965,9 @@ function flashSessionError(taskId, message){
   // Ensure the first (template) panel has its local header actions wired
   rebindPanelEvents(template);
 
-// Wire the template panel's create button
-template.querySelectorAll('.task-add')
-  .forEach(btn => btn.addEventListener('click', onAddTaskClick));
+  // Wire the template panel's create button
+  template.querySelectorAll('.task-add')
+    .forEach(btn => btn.addEventListener('click', onAddTaskClick));
 
 
   // Outside "+" button: add a brand-new Tasks panel (clone) up to MAX_PANELS
@@ -899,13 +995,13 @@ template.querySelectorAll('.task-add')
 
     // === NEW: wire the "+ Create a Task" button inside the new panel ===
     clone.querySelectorAll('.task-add')
-    .forEach(btn => btn.addEventListener('click', onAddTaskClick));
+      .forEach(btn => btn.addEventListener('click', onAddTaskClick));
 
-// Mount it
-stack.appendChild(clone);
-placeChipRow(); // <<< ADD: reposition "+" after adding a panel
+    // Mount it
+    stack.appendChild(clone);
+    placeChipRow(); // <<< ADD: reposition "+" after adding a panel
 
-clone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    clone.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     // Cap at MAX_PANELS
     if (nextIndex >= MAX_PANELS) {

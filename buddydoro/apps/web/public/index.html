@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,19 +14,20 @@
 
   <!-- Core styles (order matters: base → layout → components → feature CSS → themes) -->
   <link rel="stylesheet" href="../styles/base.css" />
-  <link rel="stylesheet" href="../styles/layout.css" />
+  <link rel="stylesheet" href="../styles/layout2.css" />
   <link rel="stylesheet" href="../styles/components.css" />
 
   <!-- Feature-specific CSS -->
   <link rel="stylesheet" href="../styles/scene.css" />
+  <link rel="stylesheet" href="../styles/notifications.css" />
 
   <!-- Moon overlay -->
-   <link rel="preload" as="image" href="/assets/artwork/Moon.png" />  <!-- ✅ UPDATED -->
+  <link rel="preload" as="image" href="/assets/artwork/Moon.png" /> <!-- ✅ UPDATED -->
 
   <link rel="stylesheet" href="../styles/moon.css" />
 
   <link rel="stylesheet" href="../styles/earndoros.css" />
-  <link rel="stylesheet" href="../styles/diamond.css" /> 
+  <link rel="stylesheet" href="../styles/diamond.css" />
 
   <link rel="stylesheet" href="../styles/dragon.css" />
   <link rel="stylesheet" href="../styles/topbar.css" />
@@ -34,7 +36,7 @@
   <link rel="stylesheet" href="../styles/store.css" />
   <link rel="stylesheet" href="../styles/animations.css" />
 
-    <!-- Life Circle CSS -->
+  <!-- Life Circle CSS -->
   <link rel="stylesheet" href="../styles/lifecircle.css" />
 
   <!-- Restore Life Segment CSS -->
@@ -50,6 +52,7 @@
   <!-- Theme last so it can override colors if needed -->
   <link rel="stylesheet" href="../styles/themes.css" />
 </head>
+
 <body>
   <!-- Background scene -->
   <div id="scene" class="scene" role="img" aria-label="Sunny forest clearing with a tree stump">
@@ -69,89 +72,90 @@
       <div class="top-chips">
 
         <!-- Store chip (opens window) -->
-        <button class="chip glass-chip store-chip" id="storeChip" type="button"
-                aria-haspopup="dialog" aria-controls="storeDialog">
+        <button class="chip glass-chip store-chip" id="storeChip" type="button" aria-haspopup="dialog"
+          aria-controls="storeDialog">
           <svg class="store-icon" viewBox="0 0 64 64" aria-hidden="true">
             <defs>
               <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#f7d073"/>
-                <stop offset="100%" stop-color="#d39b2d"/>
+                <stop offset="0%" stop-color="#f7d073" />
+                <stop offset="100%" stop-color="#d39b2d" />
               </linearGradient>
               <radialGradient id="goldFill" cx="35%" cy="30%" r="70%">
-                <stop offset="0%"  stop-color="#fff6c3"/>
-                <stop offset="55%" stop-color="#ffd36b"/>
-                <stop offset="100%" stop-color="#f0b13a"/>
+                <stop offset="0%" stop-color="#fff6c3" />
+                <stop offset="55%" stop-color="#ffd36b" />
+                <stop offset="100%" stop-color="#f0b13a" />
               </radialGradient>
             </defs>
-            <circle cx="32" cy="32" r="29" fill="url(#goldRing)"/>
-            <circle cx="32" cy="32" r="25" fill="url(#goldFill)" stroke="#b98627" stroke-width="2"/>
-            <path d="M22 28h20l2 20a3 3 0 0 1-3 3H23a3 3 0 0 1-3-3l2-20zm4-6a6 6 0 0 1 12 0v6h-4v-6a2 2 0 0 0-4 0v6h-4v-6z" fill="#2b2213"/>
+            <circle cx="32" cy="32" r="29" fill="url(#goldRing)" />
+            <circle cx="32" cy="32" r="25" fill="url(#goldFill)" stroke="#b98627" stroke-width="2" />
+            <path
+              d="M22 28h20l2 20a3 3 0 0 1-3 3H23a3 3 0 0 1-3-3l2-20zm4-6a6 6 0 0 1 12 0v6h-4v-6a2 2 0 0 0-4 0v6h-4v-6z"
+              fill="#2b2213" />
           </svg>
           <span class="store-label">Store</span>
         </button>
 
         <!-- Diamond chip -->
-<button class="chip glass-chip diamond-chip" id="diamondChip" type="button"
-        aria-label="Diamond balance">
-  <img
-    src="./assets/artwork/DiamondIcon.png"
-    alt="Diamonds"
-    class="diamond-icon"
-  />
-  <span id="diamondAmount" class="diamond-amount">0</span>
-  <span class="diamond-label">Diamonds</span>
-</button>
+        <button class="chip glass-chip diamond-chip" id="diamondChip" type="button" aria-label="Diamond balance">
+          <img src="./assets/artwork/DiamondIcon.png" alt="Diamonds" class="diamond-icon" />
+          <span id="diamondAmount" class="diamond-amount">0</span>
+          <span class="diamond-label">Diamonds</span>
+        </button>
 
 
         <!-- Doros chip -->
         <div class="doros-dropdown">
-          <button class="chip glass-chip doros-chip" id="dorosChip" type="button"
-                  aria-label="Doros balance" aria-haspopup="true" aria-expanded="false"
-                  aria-controls="dorosMenu">
+          <button class="chip glass-chip doros-chip" id="dorosChip" type="button" aria-label="Doros balance"
+            aria-haspopup="true" aria-expanded="false" aria-controls="dorosMenu">
             <svg class="doros-icon" viewBox="0 0 64 64" aria-hidden="true">
               <defs>
                 <radialGradient id="gemGlow" cx="35%" cy="30%" r="70%">
-                  <stop offset="0%"  stop-color="#fff9d1"/>
-                  <stop offset="45%" stop-color="#ffd979"/>
-                  <stop offset="100%" stop-color="#f2b942"/>
+                  <stop offset="0%" stop-color="#fff9d1" />
+                  <stop offset="45%" stop-color="#ffd979" />
+                  <stop offset="100%" stop-color="#f2b942" />
                 </radialGradient>
                 <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#f7d073"/>
-                  <stop offset="100%" stop-color="#d39b2d"/>
+                  <stop offset="0%" stop-color="#f7d073" />
+                  <stop offset="100%" stop-color="#d39b2d" />
                 </linearGradient>
               </defs>
-              <circle cx="32" cy="32" r="29" fill="url(#ring)"/>
-              <circle cx="32" cy="32" r="25" fill="url(#gemGlow)" stroke="#b98627" stroke-width="2"/>
-              <ellipse cx="26" cy="22" rx="14" ry="9" fill="#fff" opacity=".35"/>
-              <text x="32" y="39" text-anchor="middle"
-                    font-family="DejaVu Sans, Arial" font-weight="700" font-size="24" fill="#2b2213">D</text>
+              <circle cx="32" cy="32" r="29" fill="url(#ring)" />
+              <circle cx="32" cy="32" r="25" fill="url(#gemGlow)" stroke="#b98627" stroke-width="2" />
+              <ellipse cx="26" cy="22" rx="14" ry="9" fill="#fff" opacity=".35" />
+              <text x="32" y="39" text-anchor="middle" font-family="DejaVu Sans, Arial" font-weight="700" font-size="24"
+                fill="#2b2213">D</text>
             </svg>
             <span id="dorosAmount" class="doros-amount">1,250</span>
             <span class="doros-label">Doros</span>
           </button>
           <div class="doros-menu" id="dorosMenu" role="menu" hidden>
-            <button type="button" class="doros-menu-item" role="menuitem" data-menu-action="buy-doros">Buy Doros</button>
+            <button type="button" class="doros-menu-item" role="menuitem" data-menu-action="buy-doros">Buy
+              Doros</button>
           </div>
         </div>
 
         <!-- Greeting chip -->
         <div class="greet-container">
-          <button class="chip glass-chip greet-chip" id="greetChip" type="button"
-                  aria-haspopup="menu" aria-expanded="false" aria-controls="greetMenu">
+          <button class="chip glass-chip greet-chip" id="greetChip" type="button" aria-haspopup="menu"
+            aria-expanded="false" aria-controls="greetMenu">
             <span id="greetText">Hello, Joe</span>
           </button>
           <div id="greetMenu" class="greet-menu" role="menu" hidden>
             <div class="greet-menu-section" role="none">
-              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/account">Account Settings</button>
-              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/profile">Profile Settings</button>
+              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/account">Account
+                Settings</button>
+              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/profile">Profile
+                Settings</button>
             </div>
             <hr class="greet-menu-divider" />
             <form id="defaultsForm" class="greet-defaults" novalidate>
               <div class="greet-defaults-heading">Defaults</div>
               <label class="greet-defaults-label" for="focusDefaultInput">Focus session (min)</label>
-              <input id="focusDefaultInput" name="focusDefault" type="number" inputmode="numeric" min="1" max="180" step="1" class="greet-defaults-input" />
+              <input id="focusDefaultInput" name="focusDefault" type="number" inputmode="numeric" min="1" max="180"
+                step="1" class="greet-defaults-input" />
               <label class="greet-defaults-label" for="breakDefaultInput">Break session (min)</label>
-              <input id="breakDefaultInput" name="breakDefault" type="number" inputmode="numeric" min="1" max="180" step="1" class="greet-defaults-input" />
+              <input id="breakDefaultInput" name="breakDefault" type="number" inputmode="numeric" min="1" max="180"
+                step="1" class="greet-defaults-input" />
               <div id="defaultsError" class="greet-defaults-error" role="alert" hidden></div>
               <button type="submit" class="greet-defaults-save">Save</button>
             </form>
@@ -161,55 +165,46 @@
     </header>
 
 
-<!-- Tasks stack (flow layout) — single top-level panel, no nesting >>> -->
-<section class="tasks-wrap" aria-label="Tasks section">
-  <div id="tasksStack" class="tasks-stack">
-    <!-- First panel (template) — top-level child of #tasksStack -->
-    <div id="tasksPanel-1" class="tasks-panel" aria-label="Tasks">
-      <div class="tasks-header">
-        <div class="tasks-title">Task</div>
-        <div class="tasks-header-actions">
-          <button class="task-title-edit" type="button" aria-label="Rename task group">
-            <svg class="task-title-edit-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 14.5V19h4.5L18 9.5l-4.5-4.5L4 14.5zm11-11 4.5 4.5"
-                    fill="none" stroke="#2b2213" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <button class="task-title-delete" type="button" aria-label="Delete task group">
-            <svg class="task-title-delete-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M6 7h12l-1 13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7zm3-3h6l1 2H8l1-2zm1 6v8m4-8v8"
-                    fill="none" stroke="#2b2213" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
+    <!-- Tasks stack (flow layout) — single top-level panel, no nesting >>> -->
+    <section class="tasks-wrap" aria-label="Tasks section">
+      <div id="tasksStack" class="tasks-stack">
+        <!-- First panel (template) — top-level child of #tasksStack -->
+        <div id="tasksPanel-1" class="tasks-panel" aria-label="Tasks">
+          <div class="tasks-header">
+            <div class="tasks-title">Task</div>
+            <div class="tasks-header-actions">
+              <button class="task-title-edit" type="button" aria-label="Rename task group">
+                <svg class="task-title-edit-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 14.5V19h4.5L18 9.5l-4.5-4.5L4 14.5zm11-11 4.5 4.5" fill="none" stroke="#2b2213"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <button class="task-title-delete" type="button" aria-label="Delete task group">
+                <svg class="task-title-delete-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 7h12l-1 13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7zm3-3h6l1 2H8l1-2zm1 6v8m4-8v8" fill="none"
+                    stroke="#2b2213" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div id="tasksList" class="tasks-list" role="listbox" aria-activedescendant=""></div>
+          <button id="addTaskBtn" class="task-add" type="button">＋ Create a Task</button>
         </div>
       </div>
 
-      <div id="tasksList" class="tasks-list" role="listbox" aria-activedescendant=""></div>
-      <button id="addTaskBtn" class="task-add" type="button">＋ Create a Task</button>
-    </div>
-  </div>
-
-  <!-- “Add task box” chip must be a SIBLING of #tasksStack (not inside a .tasks-panel) -->
-  <div class="tasks-chip-row">
-    <button id="addTasksPanel"
-            class="chip gold add-chip"
-            type="button"
-            aria-label="Add a Tasks box"
-            title="Add a Tasks box">
-      <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M12 5v14M5 12h14"
-              fill="none"
-              stroke="#2b2213"
-              stroke-width="3.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"/>
-      </svg>
-    </button>
-  </div>
-</section>
-<!-- <<< REPLACEMENT END <<< -->
+      <!-- “Add task box” chip must be a SIBLING of #tasksStack (not inside a .tasks-panel) -->
+      <div class="tasks-chip-row">
+        <button id="addTasksPanel" class="chip gold add-chip" type="button" aria-label="Add a Tasks box"
+          title="Add a Tasks box">
+          <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 5v14M5 12h14" fill="none" stroke="#2b2213" stroke-width="3.4" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </section>
+    <!-- <<< REPLACEMENT END <<< -->
 
 
 
@@ -222,14 +217,8 @@
         <div id="timerDisplay" class="timer-value">25:00</div>
 
         <!-- 3-dot trigger on the bottom of the circle -->
-        <button
-          id="timerMenuBtn"
-          class="btn-primary timer-menu-trigger"
-          type="button"
-          aria-haspopup="true"
-          aria-expanded="false"
-          aria-controls="timerMenu"
-          aria-label="Timer options">
+        <button id="timerMenuBtn" class="btn-primary timer-menu-trigger" type="button" aria-haspopup="true"
+          aria-expanded="false" aria-controls="timerMenu" aria-label="Timer options">
           <span class="timer-menu-dots" aria-hidden="true"></span>
         </button>
 
@@ -238,15 +227,18 @@
           <form id="timerMenuForm" class="timer-menu-form">
             <div class="timer-menu-field">
               <label class="timer-menu-label" for="timerStudyInput">Study (min)</label>
-              <input id="timerStudyInput" class="timer-menu-input" type="number" min="1" max="180" step="1" inputmode="numeric" />
+              <input id="timerStudyInput" class="timer-menu-input" type="number" min="1" max="180" step="1"
+                inputmode="numeric" />
             </div>
             <div class="timer-menu-field">
               <label class="timer-menu-label" for="timerShortInput">Short Break (min)</label>
-              <input id="timerShortInput" class="timer-menu-input" type="number" min="1" max="180" step="1" inputmode="numeric" />
+              <input id="timerShortInput" class="timer-menu-input" type="number" min="1" max="180" step="1"
+                inputmode="numeric" />
             </div>
             <div class="timer-menu-field">
               <label class="timer-menu-label" for="timerLongInput">Long Break (min)</label>
-              <input id="timerLongInput" class="timer-menu-input" type="number" min="1" max="180" step="1" inputmode="numeric" />
+              <input id="timerLongInput" class="timer-menu-input" type="number" min="1" max="180" step="1"
+                inputmode="numeric" />
             </div>
 
             <div id="timerMenuError" class="timer-menu-error" hidden></div>
@@ -307,7 +299,7 @@
     </div>
   </section>
 
-   <!-- Life Circle logic (auto-mounts into #scene and positions under the dragon) -->
+  <!-- Life Circle logic (auto-mounts into #scene and positions under the dragon) -->
   <script src="../js/features/lifecircle.js"></script>
   <script>
     window.addEventListener('DOMContentLoaded', () => {
@@ -338,20 +330,20 @@
     });
   </script>
 
-    <!-- Automatic day/night background switch -->
+  <!-- Automatic day/night background switch -->
   <script src="../js/features/backgroundnight.js"></script>
 
-    <!-- Moon overlay (shows only at night) -->
+  <!-- Moon overlay (shows only at night) -->
   <script src="../js/features/moon.js"></script>
 
   <!-- Earn Doros logic -->
   <script src="../js/features/earndoros.js"></script>
 
   <!-- Diamond balance logic -->
-<script src="../js/diamond.js"></script>
+  <script src="../js/diamond.js"></script>
 
   <!-- Entry script: lives in apps/web/js/main.js -->
   <script type="module" src="../js/main.js"></script>
 </body>
-</html>
 
+</html>

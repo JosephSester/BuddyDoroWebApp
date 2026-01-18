@@ -40,23 +40,31 @@ router.post('/signup', async (req, res) => {
 // LOGIN
 router.post('/login', async (req, res) => {
   try {
+    console.log('Login attempt:', req.body.email);
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!user) {
+      console.log('User not found:', email);
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!isMatch) {
+      console.log('Password mismatch for:', email);
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
 
     // CREATE TOKEN
-
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET, // this must now have a value
       { expiresIn: '1h' }
     );
 
+    console.log('Login successful:', email);
     res.json({ message: 'Login successful', userId: user._id, token });
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });

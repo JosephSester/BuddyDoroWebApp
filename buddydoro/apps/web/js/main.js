@@ -1,13 +1,21 @@
 // apps/web/js/main.js
 
 // Scene / sprite
-import { initScene }             from './features/scene.js';
-import { initDragon }            from './features/dragon.js';
+import { initScene } from './features/scene.js';
+import { initDragon } from './features/dragon.js';
+
+// Auth guard: redirect to login if no token
+const authToken = localStorage.getItem('authToken');
+if (!authToken) {
+  console.log('No auth token found. Redirecting to login...');
+  window.location.href = 'login.html';
+  throw new Error('Not authenticated'); // Halt further execution
+}
 
 // UI features
-import { initTopbar }            from './features/topbar.js';
-import { initTimer }             from './features/timer.js';
-import { initStore }             from './features/store.js';
+import { initTopbar } from './features/topbar.js';
+import { initTimer } from './features/timer.js';
+import { initStore } from './features/store.js';
 import { initTasks, getActiveTaskId } from './features/tasks.js';
 
 // ----- 1) Background & dragon -------------------------------------------------
@@ -73,7 +81,7 @@ initStore({
 
 
 // ----- 5) Tasks ---------------------------------------------------------------
-initTasks({
+await initTasks({
   onActiveTaskChange: () => {
     // Enable/disable Start button depending on whether a task is selected
     syncStartEnabled();

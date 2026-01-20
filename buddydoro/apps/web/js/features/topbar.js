@@ -134,5 +134,98 @@ export function initTopbar({ userName='Joe', onOpenStore }={}){
     if(item.dataset.menuAction==='buy-doros' && typeof openStoreCb==='function') openStoreCb();
   });
 
+  // Diamonds dropdown → "Buy Diamonds"
+  
+  const diamondChipBtn = document.getElementById('diamondChip');
+  console.log('diamondChipBtn =', diamondChipBtn);
+  const diamondMenuEl = document.getElementById('diamondMenu');
+  const diamondDropdown = diamondChipBtn ? diamondChipBtn.closest('.doros-dropdown') : null;
+
+  let diamondOpen = false;
+  let diamondCleaners = [];
+
+  function openDiamondMenu(){
+    if(!diamondChipBtn || !diamondMenuEl || diamondOpen) return;
+    diamondOpen = true;
+    diamondChipBtn.setAttribute('aria-expanded','true');
+    if(diamondDropdown) diamondDropdown.setAttribute('data-open','true');
+    diamondMenuEl.hidden = false;
+
+    const down = e => {
+      if(diamondDropdown && e.target instanceof Node && diamondDropdown.contains(e.target)) return;
+      closeDiamondMenu();
+    };
+    const key = e => {
+      if(e.key === 'Escape'){
+        e.preventDefault();
+        closeDiamondMenu({ focusChip:true });
+      }
+    };
+    const focusin = e => {
+      if(diamondDropdown && e.target instanceof Node && diamondDropdown.contains(e.target)) return;
+      closeDiamondMenu();
+    };
+
+    document.addEventListener('pointerdown', down, true);
+    document.addEventListener('keydown', key, true);
+    document.addEventListener('focusin', focusin, true);
+
+    diamondCleaners = [
+      ()=>document.removeEventListener('pointerdown', down, true),
+      ()=>document.removeEventListener('keydown', key, true),
+      ()=>document.removeEventListener('focusin', focusin, true),
+    ];
+  }
+
+  function closeDiamondMenu({ focusChip=false } = {}){
+    if(!diamondChipBtn || !diamondOpen) return;
+    diamondOpen = false;
+    diamondChipBtn.setAttribute('aria-expanded','false');
+    if(diamondDropdown) diamondDropdown.removeAttribute('data-open');
+    diamondMenuEl.hidden = true;
+
+    diamondCleaners.forEach(fn=>{ try{ fn(); }catch{} });
+    diamondCleaners = [];
+
+    if(focusChip) diamondChipBtn.focus({ preventScroll:true });
+  }
+
+  function toggleDiamondMenu(){
+    diamondOpen ? closeDiamondMenu() : openDiamondMenu();
+  }
+
+  diamondChipBtn?.addEventListener('click', (e)=>{
+    e.preventDefault();
+    toggleDiamondMenu();
+  });
+
+  diamondChipBtn?.addEventListener('keydown', (e)=>{
+    if(e.key==='ArrowDown' || e.key==='Enter' || e.key===' '){
+      e.preventDefault();
+      openDiamondMenu();
+    } else if(e.key==='Escape' && diamondOpen){
+      e.preventDefault();
+      closeDiamondMenu();
+    }
+  });
+ diamondMenuEl?.addEventListener('click', (e) => {
+    const item =
+      e.target instanceof Element
+        ? e.target.closest('.doros-menu-item')
+        : null;
+
+    if (!item) return;
+
+    e.preventDefault();
+    closeDiamondMenu({ focusChip: true });
+
+    if (
+      item.dataset.menuAction === 'buy-diamonds' &&
+      typeof openStoreCb === 'function'
+    ) {
+      openStoreCb('diamonds');
+    }
+  });
+
   return { getDoros, addDoros, spendDoros };
 }

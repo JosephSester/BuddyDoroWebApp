@@ -1,22 +1,30 @@
-/* diamond.css */
 
+
+/* ---------- Diamond chip ---------- */
 .diamond-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
 }
 
-.diamond-icon {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
+.diamond-chip .diamond-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
 }
 
-.diamond-amount {
-  font-weight: 700;
+.diamond-chip .diamond-amount {
+  font-size: 18px;
+  font-weight: 800;
 }
 
-.diamond-label {
+.diamond-chip .diamond-label {
+  font-size: 12px;
   opacity: 0.85;
-  font-size: 0.9em;
+  margin-left: 2px;
+}
+
+/* ---------- Diamond dropdown menu ---------- */
+#diamondMenu {
+  z-index: 9999;
 }

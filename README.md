@@ -61,15 +61,16 @@ MONGO_URI=mongodb://localhost:27017/buddydoro
 From the `buddydoro/server` directory:
 
 ```bash
-npm start
+node server.js
 ```
 
 The server will start on `http://localhost:3000`
 
 You should see:
 ```
-Server running on port 3000
-MongoDB connected successfully
+[dotenv] injecting env from .env
+Server listening on port 3000
+MongoDB connected
 ```
 
 ### 5. Open the Frontend

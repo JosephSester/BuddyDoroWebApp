@@ -1,6 +1,12 @@
 // Store dialog. Requires callbacks to read/update Doros.
-import { fetchInventory, purchaseItem, useItem, inventoryToMap } from '../api/inventoryService.js';
+import { fetchInventory, purchaseItem, useItem, inventoryToMap} from '../api/inventoryService.js';
 import { showNotification, setBusy } from '../utils/notifications.js';
+import { fetchCatalog } from '../api/storeService.js';
+
+console.log('[Store Init] storeChip:', !!document.getElementById('storeChip'));
+console.log('[Store Init] storeDialog:', !!document.getElementById('storeDialog'));
+// ... same for others
+
 
 export function initStore({ getDoros, spendDoros }) {
   const storeChip = document.getElementById('storeChip');
@@ -16,29 +22,16 @@ export function initStore({ getDoros, spendDoros }) {
 
   let currentCat = 'food';
   let selectedSku = null;
-
-  const catalog = {
-    food: [
-      { sku: 'food-apple', name: 'Apple', price: 20, emoji: '🍎' },
-      { sku: 'food-fish', name: 'Grilled Fish', price: 35, emoji: '🐟' },
-      { sku: 'food-cake', name: 'Berry Cake', price: 60, emoji: '🍰' }
-    ],
-    play: [
-      { sku: 'play-ball', name: 'Bouncy Ball', price: 25, emoji: '🟣' },
-      { sku: 'play-rope', name: 'Rope Toy', price: 30, emoji: '🪢' },
-      { sku: 'play-kite', name: 'Kite', price: 45, emoji: '🪁' }
-    ],
-    water: [
-      { sku: 'water-bottle', name: 'Spring Water', price: 15, emoji: '💧' },
-      { sku: 'water-juice', name: 'Fruit Juice', price: 28, emoji: '🧃' }
-    ],
-    medicine: [
-      { sku: 'med-bandage', name: 'Bandage', price: 40, emoji: '🩹' },
-      { sku: 'med-potion', name: 'Potion', price: 85, emoji: '🧪' }
-    ]
-  };
+  let allItems = [];           // ← Loaded from API
+  let itemsByCategory = {};    // ← Grouped for tabs
 
   const inventory = new Map();
+
+  if (!storeChip) {
+    console.error('[Store] storeChip not found');
+    return;
+  }
+  
 
   async function openStore() {
     storeBackdrop.hidden = false;
@@ -46,27 +39,51 @@ export function initStore({ getDoros, spendDoros }) {
     storeChip.setAttribute('aria-expanded', 'true');
     (storeDialog.querySelector('.tab') || storeClose).focus();
 
-    // INTEGRATION: Load inventory from API
     try {
-      setBusy(true, 'Loading inventory...');
+      setBusy(true, 'Loading store...');
+
+      // Load catalog from backend
+      const apiItems = await fetchCatalog();
+      allItems = apiItems; // keep flat list for lookups
+
+      // Group by category for tabs
+      itemsByCategory = apiItems.reduce((acc, item) => {
+        const cat = item.category || 'other';
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(item);
+        return acc;
+      }, {});
+
+      // Load inventory
       const apiInventory = await fetchInventory();
       inventory.clear();
       const loaded = inventoryToMap(apiInventory);
       for (const [sku, count] of loaded.entries()) {
         inventory.set(sku, count);
       }
+
       setBusy(false);
     } catch (error) {
-      console.error('Failed to load inventory:', error);
-      showNotification('Failed to load inventory', 'error');
+      console.error('Failed to load store data:', error);
+      showNotification('Failed to load store', 'error');
       setBusy(false);
+      allItems = [];
+      itemsByCategory = {};
       inventory.clear();
     }
 
-    renderCatalog();
+    // Activate default tab or first available
+    const defaultTab = tabs.find(t => t.dataset.cat === currentCat) || tabs[0];
+    if (defaultTab) {
+      defaultTab.click();
+    } else {
+      renderCatalog([]);
+    }
+
     renderInventory();
     document.addEventListener('keydown', onStoreKey);
   }
+
   function closeStore() {
     storeBackdrop.hidden = true;
     storeDialog.hidden = true;
@@ -75,7 +92,11 @@ export function initStore({ getDoros, spendDoros }) {
     document.removeEventListener('keydown', onStoreKey);
     storeChip.focus();
   }
-  function onStoreKey(e) { if (e.key === 'Escape') closeStore(); }
+
+  function onStoreKey(e) {
+    if (e.key === 'Escape') closeStore();
+  }
+
 
   storeChip?.addEventListener('click', openStore);
   storeBackdrop?.addEventListener('click', closeStore);
@@ -84,39 +105,52 @@ export function initStore({ getDoros, spendDoros }) {
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      tabs.forEach(t => { t.classList.toggle('is-active', t === tab); t.setAttribute('aria-selected', t === tab ? 'true' : 'false'); });
-      currentCat = tab.dataset.cat; selectedSku = null; renderCatalog();
+      tabs.forEach(t => {
+        t.classList.toggle('is-active', t === tab);
+        t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+      });
+      currentCat = tab.dataset.cat;
+      selectedSku = null;
+      renderCatalog(itemsByCategory[currentCat] || []);
     });
   });
 
-  function renderCatalog() {
+  function renderCatalog(categoryItems = []) {
     grid.innerHTML = '';
-    const items = catalog[currentCat] || [];
-    items.forEach(it => {
+    
+    if (categoryItems.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-message';
+      empty.textContent = 'No items in this category yet.';
+      grid.appendChild(empty);
+      return;
+    }
+
+    categoryItems.forEach(it => {
       const card = document.createElement('div');
       card.className = 'card';
+      card.dataset.sku = it.sku;
       card.innerHTML = `
-        <div class="item-emoji" aria-hidden="true">${it.emoji}</div>
-        <div class="item-name">${it.name}</div>
-        <div class="item-price">${it.price.toLocaleString()} Doros</div>
+        <div class="item-emoji" aria-hidden="true">${it.emoji || '🎁'}</div>
+        <div class="item-name">${it.name || it.sku}</div>
+        <div class="item-price">${(it.price || 0).toLocaleString()} Doros</div>
         <div class="item-actions">
           <button class="buy-btn" type="button">Buy</button>
           <button class="use-btn" type="button">Use</button>
         </div>
       `;
+
       card.querySelector('.buy-btn').addEventListener('click', async () => {
         if (getDoros() < it.price) {
           showNotification('Not enough Doros', 'error');
           return;
         }
 
-        // INTEGRATION: Call API to purchase item
         try {
           setBusy(true, `Buying ${it.name}...`);
           spendDoros(it.price);
           const response = await purchaseItem(it.sku);
 
-          // Update local inventory from API response
           inventory.clear();
           const updated = inventoryToMap(response);
           for (const [sku, count] of updated.entries()) {
@@ -130,23 +164,20 @@ export function initStore({ getDoros, spendDoros }) {
           setBusy(false);
           showNotification(`Failed to buy ${it.name}`, 'error');
           console.error('Purchase error:', error);
-          // Refund Doros if purchase failed
-          spendDoros(-it.price);
+          spendDoros(-it.price); // refund
         }
       });
 
       card.querySelector('.use-btn').addEventListener('click', async () => {
         if ((inventory.get(it.sku) || 0) <= 0) {
-          showNotification('You do not own this item yet', 'error');
+          showNotification('You do not own this item', 'error');
           return;
         }
 
-        // INTEGRATION: Call API to use item
         try {
           setBusy(true, `Using ${it.name}...`);
           const response = await useItem(it.sku);
 
-          // Update local inventory from API response
           inventory.clear();
           const updated = inventoryToMap(response);
           for (const [sku, count] of updated.entries()) {
@@ -156,7 +187,7 @@ export function initStore({ getDoros, spendDoros }) {
           setBusy(false);
           showNotification(`${it.name} used! 🐉✨`, 'success');
           renderInventory();
-          emitItemUsed(it.sku); // Tell the rest of the app an item was used
+          emitItemUsed(it.sku);
         } catch (error) {
           setBusy(false);
           showNotification(`Failed to use ${it.name}`, 'error');
@@ -164,16 +195,15 @@ export function initStore({ getDoros, spendDoros }) {
         }
       });
 
-
       card.addEventListener('click', (e) => {
         if (e.target.tagName.toLowerCase() === 'button') return;
         selectedSku = (selectedSku === it.sku) ? null : it.sku;
         highlightSelection();
       });
 
-      card.dataset.sku = it.sku;
       grid.appendChild(card);
     });
+
     highlightSelection();
   }
 
@@ -186,6 +216,7 @@ export function initStore({ getDoros, spendDoros }) {
       invUl.appendChild(li);
       return;
     }
+
     for (const [sku, count] of inventory.entries()) {
       const meta = findItemBySku(sku);
       const li = document.createElement('li');
@@ -203,43 +234,54 @@ export function initStore({ getDoros, spendDoros }) {
       c.style.outlineOffset = active ? '2px' : '0';
     });
   }
+
   function findItemBySku(sku) {
-    for (const cat of Object.values(catalog)) {
-      const found = cat.find(i => i.sku === sku);
-      if (found) return found;
-    }
-    return null;
+    return allItems.find(i => i.sku === sku) || null;
   }
 
-  // --- Broadcast "item used" so other features (like LifeCircle) can react ---
   function emitItemUsed(sku) {
     const meta = findItemBySku(sku);
+    if (!meta) return;
+
     const detail = {
       sku,
-      name: meta?.name || sku,
-      emoji: meta?.emoji || '',
-      // Simple category guess from sku prefix
-      category: sku.startsWith('food-') ? 'food'
-        : sku.startsWith('water-') ? 'water'
-          : sku.startsWith('play-') ? 'play'
-            : sku.startsWith('med-') ? 'medicine'
-              : 'other'
+      name: meta.name || sku,
+      emoji: meta.emoji || '',
+      category: meta.category || 'other'
     };
 
     const evt = new CustomEvent('store:itemUsed', { detail });
     window.dispatchEvent(evt);
   }
 
+  // Optional: keep this for manual use button if you want to keep it
   useBtn?.addEventListener('click', () => {
-    if (!selectedSku) { alert('Select an item card first.'); return; }
-    if ((inventory.get(selectedSku) || 0) <= 0) { alert('You do not own that item.'); return; }
-    inventory.set(selectedSku, inventory.get(selectedSku) - 1);
-    renderInventory();
-    const meta = findItemBySku(selectedSku);
-    alert(`${meta?.name || selectedSku} used! 🐉✨`);
-    emitItemUsed(selectedSku); // NEW: tell the rest of the app an item was used
-  });
+    if (!selectedSku) {
+      showNotification('Select an item card first', 'error');
+      return;
+    }
+    if ((inventory.get(selectedSku) || 0) <= 0) {
+      showNotification('You do not own that item', 'error');
+      return;
+    }
 
+    // You could call useItem() here instead of local decrement
+    // For consistency with buy, better to use API
+    const meta = findItemBySku(selectedSku);
+    useItem(selectedSku)
+      .then(response => {
+        inventory.clear();
+        const updated = inventoryToMap(response);
+        for (const [s, c] of updated.entries()) inventory.set(s, c);
+        renderInventory();
+        showNotification(`${meta?.name || selectedSku} used! 🐉✨`, 'success');
+        emitItemUsed(selectedSku);
+      })
+      .catch(err => {
+        console.error(err);
+        showNotification('Failed to use item', 'error');
+      });
+  });
 
   return { openStore };
 }

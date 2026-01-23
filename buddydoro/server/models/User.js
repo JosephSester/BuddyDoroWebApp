@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    lowercase: true
+    lowercase: true,
+    index: true
   },
 
   passwordHash: {
@@ -18,9 +19,54 @@ const userSchema = new mongoose.Schema({
     required: true
   },
 
+  // Currencies
+
+  doros: {
+    type: Number,
+    default: 1250,
+    min: 0
+  },
+  diamonds: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+
+  // Life circle
+
+  life: {
+    current: {type: Number,
+    default: 14,
+    min: 0},
+    max: {type: Number,
+    default: 14,
+    min: 1}
+  },
+
+  //User preferences
+
+  settings: {
+    focusMinutes: {
+      type: Number,
+      default: 25
+    },
+    breakMinutes: {
+      type: Number,
+      default: 5
+    },
+    theme: {
+      type: String,
+      default: 'default'
+    }
+  },
+
   createdAt: {
     type: Date,
     default: Date.now
+  },
+
+  lastLogin: {
+    type: Date
   }
 });
 

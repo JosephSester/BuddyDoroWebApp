@@ -7,6 +7,7 @@
 
 import { apiGet, apiPost, apiPut, apiDelete } from './apiClient.js';
 
+
 /**
  * Fetch user's inventory from API
  */

@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     passwordToggle.addEventListener('click', () => {
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
       passwordInput.setAttribute('type', type);
-      
+
       const icon = passwordToggle.querySelector('i');
       if (icon) {
         icon.classList.toggle('fa-eye', type === 'password');
@@ -64,47 +64,49 @@ document.addEventListener('DOMContentLoaded', () => {
   //   const password = passwordInput.value.trim();
 
   loginForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  console.log('Login form submitted');
+    console.log('Login form submitted');
 
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
-  if (email === '' || password === '') {
-    showLoginError('Please enter both your email and password.');
-    return;
-  }
-
-  if (!validateEmail(email)) {
-    showLoginError('Please enter a valid email address.');
-    return;
-  }
-
-  try {
-    const res = await fetch('http://localhost:3000/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({email, password }) // match backend field
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      // Show backend errors (401, 404, 500, etc.)
-      showLoginError(data.message || 'Login failed');
+    if (email === '' || password === '') {
+      showLoginError('Please enter both your email and password.');
       return;
     }
 
-    // Save the token if login succeeds
-    localStorage.setItem('token', data.token);
+    if (!validateEmail(email)) {
+      showLoginError('Please enter a valid email address.');
+      return;
+    }
 
-    window.location.href = 'index.html';
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }) // match backend field
+      });
 
-  } catch (err) {
-    showLoginError('Server unreachable');
-    console.error(err);
-  }
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Show backend errors (401, 404, 500, etc.)
+        showLoginError(data.message || 'Login failed');
+        return;
+      }
+
+      // Save the token if login succeeds (must match apiClient.js)
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('userId', data.userId); 
+
+      console.log('Login successful! Redirecting to main app...');
+      window.location.href = 'index.html';
+
+    } catch (err) {
+      showLoginError('Server unreachable');
+      console.error(err);
+    }
 
 
 

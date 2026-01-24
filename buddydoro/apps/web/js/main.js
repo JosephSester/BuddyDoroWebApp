@@ -1,14 +1,29 @@
 // apps/web/js/main.js
 
 // Scene / sprite
-import { initScene }             from './features/scene.js';
-import { initDragon }            from './features/dragon.js';
+import { initScene } from './features/scene.js';
+import { initDragon } from './features/dragon.js';
+
+// Auth guard: redirect to login if no token
+const authToken = localStorage.getItem('authToken');
+if (!authToken) {
+  console.log('No auth token found. Redirecting to login...');
+  window.location.href = 'login.html';
+  throw new Error('Not authenticated'); // Halt further execution
+}
 
 // UI features
-import { initTopbar }            from './features/topbar.js';
-import { initTimer }             from './features/timer.js';
-import { initStore }             from './features/store.js';
+import { initTopbar } from './features/topbar.js';
+import { initTimer } from './features/timer.js';
+import { initStore } from './features/store.js';
 import { initTasks, getActiveTaskId } from './features/tasks.js';
+
+// document.addEventListener('DOMContentLoaded', () => {
+//   initStore({
+//     getDoros,
+//     spendDoros
+//   });
+// });
 
 // ----- 1) Background & dragon -------------------------------------------------
 initScene({
@@ -18,10 +33,40 @@ initScene({
 initDragon?.(); // safe if initDragon is a no-op
 
 // ----- 2) Topbar (greeting + Doros) ------------------------------------------
-const topbar = initTopbar({
-  userName: 'Joe',
-  startingDoros: 1250
-});
+// const topbar = initTopbar({
+//   userName: 'Joe',
+//   startingDoros: 1250
+//});
+async function initUserTopbar() {
+  try {
+    const res = await fetch('http://localhost:3000/api/auth/me', {
+      headers: {
+        'Authorization': 'Bearer ' + authToken
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch user info');
+    }
+
+    const user = await res.json();
+
+    return initTopbar({
+      userName: user.name,
+      startingDoros: user.doros
+    });
+
+  } catch (err) {
+    console.error('Error fetching user info:', err);
+    // fallback to defaults if needed
+    return initTopbar({
+      userName: 'Player',
+      startingDoros: 1250
+    });
+  }
+}
+
+const topbar = await initUserTopbar();
 // `topbar` should expose getDoros/setDoros/addDoros/subDoros/paintDoros.
 // (That’s what the module code you pasted provides.)
 
@@ -73,7 +118,7 @@ initStore({
 
 
 // ----- 5) Tasks ---------------------------------------------------------------
-initTasks({
+await initTasks({
   onActiveTaskChange: () => {
     // Enable/disable Start button depending on whether a task is selected
     syncStartEnabled();
@@ -83,6 +128,8 @@ initTasks({
     timer?.stop?.();
     syncStartEnabled();
   },
+  setTimerFromTask: timer?.setTimerFromTask,
+  resetTimerToDefault: timer?.resetTimerToDefault,
 });
 
 // Each feature owns its own DOM and logic.

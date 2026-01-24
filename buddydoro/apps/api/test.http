@@ -1,0 +1,40 @@
+### Test if API is running
+GET http://localhost:3001
+
+### Get all tasks
+GET http://localhost:3001/api/tasks
+
+### Create a task
+POST http://localhost:3001/api/tasks
+Content-Type: application/json
+
+{
+  "text": "Learn API basics"
+}
+
+### Update a task (replace TASK_ID with actual ID from create response)
+PUT http://localhost:3001/api/tasks/TASK_ID
+Content-Type: application/json
+
+{
+  "text": "Updated task text",
+  "completed": true
+}
+
+### Delete a task (replace TASK_ID with actual ID)
+DELETE http://localhost:3001/api/tasks/TASK_ID
+
+### Start a focus session
+POST http://localhost:3001/api/timer/start
+Content-Type: application/json
+
+{
+  "duration": 25,
+  "type": "focus"
+}
+
+### Complete a timer session (replace SESSION_ID with actual ID)
+POST http://localhost:3001/api/timer/SESSION_ID/complete
+
+### Get timer statistics
+GET http://localhost:3001/api/timer/stats

@@ -1,6 +1,8 @@
 // EarnDoros: awards Doros based on Study timer usage
-// - 50 Doros for every 5 full minutes that ELAPSE in a Study session
+// - 50 Doros for every 5 full minutes of ACTUAL countdown elapsed in Study
 // - Awards are given progressively during the countdown (every 5 minutes)
+// - Gated behind explicit Start/Pause button events (stricter model)
+// - Resets when timer is paused or its remaining time jumps up
 // - Balance is persisted in localStorage
 
 (function () {
@@ -31,9 +33,10 @@
 
   const state = {
     balance: 0,
-    sessionActive: false,
-    sessionMinutesPlanned: 0,     // length at Start (minutes)
-    awardedBlocks: 0              // how many 5-min blocks already rewarded this session
+    sessionActive: false,         // actively tracking a Study countdown
+    awardedBlocks: 0,             // how many 5-min blocks already rewarded this session
+    elapsedAccMinutes: 0,         // accumulated elapsed minutes based on countdown deltas
+    lastRemainingMinutes: null    // last observed remaining minutes
   };
 
   function $(selector) {
@@ -120,6 +123,22 @@
     return min + sec / 60;
   }
 
+  // Exported callback from Timer module to signal explicit Start
+  function onTimerStart() {
+    if (!isStudyModeActive()) return;
+    state.sessionActive = true;
+    state.awardedBlocks = 0;
+    state.elapsedAccMinutes = 0;
+    state.lastRemainingMinutes = getTimerMinutes();
+    console.log('[EarnDoros] Session started (Study mode, Start button pressed)');
+  }
+
+  // Exported callback from Timer module to signal explicit Pause
+  function onTimerPause() {
+    state.sessionActive = false;
+    console.log('[EarnDoros] Session paused (Pause button pressed)');
+  }
+
   function flashEarnedBadge(earned) {
     const chip = document.getElementById("dorosChip");
     if (!chip) return;
@@ -148,31 +167,48 @@
   }
 
   function handleTimerTick() {
-    if (!state.sessionActive) return;
-    if (!isStudyModeActive()) {
-      // If they left Study mode, stop this session
-      state.sessionActive = false;
+    // Only process ticks if session is explicitly active (Start was pressed)
+    if (!state.sessionActive || !isStudyModeActive()) {
       return;
     }
 
     const remaining = getTimerMinutes(); // minutes left on timer
-    const elapsed = Math.max(
-      0,
-      state.sessionMinutesPlanned - remaining
-    );
 
-    // Total full 5-min blocks that have elapsed in THIS session
-    const completedBlocks = Math.floor(elapsed / FIVE_MIN_BLOCK);
-
-    if (completedBlocks > state.awardedBlocks) {
-      const newBlocks = completedBlocks - state.awardedBlocks;
-      state.awardedBlocks = completedBlocks;
-      awardBlocks(newBlocks);
+    // Initialize remaining on first tick of session
+    if (state.lastRemainingMinutes == null) {
+      state.lastRemainingMinutes = remaining;
+      return;
     }
 
-    // When timer hits / passes 0, end this session
+    // Compute delta from previous observation
+    const delta = state.lastRemainingMinutes - remaining;
+
+    if (delta > 0) {
+      // Countdown progressed normally; accumulate elapsed minutes
+      state.elapsedAccMinutes += delta;
+      const completedBlocks = Math.floor(state.elapsedAccMinutes / FIVE_MIN_BLOCK);
+      if (completedBlocks > state.awardedBlocks) {
+        const newBlocks = completedBlocks - state.awardedBlocks;
+        state.awardedBlocks = completedBlocks;
+        awardBlocks(newBlocks);
+      }
+      state.lastRemainingMinutes = remaining;
+    } else if (delta < 0) {
+      // Remaining time increased (task estimate changed or timer reset).
+      // Stop earning session; require explicit Start to resume.
+      state.sessionActive = false;
+      state.lastRemainingMinutes = null;
+      state.elapsedAccMinutes = 0;
+      state.awardedBlocks = 0;
+      console.log('[EarnDoros] Timer duration changed; session stopped');
+      return;
+    }
+
+    // End session when timer reaches zero
     if (remaining <= 0) {
       state.sessionActive = false;
+      state.lastRemainingMinutes = null;
+      console.log('[EarnDoros] Timer finished; session ended');
     }
   }
 
@@ -182,23 +218,27 @@
     const modeGroup = document.querySelector(".mode-chips");
     const timerDisplay = document.getElementById("timerDisplay");
 
-    // Start button: begin a new Study earning session
+    // Start button: explicitly gate Doros earning
     if (startBtn) {
       startBtn.addEventListener("click", () => {
-        if (isStudyModeActive()) {
-          state.sessionActive = true;
-          state.sessionMinutesPlanned = getTimerMinutes();
-          state.awardedBlocks = 0;
+        // Check if button is now in "Pause" state (timer just started)
+        const label = (startBtn.textContent || "").trim().toLowerCase();
+        if (label === 'pause') {
+          onTimerStart();
         } else {
-          state.sessionActive = false;
+          onTimerPause();
         }
       });
     }
 
-    // Reset cancels current earning session (but keeps already-earned Doros)
+    // Reset button: cancel earning session
     if (resetBtn) {
       resetBtn.addEventListener("click", () => {
         state.sessionActive = false;
+        state.lastRemainingMinutes = null;
+        state.elapsedAccMinutes = 0;
+        state.awardedBlocks = 0;
+        console.log('[EarnDoros] Session reset');
       });
     }
 
@@ -209,6 +249,10 @@
         if (!btn) return;
         if (btn.dataset.mode !== "study") {
           state.sessionActive = false;
+          state.lastRemainingMinutes = null;
+          state.elapsedAccMinutes = 0;
+          state.awardedBlocks = 0;
+          console.log('[EarnDoros] Mode changed away from Study; session stopped');
         }
       });
     }
@@ -227,7 +271,7 @@
     }
   }
 
-    function init() {
+  function init() {
     loadBalance();
     setupListeners();
   }
@@ -249,6 +293,8 @@
     init,
     getBalance,
     spend,
+    onTimerStart,
+    onTimerPause,
     _state: state
   };
 

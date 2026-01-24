@@ -128,6 +128,8 @@ await initTasks({
     timer?.stop?.();
     syncStartEnabled();
   },
+  setTimerFromTask: timer?.setTimerFromTask,
+  resetTimerToDefault: timer?.resetTimerToDefault,
 });
 
 // Each feature owns its own DOM and logic.

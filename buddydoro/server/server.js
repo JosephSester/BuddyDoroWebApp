@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
+const panelRoutes = require('./routes/panels');
 const inventoryRoutes = require('./routes/inventory');
 const ItemsRoutes = require('./routes/items');
 
@@ -21,6 +22,7 @@ app.use('/api/protected', protectedRoutes);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/panels', panelRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/items', ItemsRoutes);
 

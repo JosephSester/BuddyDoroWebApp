@@ -1,5 +1,6 @@
 const express = require('express');
 const Task = require('../models/Task');
+const Panel = require('../models/Panel');
 const authMiddleware = require('../authMiddleware');
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router.get('/', authMiddleware, async (req, res) => {
             id: task._id.toString(),
             text: task.text,
             completed: task.completed,
+            panelId: task.panelId || 'tasksPanel-1',
             createdAt: task.createdAt,
             updatedAt: task.updatedAt
         }));
@@ -48,7 +50,7 @@ router.get('/', authMiddleware, async (req, res) => {
 // POST create a new task
 router.post('/', authMiddleware, async (req, res) => {
     try {
-        const { text } = req.body;
+        const { text, panelId } = req.body;
 
         // Validate input
         const validation = validateTaskText(text);
@@ -56,10 +58,28 @@ router.post('/', authMiddleware, async (req, res) => {
             return res.status(400).json({ error: validation.error });
         }
 
+        let resolvedPanelId = null;
+        if (panelId) {
+            const p = await Panel.findById(panelId);
+            if (!p || p.userId.toString() !== req.user.userId) {
+                return res.status(400).json({ error: 'Invalid panelId' });
+            }
+            resolvedPanelId = p._id.toString();
+        } else {
+            // Use first user panel if exists, otherwise create one
+            let p = await Panel.findOne({ userId: req.user.userId }).sort({ order: 1, createdAt: 1 });
+            if (!p) {
+                p = new Panel({ userId: req.user.userId, title: 'Goal', order: 0 });
+                await p.save();
+            }
+            resolvedPanelId = p._id.toString();
+        }
+
         const task = new Task({
             userId: req.user.userId,
             text: validation.text,
-            completed: false
+            completed: false,
+            panelId: resolvedPanelId
         });
 
         await task.save();
@@ -68,6 +88,7 @@ router.post('/', authMiddleware, async (req, res) => {
             id: task._id.toString(),
             text: task.text,
             completed: task.completed,
+            panelId: task.panelId,
             createdAt: task.createdAt,
             updatedAt: task.updatedAt
         });
@@ -108,6 +129,15 @@ router.put('/:id', authMiddleware, async (req, res) => {
             task.completed = req.body.completed;
         }
 
+        // Update panelId if provided
+        if (req.body.panelId !== undefined) {
+            const p = await Panel.findById(req.body.panelId);
+            if (!p || p.userId.toString() !== req.user.userId) {
+                return res.status(400).json({ error: 'Invalid panelId' });
+            }
+            task.panelId = p._id.toString();
+        }
+
         task.updatedAt = new Date();
         await task.save();
         // Transform _id to id for frontend
@@ -115,6 +145,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
             id: task._id.toString(),
             text: task.text,
             completed: task.completed,
+            panelId: task.panelId,
             createdAt: task.createdAt,
             updatedAt: task.updatedAt
         });

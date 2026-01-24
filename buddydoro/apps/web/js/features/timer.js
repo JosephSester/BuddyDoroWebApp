@@ -23,14 +23,17 @@ const MODES = {
   study: { label: 'Study Timer', duration: focusDefault * 60 },
   break: { label: 'Break', duration: breakDefault * 60 },
 };
-const makeModeState = (k) => {
-  const d = MODES[k].duration;
-  return { key: k, duration: d, remaining: d, running: false, lastUpdated: null };
+
+const state = {
+  duration: MODES.study.duration,
+  remaining: MODES.study.duration,
+  running: false,
+  lastUpdated: null,
 };
-const state = { study: makeModeState('study'), break: makeModeState('break') };
+
 let currentMode = 'study';
 let tickId = null;
-let activeTaskId = null; // comes from Tasks module to enable/disable Start
+let breakEnabled = true;
 
 // DOM
 let display, startBtn, resetBtn, modeLabel, chipEls;
@@ -38,43 +41,39 @@ let timerMenuBtn, timerMenu, timerMenuForm, timerMenuCancel, timerMenuError;
 let timerStudyInput, timerBreakInput;
 
 const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-const anyRunning = () => Object.values(state).some(m => m.running);
+const anyRunning = () => state.running;
 
 function ensureTick() {
-  if (!tickId) tickId = setInterval(() => { updateAllNow(); paint(); }, 1000);
+  if (!tickId) tickId = setInterval(() => { updateNow(); paint(); }, 1000);
 }
 function maybeStopTick() {
   if (!anyRunning() && tickId) { clearInterval(tickId); tickId = null; }
 }
-function updateModeNow(k, now = Date.now()) {
-  const m = state[k]; if (!m.running) return;
-  if (m.lastUpdated == null) { m.lastUpdated = now; return; }
-  const d = Math.floor((now - m.lastUpdated) / 1000);
+function updateNow(now = Date.now()) {
+  if (!state.running) return;
+  if (state.lastUpdated == null) { state.lastUpdated = now; return; }
+  const d = Math.floor((now - state.lastUpdated) / 1000);
   if (d > 0) {
-    m.remaining = Math.max(0, m.remaining - d);
-    m.lastUpdated = now;
-    if (m.remaining === 0) { m.running = false; m.lastUpdated = null; }
+    state.remaining = Math.max(0, state.remaining - d);
+    state.lastUpdated = now;
+    if (state.remaining === 0) { state.running = false; state.lastUpdated = null; }
   }
 }
-function updateAllNow() { const n = Date.now(); Object.keys(state).forEach(k => updateModeNow(k, n)); }
 
 function paint() {
-  const m = state[currentMode];
-  if (display) display.textContent = fmt(m.remaining);
-  const atStart = m.remaining === m.duration;
-  const running = m.running;
-  const finished = m.remaining === 0;
+  if (display) display.textContent = fmt(state.remaining);
+  const atStart = state.remaining === state.duration;
+  const running = state.running;
+  const finished = state.remaining === 0;
   if (startBtn) startBtn.textContent = running ? 'Pause' : ((atStart || finished) ? 'Start Timer' : 'Resume');
   if (resetBtn) resetBtn.disabled = !running && atStart;
-  updateTimerAvailability();
 }
 
 function start() {
-  const m = state[currentMode];
-  if (m.running) return;
-  if (m.remaining === 0) m.remaining = m.duration;
-  m.running = true;
-  m.lastUpdated = Date.now();
+  if (state.running) return;
+  if (state.remaining === 0) state.remaining = state.duration;
+  state.running = true;
+  state.lastUpdated = Date.now();
   ensureTick();
   paint();
   // Notify EarnDoros module if callback available
@@ -84,9 +83,8 @@ function start() {
 }
 
 function stop() {
-  const m = state[currentMode];
-  m.running = false;
-  m.lastUpdated = null;
+  state.running = false;
+  state.lastUpdated = null;
   maybeStopTick();
   paint();
   // Notify EarnDoros module if callback available
@@ -94,42 +92,58 @@ function stop() {
     window.EarnDoros.onTimerPause();
   }
 }
-function reset() { const m = state[currentMode]; m.running = false; m.remaining = m.duration; m.lastUpdated = null; maybeStopTick(); paint(); }
+function reset() {
+  state.running = false;
+  state.remaining = state.duration;
+  state.lastUpdated = null;
+  maybeStopTick();
+  paint();
+}
 
-function setMode(modeKey) {
+function setMode(modeKey, resetTime = true) {
   if (!MODES[modeKey]) return;
-  updateAllNow();
+  updateNow();
+
+  if (state.running) {
+    state.running = false;
+    state.lastUpdated = null;
+    maybeStopTick();
+  }
+
   currentMode = modeKey;
+  if (resetTime) {
+    const nextDuration = MODES[modeKey].duration;
+    state.duration = nextDuration;
+    state.remaining = nextDuration;
+  }
+
   if (modeLabel) modeLabel.textContent = MODES[modeKey].label;
   chipEls.forEach(ch => {
     const a = ch.dataset.mode === modeKey;
     ch.classList.toggle('is-active', a);
     ch.setAttribute('aria-pressed', a ? 'true' : 'false');
   });
+
   anyRunning() ? ensureTick() : maybeStopTick();
-  updateTimerAvailability(); // Update button state when mode changes
   paint();
 }
 
-function updateTimerAvailability() {
-  // Both Study and Break modes can run without a task
-  if (startBtn) startBtn.disabled = false;
-}
-
-export function setActiveTaskIdForTimer(id) {
-  activeTaskId = id;
-  if (activeTaskId == null && anyRunning()) {
-    // If timer is running in study mode and task is removed, stop the timer
-    if (currentMode === 'study') stop();
+function setBreakEnabled(enabled) {
+  breakEnabled = !!enabled;
+  if (chipEls && chipEls.length > 0) {
+    chipEls.forEach(ch => {
+      if (ch.dataset.mode === 'break') {
+        const isDisabled = !breakEnabled;
+        ch.disabled = isDisabled;
+        ch.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+        ch.classList.toggle('is-disabled', isDisabled);
+      }
+    });
   }
-  updateTimerAvailability();
 }
 
-// ----- Defaults (menu) -----
-function validateDefaultValue(value, label) {
-  const trimmed = String(value ?? '').trim();
-  if (trimmed === '') return { error: `${label} is required.` };
-  const parsed = Number(trimmed);
+function validateDefaultValue(raw, label) {
+  const parsed = Number.parseInt(raw, 10);
   if (!Number.isFinite(parsed) || !Number.isInteger(parsed)) return { error: `${label} must be a whole number.` };
   if (parsed < DEFAULT_LIMITS.min || parsed > DEFAULT_LIMITS.max) {
     return { error: `${label} must be between ${DEFAULT_LIMITS.min} and ${DEFAULT_LIMITS.max}.` };
@@ -148,60 +162,55 @@ export function applyTimerDefaults({ focusMinutes, breakMinutes } = {}) {
   const focusSec = nextFocus * 60;
   const breakSec = nextBreak * 60;
 
-  const pF = state.study.duration;
-  const pB = state.break.duration;
+  const prevFocusSec = MODES.study.duration;
+  const prevBreakSec = MODES.break.duration;
 
   // Update MODES durations
   MODES.study.duration = focusSec;
   MODES.break.duration = breakSec;
 
-  // Update state durations
-  MODES.study.duration = state.study.duration = focusSec;
-  // If study timer is at the old default (not started/modified), update remaining time
-  if (state.study.remaining === pF) state.study.remaining = focusSec;
-
-  MODES.break.duration = state.break.duration = breakSec;
-  if (state.break.remaining === pB) state.break.remaining = breakSec;
-
-  paint();
-}
-
-// Set timer from task estimate (in minutes)
-export function setTimerFromTask(minutes) {
-  if (!minutes || minutes <= 0) return;
-  const seconds = Math.min(minutes * 60, 180 * 60); // Cap at 180 minutes
-  const m = state[currentMode];
-
-  // Stop timer if running
-  if (m.running) {
-    m.running = false;
-    m.lastUpdated = null;
-    maybeStopTick();
+  // Update active timer only if it's still using the old default for this mode
+  if (currentMode === 'study') {
+    if (state.duration === prevFocusSec) state.duration = focusSec;
+    if (state.remaining === prevFocusSec) state.remaining = focusSec;
   }
 
-  // Set duration and remaining time
-  m.duration = seconds;
-  m.remaining = seconds;
+  if (currentMode === 'break') {
+    if (state.duration === prevBreakSec) state.duration = breakSec;
+    if (state.remaining === prevBreakSec) state.remaining = breakSec;
+  }
 
   paint();
 }
 
 // Reset timer to default duration for current mode
 export function resetTimerToDefault() {
-  const m = state[currentMode];
-
   // Stop timer if running
-  if (m.running) {
-    m.running = false;
-    m.lastUpdated = null;
+  if (state.running) {
+    state.running = false;
+    state.lastUpdated = null;
     maybeStopTick();
   }
 
   // Reset to mode's default duration
   const defaultDuration = MODES[currentMode].duration;
-  m.duration = defaultDuration;
-  m.remaining = defaultDuration;
+  state.duration = defaultDuration;
+  state.remaining = defaultDuration;
 
+  paint();
+}
+
+export function setDuration(seconds, { reset = true } = {}) {
+  const safeSeconds = Math.max(1, Math.min(180 * 60, Math.floor(seconds)));
+
+  if (state.running) {
+    state.running = false;
+    state.lastUpdated = null;
+    maybeStopTick();
+  }
+
+  state.duration = safeSeconds;
+  if (reset) state.remaining = safeSeconds;
   paint();
 }
 
@@ -292,23 +301,42 @@ export function initTimer() {
 
   // events
   startBtn?.addEventListener('click', () => {
-    const m = state[currentMode];
-    if (!m.running && m.remaining === 0) m.remaining = m.duration;
-    m.running ? stop() : start();
+    if (!state.running && state.remaining === 0) state.remaining = state.duration;
+    state.running ? stop() : start();
   });
   resetBtn?.addEventListener('click', reset);
 
-  chipEls.forEach(ch => ch.addEventListener('click', () => setMode(ch.dataset.mode)));
+  chipEls.forEach(ch => {
+    ch.addEventListener('click', (e) => {
+      // Prevent clicking disabled chips
+      if (ch.classList.contains('is-disabled')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      setMode(ch.dataset.mode);
+    });
+    ch.addEventListener('keydown', (e) => {
+      // Prevent Enter/Space on disabled chips
+      if (ch.classList.contains('is-disabled') && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+  });
   setMode(currentMode);
 
   wireMenu();
   paint();
 
+  setBreakEnabled(breakEnabled);
+
   return {
-    setActiveTaskId: setActiveTaskIdForTimer,
     applyDefaults: applyTimerDefaults,
-    setTimerFromTask: setTimerFromTask,
     resetTimerToDefault: resetTimerToDefault,
+    setDuration,
     setMode,
+    setBreakEnabled,
+    stop,
   };
 }

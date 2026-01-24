@@ -1,6 +1,6 @@
 // apps/web/js/features/tasks.js
 // Full-featured Tasks module (create/select/delete + session editing)
-// Exposes: initTasks({ onActiveTaskChange, onShouldStopTimer }), getActiveTaskId()
+// Exposes: initTasks({ onActiveTaskChange, onShouldStopTimer, onTaskEstimate }), getActiveTaskId(), getActiveTask()
 
 // INTEGRATION: Import API service for backend communication
 import { fetchTasks, createTask, updateTask, deleteTask as apiDeleteTask } from '../api/taskService.js';
@@ -15,18 +15,15 @@ import { createSubtasksSection, createSubtasksToggle, deleteTaskSubtasks, getSub
 // -----------------------------------------------------------------------------
 let onActiveTaskChange = () => { };
 let onShouldStopTimer = () => { };
-let setTimerFromTaskCb = null;
-let resetTimerToDefaultCb = null;
+let onTaskEstimate = null;
 
 export async function initTasks(opts = {}) {
   onActiveTaskChange = typeof opts.onActiveTaskChange === 'function'
     ? opts.onActiveTaskChange : () => { };
   onShouldStopTimer = typeof opts.onShouldStopTimer === 'function'
     ? opts.onShouldStopTimer : () => { };
-  setTimerFromTaskCb = typeof opts.setTimerFromTask === 'function'
-    ? opts.setTimerFromTask : null;
-  resetTimerToDefaultCb = typeof opts.resetTimerToDefault === 'function'
-    ? opts.resetTimerToDefault : null;
+  onTaskEstimate = typeof opts.onTaskEstimate === 'function'
+    ? opts.onTaskEstimate : null;
 
   // Default to first panel's ids (keeps old behavior if present)
   els.addTaskBtn = document.getElementById('addTaskBtn');
@@ -180,6 +177,11 @@ export async function initTasks(opts = {}) {
 
 export function getActiveTaskId() {
   return activeTaskId;
+}
+
+export function getActiveTask() {
+  if (activeTaskId == null) return null;
+  return tasks.find(t => String(t.id) === String(activeTaskId)) || null;
 }
 
 // -----------------------------------------------------------------------------
@@ -491,11 +493,12 @@ function wireHeaderDelete(panel) {
 
       setTasksBusy(false);
 
-      // Reset timer if active task was deleted with the panel
-      if (activeTaskInPanel && resetTimerToDefaultCb) {
-        console.log('[Panel Delete] Active task was in deleted panel, resetting timer to defaults');
-        resetTimerToDefaultCb();
+      // Reset active task if it was deleted with the panel
+      if (activeTaskInPanel) {
+        console.log('[Panel Delete] Active task was in deleted panel');
         activeTaskId = null;
+        updateActiveTaskVisuals();
+        notifyActiveChange();
       }
 
       // Delete panel from server
@@ -589,7 +592,7 @@ function createTaskCard(task) {
 
   // Subtasks UI: Create subtasks section and toggle button
   const subsSection = createSubtasksSection(task, {
-    onSetTimerFromEstimate: setTimerFromTaskCb,
+    onSetTimerFromEstimate: onTaskEstimate,
     onChange: renderAllTasks,
   });
 
@@ -604,11 +607,11 @@ function createTaskCard(task) {
       const sub = { id: makeSubtaskId(), title: title.trim(), estimate, done: false };
       const next = [...getSubtasks(task.id), sub];
       setSubtasks(task.id, next);
-      renderList(task, subsSection.list, { onSetTimerFromEstimate: setTimerFromTaskCb, onChange: renderAllTasks });
+      renderList(task, subsSection.list, { onSetTimerFromEstimate: onTaskEstimate, onChange: renderAllTasks });
       subsSection.wrapInner.hidden = false;
       subToggle.setAttribute('aria-expanded', 'true');
     },
-    onSetTimerFromEstimate: setTimerFromTaskCb,
+    onSetTimerFromEstimate: onTaskEstimate,
     onChange: renderAllTasks,
   });
   right.insertBefore(subToggle, del);
@@ -778,14 +781,6 @@ async function deleteTask(id) {
     if (removed.id === activeTaskId) {
       activeTaskId = null;
       try { onShouldStopTimer(); } catch { /* noop */ }
-      // Reset timer to default when active task is deleted
-      if (resetTimerToDefaultCb) {
-        try {
-          resetTimerToDefaultCb();
-        } catch (err) {
-          console.error('Failed to reset timer to default:', err);
-        }
-      }
     }
     // Also remove local mappings
     deleteTaskPanel(id);
@@ -813,14 +808,6 @@ function setActiveTask(taskId) {
   if (String(activeTaskId) === taskIdStr) {
     activeTaskId = null;
     try { onShouldStopTimer(); } catch { /* noop */ }
-    // Reset timer to default when deselecting task
-    if (resetTimerToDefaultCb) {
-      try {
-        resetTimerToDefaultCb();
-      } catch (err) {
-        console.error('Failed to reset timer to default:', err);
-      }
-    }
     updateActiveTaskVisuals();
     notifyActiveChange();
     return;
@@ -829,16 +816,6 @@ function setActiveTask(taskId) {
   activeTaskId = taskIdStr;
   if (activeTaskId == null) {
     try { onShouldStopTimer(); } catch { /* noop */ }
-  } else {
-    // Load task estimate into timer
-    const task = tasks.find(t => String(t.id) === taskIdStr);
-    if (task && task.total && setTimerFromTaskCb) {
-      try {
-        setTimerFromTaskCb(task.total);
-      } catch (err) {
-        console.error('Failed to set timer from task:', err);
-      }
-    }
   }
   updateActiveTaskVisuals();
   notifyActiveChange();
@@ -1277,12 +1254,12 @@ function commitSessionEdit() {
   // Persist sessions to localStorage
   setTaskSessions(taskRef.id, { total: estimateVal, done: completedVal });
 
-  // If this is the active task, update the timer with new estimate
-  if (String(taskRef.id) === String(activeTaskId) && setTimerFromTaskCb) {
+  // If this is the active task, notify estimate change
+  if (String(taskRef.id) === String(activeTaskId) && onTaskEstimate) {
     try {
-      setTimerFromTaskCb(estimateVal);
+      onTaskEstimate(estimateVal);
     } catch (err) {
-      console.error('Failed to update timer from task estimate:', err);
+      console.error('Failed to handle task estimate:', err);
     }
   }
 

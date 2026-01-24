@@ -148,17 +148,7 @@
                 Settings</button>
             </div>
             <hr class="greet-menu-divider" />
-            <form id="defaultsForm" class="greet-defaults" novalidate>
-              <div class="greet-defaults-heading">Defaults</div>
-              <label class="greet-defaults-label" for="focusDefaultInput">Focus session (min)</label>
-              <input id="focusDefaultInput" name="focusDefault" type="number" inputmode="numeric" min="1" max="180"
-                step="1" class="greet-defaults-input" />
-              <label class="greet-defaults-label" for="breakDefaultInput">Break session (min)</label>
-              <input id="breakDefaultInput" name="breakDefault" type="number" inputmode="numeric" min="1" max="180"
-                step="1" class="greet-defaults-input" />
-              <div id="defaultsError" class="greet-defaults-error" role="alert" hidden></div>
-              <button type="submit" class="greet-defaults-save">Save</button>
-            </form>
+            <button type="button" class="greet-menu-item" role="menuitem" id="logoutBtn">Log Out</button>
           </div>
         </div>
       </div>
@@ -171,15 +161,15 @@
         <!-- First panel (template) — top-level child of #tasksStack -->
         <div id="tasksPanel-1" class="tasks-panel" aria-label="Tasks">
           <div class="tasks-header">
-            <div class="tasks-title">Task</div>
+            <div class="tasks-title">Goal</div>
             <div class="tasks-header-actions">
-              <button class="task-title-edit" type="button" aria-label="Rename task group">
+              <button class="task-title-edit" type="button" aria-label="Rename goal">
                 <svg class="task-title-edit-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M4 14.5V19h4.5L18 9.5l-4.5-4.5L4 14.5zm11-11 4.5 4.5" fill="none" stroke="#2b2213"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </button>
-              <button class="task-title-delete" type="button" aria-label="Delete task group">
+              <button class="task-title-delete" type="button" aria-label="Delete goal">
                 <svg class="task-title-delete-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M6 7h12l-1 13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7zm3-3h6l1 2H8l1-2zm1 6v8m4-8v8" fill="none"
                     stroke="#2b2213" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -193,10 +183,9 @@
         </div>
       </div>
 
-      <!-- “Add task box” chip must be a SIBLING of #tasksStack (not inside a .tasks-panel) -->
+      <!-- "Add goal" chip must be a SIBLING of #tasksStack (not inside a .tasks-panel) -->
       <div class="tasks-chip-row">
-        <button id="addTasksPanel" class="chip gold add-chip" type="button" aria-label="Add a Tasks box"
-          title="Add a Tasks box">
+        <button id="addTasksPanel" class="chip gold add-chip" type="button" aria-label="Add a goal" title="Add a goal">
           <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M12 5v14M5 12h14" fill="none" stroke="#2b2213" stroke-width="3.4" stroke-linecap="round"
               stroke-linejoin="round" />
@@ -231,13 +220,8 @@
                 inputmode="numeric" />
             </div>
             <div class="timer-menu-field">
-              <label class="timer-menu-label" for="timerShortInput">Short Break (min)</label>
-              <input id="timerShortInput" class="timer-menu-input" type="number" min="1" max="180" step="1"
-                inputmode="numeric" />
-            </div>
-            <div class="timer-menu-field">
-              <label class="timer-menu-label" for="timerLongInput">Long Break (min)</label>
-              <input id="timerLongInput" class="timer-menu-input" type="number" min="1" max="180" step="1"
+              <label class="timer-menu-label" for="timerBreakInput">Break (min)</label>
+              <input id="timerBreakInput" class="timer-menu-input" type="number" min="1" max="180" step="1"
                 inputmode="numeric" />
             </div>
 
@@ -258,8 +242,7 @@
 
       <div class="mode-chips" role="group" aria-label="Timer mode">
         <button class="chip is-active" data-mode="study" aria-pressed="true">Study</button>
-        <button class="chip" data-mode="short" aria-pressed="false">Short Break</button>
-        <button class="chip" data-mode="long" aria-pressed="false">Long Break</button>
+        <button class="chip" data-mode="break" aria-pressed="false">Break</button>
       </div>
     </div>
   </div>
@@ -340,7 +323,7 @@
   <script src="../js/features/earndoros.js"></script>
 
   <!-- Diamond balance logic -->
-  <script src="../js/diamond.js"></script>
+  <script src="../js/features/diamond.js"></script>
 
   <!-- Entry script: lives in apps/web/js/main.js -->
   <script type="module" src="../js/main.js"></script>

@@ -1,22 +1,21 @@
 const mongoose = require('mongoose');
 
-const taskSchema = new mongoose.Schema({
+const panelSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    text: {
+    title: {
         type: String,
-        required: true
+        default: 'Goal',
+        trim: true,
+        maxlength: 100
     },
-    completed: {
-        type: Boolean,
-        default: false
-    },
-    panelId: {
-        type: String,
-        default: 'tasksPanel-1'
+    order: {
+        type: Number,
+        default: 0,
+        index: true
     },
     createdAt: {
         type: Date,
@@ -28,4 +27,6 @@ const taskSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Task', taskSchema);
+panelSchema.index({ userId: 1, order: 1 });
+
+module.exports = mongoose.model('Panel', panelSchema);

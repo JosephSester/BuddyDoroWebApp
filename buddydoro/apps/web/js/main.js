@@ -18,6 +18,13 @@ import { initTimer } from './features/timer.js';
 import { initStore } from './features/store.js';
 import { initTasks, getActiveTaskId } from './features/tasks.js';
 
+// document.addEventListener('DOMContentLoaded', () => {
+//   initStore({
+//     getDoros,
+//     spendDoros
+//   });
+// });
+
 // ----- 1) Background & dragon -------------------------------------------------
 initScene({
   background: 'BackgroundDay.jpg',
@@ -26,10 +33,40 @@ initScene({
 initDragon?.(); // safe if initDragon is a no-op
 
 // ----- 2) Topbar (greeting + Doros) ------------------------------------------
-const topbar = initTopbar({
-  userName: 'Joe',
-  startingDoros: 1250
-});
+// const topbar = initTopbar({
+//   userName: 'Joe',
+//   startingDoros: 1250
+//});
+async function initUserTopbar() {
+  try {
+    const res = await fetch('http://localhost:3000/api/auth/me', {
+      headers: {
+        'Authorization': 'Bearer ' + authToken
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch user info');
+    }
+
+    const user = await res.json();
+
+    return initTopbar({
+      userName: user.name,
+      startingDoros: user.doros
+    });
+
+  } catch (err) {
+    console.error('Error fetching user info:', err);
+    // fallback to defaults if needed
+    return initTopbar({
+      userName: 'Player',
+      startingDoros: 1250
+    });
+  }
+}
+
+const topbar = await initUserTopbar();
 // `topbar` should expose getDoros/setDoros/addDoros/subDoros/paintDoros.
 // (That’s what the module code you pasted provides.)
 

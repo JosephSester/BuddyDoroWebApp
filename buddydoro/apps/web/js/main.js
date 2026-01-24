@@ -49,11 +49,15 @@ async function initUserTopbar() {
       throw new Error('Failed to fetch user info');
     }
 
-    const user = await res.json();
+    const data = await res.json();
+
+    if (window.EarnDoros && typeof window.EarnDoros.setBalance === 'function') {
+      window.EarnDoros.setBalance(data.doros);
+    }
 
     return initTopbar({
-      userName: user.name,
-      startingDoros: user.doros
+      userName: data.name,
+      doros: data.doros,
     });
 
   } catch (err) {
@@ -61,7 +65,7 @@ async function initUserTopbar() {
     // fallback to defaults if needed
     return initTopbar({
       userName: 'Player',
-      startingDoros: 1250
+      doros: 0,
     });
   }
 }

@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
 
   doros: {
     type: Number,
-    default: 1250,
+    default: 0,
     min: 0
   },
   diamonds: {

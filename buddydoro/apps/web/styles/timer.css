@@ -226,7 +226,7 @@
   line-height: 1;
   box-shadow: 0 6px 14px rgba(0, 0, 0, .12);
   cursor: pointer;
-  transition: filter .15s, transform .05s;
+  transition: filter .15s, transform .05s, opacity .15s;
 }
 
 .chip:hover {
@@ -240,6 +240,12 @@
 .chip.is-active {
   background: linear-gradient(#ffd36b, #f2b942);
   box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
+}
+
+.chip.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .chip:focus-visible {

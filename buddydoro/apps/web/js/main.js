@@ -16,7 +16,7 @@ if (!authToken) {
 import { initTopbar } from './features/topbar.js';
 import { initTimer } from './features/timer.js';
 import { initStore } from './features/store.js';
-import { initTasks, getActiveTaskId } from './features/tasks.js';
+import { initTasks, getActiveTask } from './features/tasks.js';
 
 // document.addEventListener('DOMContentLoaded', () => {
 //   initStore({
@@ -74,13 +74,6 @@ const topbar = await initUserTopbar();
 const timer = initTimer({
   // You can extend this later; for now we only need stop()
 });
-// We'll also manage the Start button enabled/disabled state from here:
-const startBtn = document.getElementById('startBtn');
-const syncStartEnabled = () => {
-  if (!startBtn) return;
-  startBtn.disabled = (getActiveTaskId() == null);
-};
-syncStartEnabled(); // initial state
 
 // ----- 4) Store ---------------------------------------------------------------
 initStore({
@@ -120,16 +113,26 @@ initStore({
 // ----- 5) Tasks ---------------------------------------------------------------
 await initTasks({
   onActiveTaskChange: () => {
-    // Enable/disable Start button depending on whether a task is selected
-    syncStartEnabled();
+    const task = getActiveTask();
+    if (task) {
+      timer?.setMode?.('study', false);
+      timer?.setDuration?.(task.total * 60);
+      timer?.setBreakEnabled?.(false);
+    } else {
+      timer?.setBreakEnabled?.(true);
+      timer?.setMode?.('study', true);
+    }
   },
   onShouldStopTimer: () => {
     // If the active task disappears while the timer is running, stop it.
     timer?.stop?.();
-    syncStartEnabled();
   },
-  setTimerFromTask: timer?.setTimerFromTask,
-  resetTimerToDefault: timer?.resetTimerToDefault,
+  onTaskEstimate: (minutes) => {
+    if (!minutes || minutes <= 0) return;
+    timer?.setMode?.('study', false);
+    timer?.setDuration?.(minutes * 60);
+    timer?.setBreakEnabled?.(false);
+  },
 });
 
 // Each feature owns its own DOM and logic.

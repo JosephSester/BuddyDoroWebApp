@@ -54,6 +54,24 @@ export function initTopbar({ userName = 'Joe', onOpenStore } = {}) {
 
   greetChip?.addEventListener('click', toggleGreetMenu);
 
+  greetMenu?.addEventListener('click', (e) => {
+  const item = e.target.closest('.greet-menu-item');
+  if (!item) return;
+
+  // If they clicked "Log Out", let the existing logout handler handle it
+  if (item.id === 'logoutBtn') return;
+
+  const nav = item.dataset.nav;
+  if (!nav) return;
+
+  e.preventDefault();
+  closeGreetMenu({ focusTrigger: true });
+
+  window.location.href = new URL(nav, window.location.href).toString();
+
+  //console.log('Greet menu clicked:', item.textContent.trim()); -> delete if working
+  });
+
   // Doros dropdown → "Buy Doros"
   const dorosChipBtn = document.getElementById('dorosChip');
   const dorosMenuEl = document.getElementById('dorosMenu');

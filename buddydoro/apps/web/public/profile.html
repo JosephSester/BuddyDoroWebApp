@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../styles/base.css" />
+  <link rel="stylesheet" href="../styles/layout2.css" />
+  <link rel="stylesheet" href="../styles/components.css" />
+  <link rel="stylesheet" href="../styles/topbar.css" />
+  <link rel="stylesheet" href="../styles/themes.css" />
+  <link rel="stylesheet" href="../styles/settings-pages.css" />
+
+  <title>Profile Settings</title>
+</head>
+
+<body>
+  <h1 class="settings-title">Profile Settings</h1>
+
+  <div class="settings-actions">
+    <a href="./index.html" class="btn-secondary" style="display:inline-block; text-decoration:none;">← Back</a>
+  </div>
+
+  <form id="profileForm">
+    <div class="settings-row">
+      <label for="nameInput">Display name</label><br />
+      <input id="nameInput" name="name" type="text" autocomplete="name" />
+    </div>
+
+    <div class="settings-actions">
+      <button type="submit" class="btn-primary">Save</button>
+    </div>
+  </form>
+
+  <p id="profileMsg"></p>
+
+
+  <script type="module" src="../js/pages/profileSettings.js"></script>
+</body>
+
+</html>

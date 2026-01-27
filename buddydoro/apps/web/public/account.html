@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../styles/base.css" />
+  <link rel="stylesheet" href="../styles/layout2.css" />
+  <link rel="stylesheet" href="../styles/components.css" />
+  <link rel="stylesheet" href="../styles/topbar.css" />
+  <link rel="stylesheet" href="../styles/themes.css" />
+  <link rel="stylesheet" href="../styles/settings-pages.css" />
+  
+  <title>Account Settings</title>
+</head>
+<body>
+  <div class="ui-layer">
+    <div class="right-ui">
+      <div class="timer-card">
+        <h1>Account Settings</h1>
+
+        <p><a href="./index.html" class="btn-secondary" style="display:inline-block; text-decoration:none;">
+            ← Back
+          </a>
+        </p>
+
+        <form id="accountForm">
+          <label for="emailInput">Email</label><br />
+          <input id="emailInput" type="email" autocomplete="email" /><br /><br />
+
+          <hr />
+
+          <p><strong>Change password (optional)</strong></p>
+
+          <label for="currentPassword">Current password</label><br />
+          <input id="currentPassword" type="password" autocomplete="current-password" /><br /><br />
+
+          <label for="newPassword">New password</label><br />
+          <input id="newPassword" type="password" autocomplete="new-password" /><br /><br />
+
+          <button type="submit" class="btn-primary">Save</button>
+        </form>
+
+        <p id="accountMsg"></p>
+
+        <script type="module" src="../js/pages/accountSettings.js"></script>
+      </div>
+    </div>
+  </div>    
+</body>
+</html>

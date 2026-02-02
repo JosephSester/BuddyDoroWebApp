@@ -1,17 +1,45 @@
 // Greeting chip + Doros balance display
-let USER_NAME = 'Joe';
+let USER_NAME = localStorage.getItem('userName') || 'Player';
 let dorosBalance = 1250;
 
-let greetTextEl, dorosAmountEl, greetChip, greetMenu;
+let greetTextEl, dorosAmountEl, greetChip, greetMenu, menuButton;
 let openStoreCb = null;
 
 function paintDoros() { if (dorosAmountEl) dorosAmountEl.textContent = dorosBalance.toLocaleString(); }
 
 let greetMenuOpen = false, greetCleanup = [];
+let menuHidden = false;
+let timerRunning = false;
+
+function setTasksChipRowHidden(hidden) {
+  const row = document.querySelector('.tasks-chip-row');
+  if (!row) return;
+  row.classList.toggle('is-hidden', hidden);
+  row.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+}
+
+function updateTasksChipRowVisibility() {
+  const row = document.querySelector('.tasks-chip-row');
+  if (row) {
+    row.classList.toggle('is-timer-running', timerRunning);
+  }
+  setTasksChipRowHidden(menuHidden || greetMenuOpen);
+}
+
+function toggleTasksChipRow() {
+  menuHidden = !menuHidden;
+  updateTasksChipRowVisibility();
+}
+
+function setTimerRunningState(isRunning) {
+  timerRunning = Boolean(isRunning);
+  updateTasksChipRowVisibility();
+}
 
 function openGreetMenu() {
   if (!greetChip || !greetMenu || greetMenuOpen) return;
   greetMenuOpen = true; greetMenu.hidden = false; greetChip.setAttribute('aria-expanded', 'true');
+  updateTasksChipRowVisibility();
 
   const onPointerDown = (evt) => {
     if (evt.target instanceof Node && (greetMenu.contains(evt.target) || evt.target === greetChip)) return;
@@ -28,6 +56,7 @@ function closeGreetMenu({ focusTrigger = true } = {}) {
   if (!greetMenu || !greetMenuOpen) return;
   greetMenuOpen = false; greetMenu.hidden = true; greetChip?.setAttribute('aria-expanded', 'false');
   greetCleanup.forEach(fn => { try { fn(); } catch { } }); greetCleanup = [];
+  updateTasksChipRowVisibility();
   if (focusTrigger && greetChip) { greetChip.focus({ preventScroll: true }); }
 }
 function toggleGreetMenu() { greetMenuOpen ? closeGreetMenu() : openGreetMenu(); }
@@ -39,8 +68,8 @@ export function spendDoros(amount) {
 export function getDoros() { return dorosBalance; }
 export function addDoros(amount) { dorosBalance += Math.max(0, amount | 0); paintDoros(); }
 
-export function initTopbar({ userName = 'Joe', onOpenStore } = {}) {
-  USER_NAME = userName;
+export function initTopbar({ userName = localStorage.getItem('userName') || 'Player', onOpenStore } = {}) {
+  USER_NAME = userName || localStorage.getItem('userName') || 'Player';
   openStoreCb = onOpenStore || null;
 
   greetTextEl = document.getElementById('greetText');
@@ -48,11 +77,15 @@ export function initTopbar({ userName = 'Joe', onOpenStore } = {}) {
 
   greetChip = document.getElementById('greetChip');
   greetMenu = document.getElementById('greetMenu');
+  menuButton = document.getElementById('menuButton');
 
   if (greetTextEl) greetTextEl.textContent = `Hello, ${USER_NAME}`;
   paintDoros();
 
   greetChip?.addEventListener('click', toggleGreetMenu);
+  menuButton?.addEventListener('click', toggleTasksChipRow);
+
+  updateTasksChipRowVisibility();
 
   // Doros dropdown → "Buy Doros"
   const dorosChipBtn = document.getElementById('dorosChip');
@@ -98,7 +131,7 @@ export function initTopbar({ userName = 'Joe', onOpenStore } = {}) {
   });
 
   // Diamonds dropdown → "Buy Diamonds"
-  
+
   const diamondChipBtn = document.getElementById('diamondChip');
   console.log('diamondChipBtn =', diamondChipBtn);
   const diamondMenuEl = document.getElementById('diamondMenu');
@@ -107,25 +140,25 @@ export function initTopbar({ userName = 'Joe', onOpenStore } = {}) {
   let diamondOpen = false;
   let diamondCleaners = [];
 
-  function openDiamondMenu(){
-    if(!diamondChipBtn || !diamondMenuEl || diamondOpen) return;
+  function openDiamondMenu() {
+    if (!diamondChipBtn || !diamondMenuEl || diamondOpen) return;
     diamondOpen = true;
-    diamondChipBtn.setAttribute('aria-expanded','true');
-    if(diamondDropdown) diamondDropdown.setAttribute('data-open','true');
+    diamondChipBtn.setAttribute('aria-expanded', 'true');
+    if (diamondDropdown) diamondDropdown.setAttribute('data-open', 'true');
     diamondMenuEl.hidden = false;
 
     const down = e => {
-      if(diamondDropdown && e.target instanceof Node && diamondDropdown.contains(e.target)) return;
+      if (diamondDropdown && e.target instanceof Node && diamondDropdown.contains(e.target)) return;
       closeDiamondMenu();
     };
     const key = e => {
-      if(e.key === 'Escape'){
+      if (e.key === 'Escape') {
         e.preventDefault();
-        closeDiamondMenu({ focusChip:true });
+        closeDiamondMenu({ focusChip: true });
       }
     };
     const focusin = e => {
-      if(diamondDropdown && e.target instanceof Node && diamondDropdown.contains(e.target)) return;
+      if (diamondDropdown && e.target instanceof Node && diamondDropdown.contains(e.target)) return;
       closeDiamondMenu();
     };
 
@@ -134,44 +167,44 @@ export function initTopbar({ userName = 'Joe', onOpenStore } = {}) {
     document.addEventListener('focusin', focusin, true);
 
     diamondCleaners = [
-      ()=>document.removeEventListener('pointerdown', down, true),
-      ()=>document.removeEventListener('keydown', key, true),
-      ()=>document.removeEventListener('focusin', focusin, true),
+      () => document.removeEventListener('pointerdown', down, true),
+      () => document.removeEventListener('keydown', key, true),
+      () => document.removeEventListener('focusin', focusin, true),
     ];
   }
 
-  function closeDiamondMenu({ focusChip=false } = {}){
-    if(!diamondChipBtn || !diamondOpen) return;
+  function closeDiamondMenu({ focusChip = false } = {}) {
+    if (!diamondChipBtn || !diamondOpen) return;
     diamondOpen = false;
-    diamondChipBtn.setAttribute('aria-expanded','false');
-    if(diamondDropdown) diamondDropdown.removeAttribute('data-open');
+    diamondChipBtn.setAttribute('aria-expanded', 'false');
+    if (diamondDropdown) diamondDropdown.removeAttribute('data-open');
     diamondMenuEl.hidden = true;
 
-    diamondCleaners.forEach(fn=>{ try{ fn(); }catch{} });
+    diamondCleaners.forEach(fn => { try { fn(); } catch { } });
     diamondCleaners = [];
 
-    if(focusChip) diamondChipBtn.focus({ preventScroll:true });
+    if (focusChip) diamondChipBtn.focus({ preventScroll: true });
   }
 
-  function toggleDiamondMenu(){
+  function toggleDiamondMenu() {
     diamondOpen ? closeDiamondMenu() : openDiamondMenu();
   }
 
-  diamondChipBtn?.addEventListener('click', (e)=>{
+  diamondChipBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     toggleDiamondMenu();
   });
 
-  diamondChipBtn?.addEventListener('keydown', (e)=>{
-    if(e.key==='ArrowDown' || e.key==='Enter' || e.key===' '){
+  diamondChipBtn?.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       openDiamondMenu();
-    } else if(e.key==='Escape' && diamondOpen){
+    } else if (e.key === 'Escape' && diamondOpen) {
       e.preventDefault();
       closeDiamondMenu();
     }
   });
- diamondMenuEl?.addEventListener('click', (e) => {
+  diamondMenuEl?.addEventListener('click', (e) => {
     const item =
       e.target instanceof Element
         ? e.target.closest('.doros-menu-item')
@@ -190,5 +223,5 @@ export function initTopbar({ userName = 'Joe', onOpenStore } = {}) {
     }
   });
 
-  return { getDoros, addDoros, spendDoros };
+  return { getDoros, addDoros, spendDoros, setTimerRunning: setTimerRunningState };
 }

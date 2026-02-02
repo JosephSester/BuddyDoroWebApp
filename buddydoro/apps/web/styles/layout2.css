@@ -1,31 +1,12 @@
 /* ---------- PAGE LAYOUT / GEOMETRY (Page Scroll Enabled) ---------- */
 
 
-:root { --brand-top: -120px; } /* adjust logo vertical position */
-
 /* UI overlay now in normal flow */
 .ui-layer {
-  position: relative;      
-  width: 100%;
-  pointer-events: auto;    
-  z-index: 10;
-}
-
-/* Brand logo */
-.ui-layer .brand-logo {
   position: relative;
-  top: calc(env(safe-area-inset-top, 0px) + var(--brand-top));
-  left: 48px;
-  width: clamp(320px, 44vw, 400px);
-  max-width: none;
-  pointer-events: none;
-  z-index: 12;
-}
-
-.ui-layer .brand-logo img {
   width: 100%;
-  height: auto;
-  display: block;
+  pointer-events: auto;
+  z-index: 10;
 }
 
 /* Topbar */
@@ -67,14 +48,23 @@
 /* New task button placement & click fix */
 .tasks-chip-row {
   position: relative;
-  z-index: 20;
+  z-index: 6;
   margin-top: 16px;
+}
+
+.tasks-chip-row.is-hidden {
+  display: none;
+}
+
+.tasks-chip-row.is-timer-running #aiPlanBtn,
+.tasks-chip-row.is-timer-running #timerChip {
+  display: none;
 }
 
 #addTasksPanel {
   pointer-events: auto;
   position: relative;
-  z-index: 21;
+  z-index: 7;
 }
 
 /* Right column with timer + controls */
@@ -131,7 +121,9 @@
   z-index: 5;
 }
 
-.timer-menu-panel.is-open { display: flex; }
+.timer-menu-panel.is-open {
+  display: flex;
+}
 
 /* Store dialog/backdrop */
 .backdrop {
@@ -144,7 +136,8 @@
 /* Store panel scrolls internally */
 .store-panel {
   position: relative;
-  margin: 30vh auto 0 auto; /* top spacing & horizontal centering */
+  margin: 30vh auto 0 auto;
+  /* top spacing & horizontal centering */
   width: min(980px, 92vw);
   max-height: 78vh;
   overflow-y: auto;
@@ -179,15 +172,27 @@
     width: 88vw;
   }
 
-  .mode-chips { flex-wrap: wrap; justify-content: center; }
-  .top-chips { flex-wrap: wrap; gap: 10px; }
+  .mode-chips {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .top-chips {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 
   .store-panel {
     margin: 4vh auto 0 auto;
     width: 94vw;
   }
 
-  .store-content { grid-template-columns: 1fr; }
-  .inventory-column { border-left: none; padding-left: 0; }
-}
+  .store-content {
+    grid-template-columns: 1fr;
+  }
 
+  .inventory-column {
+    border-left: none;
+    padding-left: 0;
+  }
+}

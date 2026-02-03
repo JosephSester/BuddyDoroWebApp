@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../authMiddleware'); // your JWT middleware file
-const User = require('../routes/user');
+const User = require('../models/User');
 
 router.patch('/doros', authMiddleware, async (req, res) => {
   try {

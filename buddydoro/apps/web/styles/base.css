@@ -1,22 +1,49 @@
 /* ---------- base ---------- */
-* { box-sizing: border-box; }
-html, body { 
-  height: auto;
-  overflow-y: auto; 
+* {
+  box-sizing: border-box;
 }
-body { margin: 0; background: #222;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
 
+html {
+  height: 100%;
+}
 
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: #222;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  overflow-y: auto;
+  /* page scroll appears when content + padding requires it */
+}
 
+/* Themed scrollbar to match the gold/brown UI accents */
+/* Themed scrollbar to match the yellow glass UI (applies to all scrollable containers) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #e7c35a transparent;
+}
 
+/* WebKit scrollbar styling */
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
 
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
 
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255, 225, 150, 0.9) 0%, rgba(226, 176, 70, 0.9) 100%);
+  border-radius: 10px;
+  border: 2px solid rgba(224, 162, 51, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(224, 162, 51, 0.45),
+    0 4px 10px rgba(0, 0, 0, 0.18),
+    0 0 12px rgba(255, 210, 100, 0.45);
+}
 
-
-
-
-
-
-
-
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(255, 233, 170, 1) 0%, rgba(232, 190, 90, 1) 100%);
+  border-color: rgba(232, 190, 90, 0.9);
+}

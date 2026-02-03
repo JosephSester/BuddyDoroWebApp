@@ -62,36 +62,43 @@
     el.textContent = formatBalance(state.balance);
   }
 
-  function saveBalance() {
-    try {
-      localStorage.setItem(STORAGE_KEY, String(state.balance));
-    } catch (e) {
-      // storage might be unavailable; ignore
-    }
-  }
+  // function saveBalance() {
+  //   try {
+  //     localStorage.setItem(STORAGE_KEY, String(state.balance));
+  //   } catch (e) {
+  //     // storage might be unavailable; ignore
+  //   }
+  // }
 
-  function loadBalance() {
-    let balance = NaN;
+  // function loadBalance() {
+  //   let balance = NaN;
 
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored != null) {
-        const parsed = parseInt(stored, 10);
-        if (Number.isFinite(parsed)) {
-          balance = parsed;
-        }
-      }
-    } catch (e) {
-      // ignore, fall back to DOM
-    }
+  //   try {
+  //     const stored = localStorage.getItem(STORAGE_KEY);
+  //     if (stored != null) {
+  //       const parsed = parseInt(stored, 10);
+  //       if (Number.isFinite(parsed)) {
+  //         balance = parsed;
+  //       }
+  //     }
+  //   } catch (e) {
+  //     // ignore, fall back to DOM
+  //   }
 
-    if (!Number.isFinite(balance)) {
-      balance = readBalanceFromDOM();
-    }
+  //   if (!Number.isFinite(balance)) {
+  //     balance = readBalanceFromDOM();
+  //   }
 
-    state.balance = balance;
-    syncBalanceToDOM();
-  }
+  //   state.balance = balance;
+  //   syncBalanceToDOM();
+  // }
+
+  function setBalance(amount) {
+  amount = Math.max(0, amount | 0);
+  state.balance = amount;
+  //saveBalance();
+  syncBalanceToDOM();
+}
 
   function isStudyModeActive() {
     const studyChip = document.querySelector(
@@ -136,16 +143,40 @@
     }, 2000);
   }
 
-  function awardBlocks(newBlocks) {
-    if (newBlocks <= 0) return;
-    const earned = newBlocks * DOROS_PER_BLOCK;
+  async function awardBlocks(newBlocks) {
+  if (newBlocks <= 0) return;
 
-    state.balance += earned;
-    saveBalance();
+  const earned = newBlocks * DOROS_PER_BLOCK;
+
+  // optimistic UI update
+  state.balance += earned;
+  syncBalanceToDOM();
+  flashEarnedBadge(earned);
+  playEarnDorosSound();
+
+  try {
+    const res = await fetch('http://localhost:3000/api/user/doros', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('authToken') },
+      body: JSON.stringify({ delta: earned })
+    });
+
+    if (!res.ok) throw new Error('Failed to earn doros');
+
+    const data = await res.json();
+
+    // backend is source of truth
+    state.balance = data.doros;
     syncBalanceToDOM();
-    flashEarnedBadge(earned);
-    playEarnDorosSound();       // 🔊 play coin / money sound
+  } catch (err) {
+    console.error('Earn doros failed:', err);
+
+    // rollback if backend fails
+    state.balance -= earned;
+    syncBalanceToDOM();
   }
+}
+
 
   function handleTimerTick() {
     if (!state.sessionActive) return;
@@ -228,18 +259,44 @@
   }
 
     function init() {
-    loadBalance();
+    //loadBalance();
     setupListeners();
   }
 
-  function spend(amount) {
-    amount = Math.max(0, amount | 0);
-    if (!amount) return;
+  async function spend(amount) {
+  amount = Math.max(0, amount | 0);
+  if (!amount) return;
 
-    state.balance = Math.max(0, state.balance - amount);
-    saveBalance();
+  // optimistic UI update
+  state.balance = Math.max(0, state.balance - amount);
+  syncBalanceToDOM();
+
+  try {
+    const res = await fetch('http://localhost:3000/api/user/doros', {
+      method: 'PATCH',
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': 'Bearer ' + localStorage.getItem('authToken') 
+      },
+      body: JSON.stringify({ delta: -amount })
+    });
+
+    if (!res.ok) throw new Error('Failed to update doros');
+
+    const data = await res.json();
+
+    // backend is source of truth
+    state.balance = data.doros;
+    syncBalanceToDOM();
+  } catch (err) {
+    console.error('Spend doros failed:', err);
+
+    // optional: rollback UI
+    state.balance += amount;
     syncBalanceToDOM();
   }
+}
+
 
   function getBalance() {
     return state.balance;
@@ -249,6 +306,7 @@
     init,
     getBalance,
     spend,
+    setBalance,
     _state: state
   };
 

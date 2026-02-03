@@ -28,7 +28,6 @@ router.post('/signup', async (req, res) => {
     const user = new User({
       name,
       email,
-      doros: 1250,
       passwordHash: hashedPassword
     });
 

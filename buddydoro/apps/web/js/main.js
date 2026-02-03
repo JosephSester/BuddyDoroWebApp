@@ -29,17 +29,25 @@ async function initUserTopbar() {
     const res = await fetch('http://localhost:3000/api/auth/me', {
       headers: { Authorization: 'Bearer ' + authToken },
     });
-    if (!res.ok) throw new Error('Auth lookup failed');
-    const user = await res.json();
-    if (user?.name) localStorage.setItem('userName', user.name);
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch user info');
+    }
+
+    const data = await res.json();
+
+    if (window.EarnDoros && typeof window.EarnDoros.setBalance === 'function') {
+      window.EarnDoros.setBalance(data.doros);
+    }
+
     return initTopbar({
-      userName: user?.name || localStorage.getItem('userName') || 'Player',
-      startingDoros: user?.doros ?? 0,
+      userName: data.name,
+      doros: data.doros,
     });
   } catch {
     return initTopbar({
-      userName: localStorage.getItem('userName') || 'Player',
-      startingDoros: 0,
+      userName: 'Player',
+      doros: 0,
     });
   }
 }

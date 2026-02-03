@@ -9,7 +9,6 @@ const taskRoutes = require('./routes/tasks');
 const panelRoutes = require('./routes/panels');
 const inventoryRoutes = require('./routes/inventory');
 const ItemsRoutes = require('./routes/items');
-const userRoutes = require('./routes/user');
 const aiRoutes = require('./routes/ai');
 
 const app = express();
@@ -27,7 +26,6 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/panels', panelRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/items', ItemsRoutes);
-app.use('/api/user', userRoutes);
 app.use('/api/ai', aiRoutes);
 
 // Connect to MongoDB

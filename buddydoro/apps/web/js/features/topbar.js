@@ -1,13 +1,6 @@
-// Greeting chip + defaults form + Doros balance display
-import { applyTimerDefaults } from './timer.js'; // only for defaults update
-
-const DEFAULT_LIMITS = { min:1, max:180 };
-const STORAGE_KEYS = { focus:'focusDefaultMinutes', break:'breakDefaultMinutes' };
-
-
-
-let USER_NAME = '';
-let dorosBalance = 0;
+// Greeting chip + Doros balance display
+let USER_NAME = localStorage.getItem('userName') || 'Player';
+let dorosBalance = 1250;
 
 let greetTextEl, dorosAmountEl, greetChip, greetMenu, menuButton;
 let openStoreCb = null;
@@ -75,9 +68,8 @@ export function spendDoros(amount) {
 export function getDoros() { return dorosBalance; }
 export function addDoros(amount) { dorosBalance += Math.max(0, amount | 0); paintDoros(); }
 
-export function initTopbar({ userName='User', doros = 0, onOpenStore }={}){
-  USER_NAME = userName;
-  dorosBalance = doros;
+export function initTopbar({ userName = localStorage.getItem('userName') || 'Player', onOpenStore } = {}) {
+  USER_NAME = userName || localStorage.getItem('userName') || 'Player';
   openStoreCb = onOpenStore || null;
 
   greetTextEl = document.getElementById('greetText');

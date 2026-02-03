@@ -10,6 +10,7 @@ const panelRoutes = require('./routes/panels');
 const inventoryRoutes = require('./routes/inventory');
 const ItemsRoutes = require('./routes/items');
 const aiRoutes = require('./routes/ai');
+const userRoutes = require('./routes/user');
 
 const app = express();
 app.use(express.json());
@@ -27,6 +28,7 @@ app.use('/api/panels', panelRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/items', ItemsRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/user', userRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/buddydoro')

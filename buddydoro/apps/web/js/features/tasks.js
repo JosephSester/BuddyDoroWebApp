@@ -1,32 +1,94 @@
 // apps/web/js/features/tasks.js
 // Full-featured Tasks module (create/select/delete + session editing)
-// Exposes: initTasks({ onActiveTaskChange, onShouldStopTimer }), getActiveTaskId()
+// Exposes: initTasks({ onActiveTaskChange, onShouldStopTimer, onTaskEstimate, onSubtaskEstimate }), getActiveTaskId(), getActiveTask()
 
 // INTEGRATION: Import API service for backend communication
 import { fetchTasks, createTask, updateTask, deleteTask as apiDeleteTask } from '../api/taskService.js';
+import { fetchPanels, createPanel as apiCreatePanel, updatePanel as apiUpdatePanel, deletePanel as apiDeletePanel } from '../api/panelService.js';
 
 // INTEGRATION: Import universal notification system
 import { showNotification, setBusy } from '../utils/notifications.js';
+import { createSubtasksSection, createSubtasksToggle, deleteTaskSubtasks, getSubtasks, setSubtasks, makeSubtaskId, renderList } from './subtasks.js';
 
 // -----------------------------------------------------------------------------
 // Public API
 // -----------------------------------------------------------------------------
 let onActiveTaskChange = () => { };
 let onShouldStopTimer = () => { };
+let onTaskEstimate = null;
+let onSubtaskEstimate = null;
 
 export async function initTasks(opts = {}) {
   onActiveTaskChange = typeof opts.onActiveTaskChange === 'function'
     ? opts.onActiveTaskChange : () => { };
   onShouldStopTimer = typeof opts.onShouldStopTimer === 'function'
     ? opts.onShouldStopTimer : () => { };
+  onTaskEstimate = typeof opts.onTaskEstimate === 'function'
+    ? opts.onTaskEstimate : null;
+  onSubtaskEstimate = typeof opts.onSubtaskEstimate === 'function'
+    ? opts.onSubtaskEstimate : null;
 
-  // Default to first panel's ids (keeps old behavior if present)
+  // Default panel elements (may be null when no panels exist yet)
   els.addTaskBtn = document.getElementById('addTaskBtn');
   els.tasksList = document.getElementById('tasksList');
 
-  // === NEW: wire ALL existing "+ Create a Task" buttons ===
+  // === Sync panels with server first (fallback to local) ===
+  let savedPanels = loadPanelsFromStorage();
+  try {
+    let apiPanels = await fetchPanels();
+    if (!Array.isArray(apiPanels)) apiPanels = [];
+
+    if (apiPanels.length === 0) {
+      localStorage.setItem(PANELS_STORAGE_KEY, JSON.stringify([]));
+      savedPanels = [];
+    } else {
+      const normalized = apiPanels.map((p, idx) => ({ panelId: String(p.id), title: p.title || 'Goal', order: Number.isFinite(p.order) ? p.order : idx }));
+      localStorage.setItem(PANELS_STORAGE_KEY, JSON.stringify(normalized));
+      savedPanels = normalized;
+      console.log('[Panels] Synced from server:', normalized);
+    }
+  } catch (e) {
+    console.warn('[Panels] Server sync failed, using local panels if any:', e);
+  }
+
+  // === Restore panels from localStorage first ===
+  // (By here, savedPanels likely reflect server state)
+  console.log('[Init] savedPanels result:', savedPanels);
+  if (savedPanels && savedPanels.length > 0) {
+    const { stack, template } = getPanelStack();
+
+    console.log('[Init] Found stack:', !!stack, 'Found template:', !!template);
+    console.log('[Init] Current panels in DOM:', stack?.querySelectorAll('.tasks-panel').length);
+
+    if (stack && template) {
+      stack.innerHTML = '';
+      savedPanels.forEach(panel => {
+        createPanelFromTemplate({ panelId: panel.panelId, title: panel.title });
+      });
+
+      const firstList = stack.querySelector('.tasks-list');
+      if (firstList) {
+        els.tasksList = firstList;
+      }
+
+      console.log(`[Init] Restored ${savedPanels.length} panels from storage`);
+      console.log('[Init] Panels now in DOM:', stack?.querySelectorAll('.tasks-panel').length);
+    }
+  } else {
+    console.log('[Init] No panels to restore');
+  }
+
+  // === Wire ALL existing "+ Create a Task" buttons ===
   document.querySelectorAll('.tasks-panel .task-add')
     .forEach(btn => btn.addEventListener('click', onAddTaskClick));
+
+  // === Wire header buttons for ALL panels (including restored ones) ===
+  document.querySelectorAll('.tasks-panel').forEach(panel => {
+    wireHeaderRename(panel);
+    wireHeaderDelete(panel);
+  });
+
+  setupTodoDialog();
 
   // INTEGRATION: Load tasks from API
   try {
@@ -35,12 +97,23 @@ export async function initTasks(opts = {}) {
     tasks.length = 0; // Clear array
     nextTaskId = 1;
 
+    const localPanelMap = readTaskPanelMap();
+    const localSessionsMap = readTaskSessionsMap();
     apiTasks.forEach(t => {
+      const resolvedPanelId = t.panelId || localPanelMap?.[String(t.id)] || 'tasksPanel-1';
+      const localSess = localSessionsMap?.[String(t.id)] || null;
+      const resolvedTotal = (typeof t.total === 'number' && t.total > 0)
+        ? t.total
+        : (localSess?.total || CREATE_DEFAULT_ESTIMATE);
+      const resolvedDone = (typeof t.done === 'number' && t.done >= 0)
+        ? t.done
+        : (typeof t.completed === 'boolean' ? (t.completed ? 1 : 0) : (localSess?.done || 0));
       tasks.push({
         id: t.id,
         name: t.text,
-        total: 1,
-        done: t.completed ? 1 : 0
+        total: resolvedTotal,
+        done: Math.min(resolvedDone, resolvedTotal),
+        panelId: resolvedPanelId
       });
       // Track the highest ID to avoid collisions
       const numId = Number(t.id);
@@ -48,6 +121,18 @@ export async function initTasks(opts = {}) {
     });
 
     console.log(`Loaded ${tasks.length} tasks from API`);
+
+    // After loading, backfill missing panelIds to the server using local mapping (one-time migration)
+    try {
+      const localMap = readTaskPanelMap();
+      const missing = tasks.filter(t => !apiTasks.find(s => s.id === t.id)?.panelId && localMap?.[String(t.id)]);
+      for (const t of missing) {
+        await updateTask(t.id, { panelId: t.panelId });
+        console.log('[Init] Backfilled panelId to server for task', t.id, '->', t.panelId);
+      }
+    } catch (e) {
+      console.warn('[Init] Could not backfill panelId to server:', e);
+    }
   } catch (error) {
     console.error('Failed to load tasks from API:', error);
     // Fall back to empty list, don't break the app
@@ -55,11 +140,50 @@ export async function initTasks(opts = {}) {
 
   renderAllTasks();
   notifyActiveChange();
-}
 
+  // Save panel structure after loading (ensures persistence on page load)
+  savePanelsToStorage();
+}
 
 export function getActiveTaskId() {
   return activeTaskId;
+}
+
+export function getActiveTask() {
+  if (activeTaskId == null) return null;
+  return tasks.find(t => String(t.id) === String(activeTaskId)) || null;
+}
+
+export async function createPlanFromAI(plan) {
+  if (!plan || !Array.isArray(plan.tasks) || plan.tasks.length === 0) {
+    throw new Error('Plan is empty.');
+  }
+
+  const title = String(plan.title || 'Goal').trim().slice(0, 100) || 'Goal';
+  const panel = await createPanelWithTitle(title);
+  const panelId = panel?.panelId || panel?.id;
+  if (!panelId) throw new Error('Unable to create goal panel.');
+
+  for (const task of plan.tasks) {
+    const taskTitle = String(task.title || '').trim();
+    if (!taskTitle) continue;
+    const estimate = Number.isFinite(Number(task.estimate)) ? Math.max(1, Math.round(Number(task.estimate))) : CREATE_DEFAULT_ESTIMATE;
+
+    const created = await addTask(taskTitle, estimate, { panelId });
+    const subtasks = Array.isArray(task.subtasks) ? task.subtasks : [];
+    if (created && subtasks.length) {
+      const mapped = subtasks.map(sub => ({
+        id: makeSubtaskId(),
+        title: String(sub.title || 'Subtask').trim().slice(0, 80) || 'Subtask',
+        estimate: Number.isFinite(Number(sub.estimate)) ? Math.max(1, Math.round(Number(sub.estimate))) : null,
+        done: false
+      }));
+      setSubtasks(created.id, mapped);
+    }
+  }
+
+  renderAllTasks();
+  showNotification('AI plan added as a new goal.', 'success');
 }
 
 // -----------------------------------------------------------------------------
@@ -67,7 +191,8 @@ export function getActiveTaskId() {
 // -----------------------------------------------------------------------------
 const els = { addTaskBtn: null, tasksList: null };
 
-const tasks = [];
+const tasks = []; // Each task has: { id, name, total, done, panelId }
+
 let nextTaskId = 1;
 let activeTaskId = null;
 
@@ -77,9 +202,102 @@ let createTaskCtx = null;
 const SESSION_MAX = 999;
 const CREATE_NAME_MAX = 80;
 const CREATE_DEFAULT_ESTIMATE = 50;
+const MAX_PANELS = 5;
+let todoDialogSetupDone = false;
 
 let domIdCounter = 0;
 const makeDomId = (prefix = 'id') => `${prefix}-${Date.now()}-${++domIdCounter}`;
+
+// -----------------------------------------------------------------------------
+// Panel Persistence in localStorage
+// -----------------------------------------------------------------------------
+const PANELS_STORAGE_KEY = 'buddydoro_panels';
+const TASK_PANEL_MAP_KEY = 'buddydoro_task_panel_map';
+const TASK_SESSIONS_MAP_KEY = 'buddydoro_task_sessions_map';
+
+function readTaskPanelMap() {
+  try {
+    const raw = localStorage.getItem(TASK_PANEL_MAP_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function writeTaskPanelMap(map) {
+  try { localStorage.setItem(TASK_PANEL_MAP_KEY, JSON.stringify(map)); } catch { }
+}
+
+function setTaskPanel(taskId, panelId) {
+  if (!taskId || !panelId) return;
+  const map = readTaskPanelMap();
+  map[String(taskId)] = panelId;
+  writeTaskPanelMap(map);
+}
+
+function deleteTaskPanel(taskId) {
+  const map = readTaskPanelMap();
+  delete map[String(taskId)];
+  writeTaskPanelMap(map);
+}
+
+function readTaskSessionsMap() {
+  try {
+    const raw = localStorage.getItem(TASK_SESSIONS_MAP_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function writeTaskSessionsMap(map) {
+  try { localStorage.setItem(TASK_SESSIONS_MAP_KEY, JSON.stringify(map)); } catch { }
+}
+
+function setTaskSessions(taskId, sessions) {
+  if (!taskId || !sessions) return;
+  const map = readTaskSessionsMap();
+  map[String(taskId)] = { total: Number(sessions.total) || 0, done: Number(sessions.done) || 0 };
+  writeTaskSessionsMap(map);
+}
+
+function deleteTaskSessions(taskId) {
+  const map = readTaskSessionsMap();
+  delete map[String(taskId)];
+  writeTaskSessionsMap(map);
+}
+
+function savePanelsToStorage() {
+  try {
+    const panels = [];
+    document.querySelectorAll('.tasks-panel').forEach((panel, index) => {
+      const titleEl = panel.querySelector('.tasks-title');
+      const list = panel.querySelector('.tasks-list');
+      panels.push({
+        panelId: list?.dataset.panelId || `tasksPanel-${index + 1}`,
+        title: titleEl?.textContent || 'Goal'
+      });
+    });
+    localStorage.setItem(PANELS_STORAGE_KEY, JSON.stringify(panels));
+    console.log('[Panels] Saved panel structure:', panels);
+    console.log('[Panels] localStorage now contains:', localStorage.getItem(PANELS_STORAGE_KEY));
+  } catch (error) {
+    console.error('[Panels] Failed to save panel structure:', error);
+  }
+}
+
+function loadPanelsFromStorage() {
+  try {
+    const stored = localStorage.getItem(PANELS_STORAGE_KEY);
+    console.log('[Panels] Raw localStorage value:', stored);
+    if (!stored) {
+      console.log('[Panels] No panels in localStorage');
+      return null;
+    }
+    const panels = JSON.parse(stored);
+    console.log('[Panels] Loaded panel structure:', panels);
+    return panels;
+  } catch (error) {
+    console.error('[Panels] Failed to load panel structure:', error);
+    return null;
+  }
+}
 
 // ============================================================================
 // Task-specific wrappers for universal notification system
@@ -134,6 +352,15 @@ function onAddTaskClick(e) {
   els.addTaskBtn = button;
   els.tasksList = list;
 
+  // CRITICAL: Ensure this list has a unique panelId
+  // If the panel has an ID, use it; otherwise generate a unique one
+  if (!list.dataset.panelId || list.dataset.panelId === '') {
+    const panelId = panel.id || `panel-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    list.dataset.panelId = panelId;
+    console.log(`[Tasks] Setting panelId: ${panelId} for list`);
+  }
+  console.log(`[Tasks] Creating task in panel: ${list.dataset.panelId}`);
+
   if (createTaskCtx) {
     createTaskCtx.nameInput.focus({ preventScroll: true });
     createTaskCtx.nameInput.select();
@@ -152,20 +379,68 @@ function onAddTaskClick(e) {
 function wireHeaderRename(panel) {
   const titleEl = panel.querySelector('.tasks-title');
   const btn = panel.querySelector('.task-title-edit');
+  const header = btn?.closest('.tasks-header') || titleEl?.parentNode;
   if (!titleEl || !btn) return;
 
-  const rename = () => {
-    const current = (titleEl.textContent || 'Tasks').trim();
-    const next = prompt('Rename this task group:', current);
-    if (next == null) return;                 // cancel
-    const clean = next.trim();
-    if (!clean) return;                       // ignore empty
-    titleEl.textContent = clean.slice(0, 40); // cap at 40 chars
+  let editing = false;
+
+  const closeInline = () => {
+    const inline = header?.querySelector('.task-title-inline');
+    if (inline) inline.remove();
+    titleEl.hidden = false;
+    btn.hidden = false;
+    editing = false;
   };
 
-  btn.addEventListener('click', (e) => { e.stopPropagation(); rename(); });
+  const saveTitle = async (value) => {
+    const clean = (value || '').trim();
+    if (!clean) { closeInline(); return; }
+    titleEl.textContent = clean.slice(0, 40);
+    savePanelsToStorage();
+    try {
+      const panelId = panel.id || panel.querySelector('.tasks-list')?.dataset.panelId;
+      if (panelId) await apiUpdatePanel(panelId, { title: titleEl.textContent });
+    } catch (e) { console.warn('[Panels] Failed to update panel title:', e); }
+    closeInline();
+  };
+
+  const startInline = () => {
+    if (editing) return;
+    editing = true;
+    // Remove any existing inline in this header (safety)
+    const existing = header?.querySelector('.task-title-inline');
+    if (existing) existing.remove();
+    titleEl.hidden = true;
+    btn.hidden = true;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'task-title-inline';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'task-title-input';
+    input.value = (titleEl.textContent || 'Tasks').trim();
+    input.maxLength = 40;
+    input.setAttribute('aria-label', 'Goal name');
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); saveTitle(input.value); }
+      if (e.key === 'Escape') { e.preventDefault(); closeInline(); }
+    });
+    input.addEventListener('blur', () => { closeInline(); });
+
+    wrapper.append(input);
+    if (header) {
+      header.insertBefore(wrapper, titleEl);
+    } else {
+      titleEl.parentNode.insertBefore(wrapper, titleEl);
+    }
+    input.focus({ preventScroll: true });
+    input.select();
+  };
+
+  btn.addEventListener('click', (e) => { e.stopPropagation(); startInline(); });
   btn.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); rename(); }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startInline(); }
   });
 }
 
@@ -175,25 +450,67 @@ function wireHeaderDelete(panel) {
   const delBtn = panel.querySelector('.task-title-delete');
   if (!delBtn) return;
 
-  delBtn.addEventListener('click', (e) => {
+  delBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
 
     const titleEl = panel.querySelector('.tasks-title');
-    const name = (titleEl?.textContent || 'this task').trim() || 'this task';
-
-    // prevent deleting the last remaining panel
-    const stack = panel.closest('#tasksStack') || document;
-    const total = stack.querySelectorAll('.tasks-panel').length;
-    if (total <= 1) {
-      alert('You must keep at least one task box.');
-      return;
-    }
+    const name = (titleEl?.textContent || 'this goal').trim() || 'this goal';
 
     const ok = confirm(`Are you sure you want to delete "${name}"?`);
     if (!ok) return;
 
+    // Get the panelId from the panel being deleted
+    const panelId = panel.id || panel.querySelector('.tasks-list')?.dataset.panelId;
+
+    // Delete all tasks in this panel from the backend
+    if (panelId) {
+      const tasksInPanel = tasks.filter(t => t.panelId === panelId);
+      console.log(`[Panel Delete] Found ${tasksInPanel.length} tasks in panel ${panelId}:`);
+
+      // Check if the active task is in this panel - if so, reset timer when panel is deleted
+      const activeTaskInPanel = tasksInPanel.some(t => t.id === activeTaskId);
+
+      setTasksBusy(true, 'Deleting goal and its tasks...');
+
+      for (const task of tasksInPanel) {
+        try {
+          console.log(`[Panel Delete] Deleting task ${task.id} from panel ${panelId}`);
+          await apiDeleteTask(task.id);
+          // Remove from local state and mapping
+          const i = tasks.findIndex(t => t.id === task.id);
+          if (i !== -1) tasks.splice(i, 1);
+          deleteTaskPanel(task.id);
+          deleteTaskSessions(task.id);
+          deleteTaskSubtasks(task.id);
+        } catch (error) {
+          console.error(`[Panel Delete] Failed to delete task ${task.id}:`, error);
+        }
+      }
+
+      setTasksBusy(false);
+
+      // Reset active task if it was deleted with the panel
+      if (activeTaskInPanel) {
+        console.log('[Panel Delete] Active task was in deleted panel');
+        activeTaskId = null;
+        updateActiveTaskVisuals();
+        notifyActiveChange();
+      }
+
+      // Delete panel from server
+      try {
+        await apiDeletePanel(panelId);
+        console.log('[Panel Delete] Deleted panel from server:', panelId);
+      } catch (e) {
+        console.warn('[Panel Delete] Failed to delete panel from server:', e);
+      }
+    }
+
     // remove the entire tasks panel
     panel.remove();
+
+    // Save panel structure to localStorage
+    savePanelsToStorage();
 
     // re-enable adder if it was disabled at limit
     const addBtn = document.querySelector('#addTasksPanel');
@@ -210,6 +527,12 @@ function wireHeaderDelete(panel) {
 // -----------------------------------------------------------------------------
 const isEditingSessions = () => sessionEditor != null;
 const formatSessions = task => `${task.done}/${task.total}`;
+const formatSubtaskProgress = task => {
+  const subs = getSubtasks(task.id);
+  if (!subs.length) return '0/0';
+  const done = subs.filter(s => s.done).length;
+  return `${done}/${subs.length}`;
+};
 
 function createTaskCard(task) {
   const card = document.createElement('div');
@@ -233,8 +556,8 @@ function createTaskCard(task) {
   bubble.className = 'session-bubble';
   bubble.tabIndex = 0;
   bubble.setAttribute('role', 'button');
-  bubble.setAttribute('aria-label', `Completed ${task.done} of ${task.total} sessions`);
-  bubble.textContent = formatSessions(task);
+  bubble.setAttribute('aria-label', `Completed ${formatSubtaskProgress(task)} subtasks`);
+  bubble.textContent = formatSubtaskProgress(task);
   bubble.addEventListener('click', evt => evt.stopPropagation());
   bubble.addEventListener('mousedown', evt => evt.stopPropagation());
   bubble.addEventListener('dblclick', evt => {
@@ -262,6 +585,38 @@ function createTaskCard(task) {
 
   right.append(bubble, del);
   card.append(main, right);
+
+  // Subtasks UI: Create subtasks section and toggle button
+  const handleSubtaskEstimate = onSubtaskEstimate || onTaskEstimate;
+
+  const subsSection = createSubtasksSection(task, {
+    onSetTimerFromEstimate: handleSubtaskEstimate,
+    onChange: renderAllTasks,
+  });
+
+  // Insert toggle button into task-right, before delete button
+  const subToggle = createSubtasksToggle(task, subsSection.wrapInner, {
+    onAddSubtask: () => {
+      const title = prompt('Subtask name');
+      if (!title || !title.trim()) return;
+      const estRaw = prompt('Estimate (minutes, optional)');
+      let estimate = Number(estRaw);
+      if (!Number.isInteger(estimate) || estimate < 1) estimate = null;
+      const sub = { id: makeSubtaskId(), title: title.trim(), estimate, done: false };
+      const next = [...getSubtasks(task.id), sub];
+      setSubtasks(task.id, next);
+      renderList(task, subsSection.list, { onSetTimerFromEstimate: handleSubtaskEstimate, onChange: renderAllTasks });
+      subsSection.wrapInner.hidden = false;
+      subToggle.setAttribute('aria-expanded', 'true');
+    },
+    onSetTimerFromEstimate: handleSubtaskEstimate,
+    onChange: renderAllTasks,
+  });
+  right.insertBefore(subToggle, del);
+
+  // Append the subtasks block below the card
+  card.append(subsSection.wrap);
+
   wireTaskCardInteractions(card);
   return card;
 }
@@ -288,7 +643,11 @@ function wireTaskCardInteractions(card) {
 }
 
 function focusSiblingCard(card, offset) {
-  const cards = Array.from(els.tasksList.querySelectorAll('.task-card'));
+  // Find the task list that contains this card
+  const list = card.closest('.tasks-list');
+  if (!list) return;
+
+  const cards = Array.from(list.querySelectorAll('.task-card'));
   const idx = cards.indexOf(card); if (idx === -1 || cards.length === 0) return;
   let next = idx + offset;
   if (next < 0) next = cards.length - 1;
@@ -298,14 +657,23 @@ function focusSiblingCard(card, offset) {
 
 function updateActiveTaskVisuals() {
   let activeCard = null;
-  els.tasksList.querySelectorAll('.task-card').forEach(card => {
+  // Update visuals in ALL panels, not just the currently selected one
+  document.querySelectorAll('.tasks-panel .task-card').forEach(card => {
     const isActive = String(card.dataset.taskId) === String(activeTaskId);
     card.classList.toggle('is-active', isActive);
     card.setAttribute('aria-selected', isActive ? 'true' : 'false');
     if (isActive) activeCard = card;
   });
-  if (activeCard) { els.tasksList.setAttribute('aria-activedescendant', activeCard.id); }
-  else { els.tasksList.removeAttribute('aria-activedescendant'); }
+
+  // Update aria-activedescendant for all task lists
+  document.querySelectorAll('.tasks-list').forEach(list => {
+    const activeInList = list.querySelector('.task-card.is-active');
+    if (activeInList) {
+      list.setAttribute('aria-activedescendant', activeInList.id);
+    } else {
+      list.removeAttribute('aria-activedescendant');
+    }
+  });
 }
 
 function ensureActiveTaskIsValid() {
@@ -317,33 +685,74 @@ function ensureActiveTaskIsValid() {
 
 function renderAllTasks() {
   cancelSessionEdit({ restoreOriginal: false });
-  const createNode = createTaskCtx?.container || null;
-  els.tasksList.innerHTML = '';
-  if (createNode) els.tasksList.appendChild(createNode);
-  tasks.forEach(t => els.tasksList.appendChild(createTaskCard(t)));
+
+  // Render tasks into ALL panels, each showing only its own tasks
+  document.querySelectorAll('.tasks-panel').forEach(panel => {
+    const list = panel.querySelector('.tasks-list');
+    if (!list) return;
+
+    // Ensure panel has an ID for tracking
+    const panelId = list.dataset.panelId || panel.id || makeDomId('panel');
+    if (!list.dataset.panelId) list.dataset.panelId = panelId;
+
+    // Only add the create node to the currently active panel
+    const createNode = (list === els.tasksList) ? (createTaskCtx?.container || null) : null;
+
+    // STRICT FILTER: Only show tasks that explicitly match this panel's ID
+    const panelTasks = tasks.filter(t => {
+      const matches = t.panelId === panelId;
+      if (!matches && t.panelId) {
+        // Task belongs to a different panel, skip it
+        return false;
+      }
+      return matches;
+    });
+
+    list.innerHTML = '';
+    if (createNode) list.appendChild(createNode);
+    panelTasks.forEach(t => list.appendChild(createTaskCard(t)));
+  });
+
   ensureActiveTaskIsValid();
   updateActiveTaskVisuals();
   // consumer decides what to do with start button, etc.
   notifyActiveChange();
+  renderTodoList();
 }
 
 // -----------------------------------------------------------------------------
 // CRUD
 // -----------------------------------------------------------------------------
-async function addTask(name, total, { atTop = false } = {}) {
+async function addTask(name, total, { atTop = false, panelId: providedPanelId } = {}) {
   setTasksBusy(true, 'Saving task...');
   try {
-    // Create task on API first
-    const apiTask = await createTask(name);
+    // Resolve the panel ID: use provided context, else current list, else default
+    const panelId = providedPanelId || els.tasksList?.dataset.panelId || 'tasksPanel-1';
+
+    // Validation: ensure panelId is valid
+    if (!panelId || panelId === '') {
+      console.error('[Tasks] Invalid panelId during task creation!');
+      throw new Error('Cannot create task without valid panel ID');
+    }
+
+    console.log(`[Tasks] Adding task "${name}" to panel: ${panelId}`);
+
+    // Create task on API with panelId
+    const apiTask = await createTask(name, panelId);
 
     // Add to local state
     const t = {
       id: apiTask.id,
       name: apiTask.text,
-      total: total || 1,
-      done: 0
+      total: Number(total || CREATE_DEFAULT_ESTIMATE),
+      done: 0,
+      panelId: panelId  // Track which panel this task belongs to
     };
     if (atTop) tasks.unshift(t); else tasks.push(t);
+    // Persist sessions mapping locally so refresh preserves 0/total
+    setTaskSessions(t.id, { total: t.total, done: t.done });
+    // persist mapping locally so refresh can recover placement if server lacks panelId
+    setTaskPanel(t.id, panelId);
     renderAllTasks();
     console.log('Task created:', t);
     showTaskNotification('Task created successfully', 'success');
@@ -372,6 +781,10 @@ async function deleteTask(id) {
       activeTaskId = null;
       try { onShouldStopTimer(); } catch { /* noop */ }
     }
+    // Also remove local mappings
+    deleteTaskPanel(id);
+    deleteTaskSessions(id);
+    deleteTaskSubtasks(id);
     renderAllTasks();
     console.log('Task deleted:', id);
     showTaskNotification('Task deleted', 'success');
@@ -389,7 +802,16 @@ function setActiveTask(taskId) {
   // Convert to string for comparison (MongoDB IDs are strings)
   const taskIdStr = taskId != null ? String(taskId) : null;
   if (taskIdStr != null && !tasks.some(t => String(t.id) === taskIdStr)) return; // Invalid ID
-  if (String(activeTaskId) === taskIdStr) return; // Already active
+
+  // Toggle: clicking the same task again deselects it
+  if (String(activeTaskId) === taskIdStr) {
+    activeTaskId = null;
+    try { onShouldStopTimer(); } catch { /* noop */ }
+    updateActiveTaskVisuals();
+    notifyActiveChange();
+    return;
+  }
+
   activeTaskId = taskIdStr;
   if (activeTaskId == null) {
     try { onShouldStopTimer(); } catch { /* noop */ }
@@ -470,7 +892,7 @@ function startCreateTask(initial = {}) {
   const estimateInputId = makeDomId('createTaskEstimate');
   const estimateLabel = document.createElement('label');
   estimateLabel.className = 'task-create-label';
-  estimateLabel.textContent = 'Estimate';
+  estimateLabel.textContent = 'Sessions';
   estimateLabel.setAttribute('for', estimateInputId);
   const estimateInput = document.createElement('input');
   estimateInput.type = 'number';
@@ -480,7 +902,7 @@ function startCreateTask(initial = {}) {
   estimateInput.step = '1';
   estimateInput.inputMode = 'numeric';
   estimateInput.value = String(initialEstimate);
-  estimateInput.setAttribute('aria-label', 'Estimated sessions');
+  estimateInput.setAttribute('aria-label', 'Sessions');
   estimateInput.id = estimateInputId;
   estimateField.append(estimateLabel, estimateInput);
 
@@ -518,6 +940,7 @@ function startCreateTask(initial = {}) {
     saveBtn,
     cancelBtn,
     errorEl,
+    panelId: els.tasksList?.dataset.panelId || 'tasksPanel-1',
     shouldShowErrors: Boolean(initial.error),
     cleanupFns: []
   };
@@ -585,13 +1008,13 @@ function validateCreateTask(ctx, { forceShow = false } = {}) {
   const rawEstimate = ctx.estimateInput.value.trim();
   let estimateValue = null;
   if (!message) {
-    if (rawEstimate === '') { message = 'Estimate is required.'; }
+    if (rawEstimate === '') { message = 'Sessions is required.'; }
     else {
       const estNumber = Number(rawEstimate);
-      if (!Number.isFinite(estNumber)) message = 'Estimate must be a number.';
-      else if (!Number.isInteger(estNumber)) message = 'Estimate must be a whole number.';
-      else if (estNumber < 1) message = 'Estimate must be at least 1.';
-      else if (estNumber > SESSION_MAX) message = `Estimate must be ${SESSION_MAX} or less.`;
+      if (!Number.isFinite(estNumber)) message = 'Sessions must be a number.';
+      else if (!Number.isInteger(estNumber)) message = 'Sessions must be a whole number.';
+      else if (estNumber < 1) message = 'Sessions must be at least 1.';
+      else if (estNumber > SESSION_MAX) message = `Sessions must be ${SESSION_MAX} or less.`;
       else estimateValue = estNumber;
     }
   }
@@ -606,7 +1029,7 @@ function validateCreateTask(ctx, { forceShow = false } = {}) {
   return { valid: !message, title, estimate: estimateValue };
 }
 
-function attemptCreateTaskSave() {
+async function attemptCreateTaskSave() {
   if (!createTaskCtx) return;
   const ctx = createTaskCtx;
   const result = validateCreateTask(ctx, { forceShow: true });
@@ -618,16 +1041,15 @@ function attemptCreateTaskSave() {
     ctx.saveBtn.disabled = true;
     return;
   }
-  const optimisticTask = addTask(title, estimate, { atTop: true });
-  const optimisticId = optimisticTask.id;
-  teardownCreateTaskEditor({ focusButton: false });
 
-  // Stubbed persistence hook; replace when you add backend:
-  Promise.resolve({ id: `task-${Date.now()}`, title, estimate }).catch(err => {
-    const idx = tasks.findIndex(t => t.id === optimisticId);
-    if (idx !== -1) { tasks.splice(idx, 1); renderAllTasks(); }
-    startCreateTask({ title, estimate, error: err?.message || 'Unable to create task. Please try again.' });
-  });
+  // CRITICAL: await the task creation to prevent race conditions
+  try {
+    await addTask(title, estimate, { atTop: true, panelId: ctx.panelId });
+    teardownCreateTaskEditor({ focusButton: false });
+  } catch (err) {
+    // Show error inline if task creation fails
+    showCreateTaskError(err?.message || 'Unable to create task. Please try again.', ctx);
+  }
 }
 
 function cancelCreateTask({ focusButton = true } = {}) {
@@ -700,7 +1122,9 @@ function paintSessionBubble(task, bubble) {
 }
 
 function paintSessionBubbleFromTask(task) {
-  const card = els.tasksList.querySelector(`.task-card[data-task-id="${task.id}"]`);
+  // Find the list for this task's panel and update its bubble
+  const list = document.querySelector(`.tasks-list[data-panel-id="${task.panelId}"]`);
+  const card = list?.querySelector(`.task-card[data-task-id="${task.id}"]`);
   if (!card) return;
   const bubble = card.querySelector('.session-bubble');
   paintSessionBubble(task, bubble);
@@ -733,7 +1157,7 @@ function startSessionEdit(task, bubble) {
   bubble.appendChild(liveRegion);
 
   const completedField = createSessionField('Completed', task.done);
-  const estimateField = createSessionField('Estimate', task.total);
+  const estimateField = createSessionField('Sessions', task.total);
   bubble.append(completedField.wrapper, estimateField.wrapper);
 
   const errorEl = document.createElement('div');
@@ -799,7 +1223,7 @@ function commitSessionEdit() {
     showSessionError(completedResult.error, ctx);
     completedInput.focus(); completedInput.select(); return;
   }
-  const estimateResult = readSessionValue(estimateInput, 'Estimate');
+  const estimateResult = readSessionValue(estimateInput, 'Sessions');
   if (estimateResult.error) {
     showSessionError(estimateResult.error, ctx);
     estimateInput.focus(); estimateInput.select(); return;
@@ -809,7 +1233,7 @@ function commitSessionEdit() {
   const estimateVal = estimateResult.value;
 
   if (completedVal > estimateVal) {
-    showSessionError('Completed cannot exceed estimate.', ctx);
+    showSessionError('Completed cannot exceed sessions.', ctx);
     completedInput.focus(); completedInput.select(); return;
   }
 
@@ -826,6 +1250,17 @@ function commitSessionEdit() {
 
   taskRef.done = completedVal;
   taskRef.total = estimateVal;
+  // Persist sessions to localStorage
+  setTaskSessions(taskRef.id, { total: estimateVal, done: completedVal });
+
+  // If this is the active task, notify estimate change
+  if (String(taskRef.id) === String(activeTaskId) && onTaskEstimate) {
+    try {
+      onTaskEstimate(estimateVal);
+    } catch (err) {
+      console.error('Failed to handle task estimate:', err);
+    }
+  }
 
   teardownSessionEditor(ctx);
   if (ctx.bubble.isConnected) ctx.bubble.focus({ preventScroll: true });
@@ -834,6 +1269,7 @@ function commitSessionEdit() {
   Promise.resolve({ ok: true }).catch(err => {
     taskRef.done = prevDone;
     taskRef.total = prevTotal;
+    setTaskSessions(taskRef.id, { total: prevTotal, done: prevDone });
     paintSessionBubbleFromTask(taskRef);
     flashSessionError(ctx.taskId, err?.message || 'Unable to save changes');
   });
@@ -875,7 +1311,10 @@ function showSessionError(message, ctx = sessionEditor) {
 }
 
 function flashSessionError(taskId, message) {
-  const card = els.tasksList.querySelector(`.task-card[data-task-id="${taskId}"]`);
+  // Route error message to the correct panel by taskId → panelId
+  const task = tasks.find(t => String(t.id) === String(taskId));
+  const list = task ? document.querySelector(`.tasks-list[data-panel-id="${task.panelId}"]`) : els.tasksList;
+  const card = list?.querySelector(`.task-card[data-task-id="${taskId}"]`);
   if (!card) return;
   let container = card.querySelector('.session-error');
   if (!container) {
@@ -890,34 +1329,303 @@ function flashSessionError(taskId, message) {
 }
 
 // -----------------------------------------------------------------------------
-// Tasks Panel Adder (outside the tasks box, below it)
+// Panel creation helpers (shared by AI + UI)
 // -----------------------------------------------------------------------------
-(function mountTasksPanelAdder() {
-  const MAX_PANELS = 5;
+function getPanelStack() {
   const stack = document.querySelector('#tasksStack');
-  const addBtn = document.querySelector('#addTasksPanel');
-  if (!stack || !addBtn) return;
-
-  // First panel is the template
-  const template = stack.querySelector('.tasks-panel');
-  if (!template) return;
-
-  // <<< ADD: keep the outside "+" chip aligned under the stack >>>
+  const templateEl = document.getElementById('tasksPanelTemplate');
+  const template = templateEl?.content?.querySelector('.tasks-panel') || stack?.querySelector('.tasks-panel') || null;
   const chipRow = document.querySelector('.tasks-chip-row');
+  const addBtn = document.querySelector('#addTasksPanel');
+  return { stack, template, chipRow, addBtn, templateEl };
+}
 
-  function placeChipRow() {
-    if (!chipRow || !stack) return;
-    const r = stack.getBoundingClientRect();
-    chipRow.style.position = 'absolute';
-    chipRow.style.right = '3vw';
-    chipRow.style.top = `${Math.round(window.scrollY + r.bottom + 12)}px`;
-  }
+function placeChipRow() {
+  const { chipRow } = getPanelStack();
+  if (!chipRow) return;
+  chipRow.style.position = 'static';
+  chipRow.style.right = '';
+  chipRow.style.top = '';
+}
 
-  // initial placement + keep in sync on resize/stack size changes
+let chipRowObserverAttached = false;
+function ensureChipRowObserver() {
+  if (chipRowObserverAttached) return;
+  const { stack } = getPanelStack();
+  if (!stack) return;
+  chipRowObserverAttached = true;
   placeChipRow();
   new ResizeObserver(() => placeChipRow()).observe(stack);
   window.addEventListener('resize', placeChipRow);
-  // <<< /ADD >>>
+}
+
+function getTodoDialogElements() {
+  return {
+    dialog: document.getElementById('todoDialog'),
+    backdrop: document.getElementById('todoBackdrop'),
+    createBtn: document.getElementById('todoCreateTask'),
+    cancelBtn: document.getElementById('todoCancel'),
+    closeBtn: document.getElementById('todoClose'),
+    taskList: document.getElementById('todoTaskList'),
+    noGoalMsg: document.getElementById('todoNoGoalMessage'),
+    goalContainer: document.getElementById('todoGoalContainer'),
+  };
+}
+
+function isTodoDialogOpen() {
+  const { dialog } = getTodoDialogElements();
+  return Boolean(dialog && dialog.hasAttribute('aria-hidden') && dialog.getAttribute('aria-hidden') === 'false');
+}
+
+const TODO_ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const escapeHtml = (str) => String(str).replace(/[&<>"']/g, ch => TODO_ESCAPE_MAP[ch]);
+
+function resolveTodoPanelContext() {
+  const { stack } = getPanelStack();
+  if (!stack) return null;
+  let list = els.tasksList;
+  if (!list || !document.contains(list)) {
+    list = stack.querySelector('.tasks-list');
+  }
+  if (!list) return null;
+  let panelId = list.dataset.panelId || list.closest('.tasks-panel')?.id || null;
+  if (!panelId) {
+    panelId = makeDomId('panel');
+    list.dataset.panelId = panelId;
+  }
+  return { list, panelId };
+}
+
+function renderTodoList() {
+  const { taskList, noGoalMsg } = getTodoDialogElements();
+  if (!taskList) return;
+  const ctx = resolveTodoPanelContext();
+  if (!ctx) {
+    taskList.innerHTML = '';
+    if (noGoalMsg) noGoalMsg.hidden = false;
+    return;
+  }
+
+  const panelTasks = tasks.filter(t => String(t.panelId) === String(ctx.panelId));
+  taskList.innerHTML = '';
+  panelTasks.forEach(task => {
+    const li = document.createElement('li');
+    li.className = 'todo-task-item';
+    li.innerHTML = `<span>${escapeHtml(task.name)}</span><span class="todo-task-meta">${task.done}/${task.total}</span>`;
+    taskList.appendChild(li);
+  });
+  if (noGoalMsg) noGoalMsg.hidden = true;
+}
+
+function syncTodoDialogState() {
+  const { createBtn, noGoalMsg, goalContainer } = getTodoDialogElements();
+  const ctx = resolveTodoPanelContext();
+  const hasGoal = Boolean(ctx);
+  const atLimit = countPanels() >= MAX_PANELS;
+
+  if (createBtn) {
+    createBtn.disabled = atLimit;
+  }
+
+  if (goalContainer) {
+    goalContainer.hidden = !hasGoal;
+  }
+
+  if (noGoalMsg) {
+    noGoalMsg.hidden = hasGoal;
+  }
+
+  if (hasGoal) {
+    renderTodoList();
+  }
+}
+
+async function handleTodoAddGoal() {
+  const { createBtn } = getTodoDialogElements();
+  if (createBtn && createBtn.disabled) return;
+  try {
+    const result = await createPanelWithTitle('Goal');
+    renderTodoList();
+    syncTodoDialogState();
+    if (result?.panelEl) {
+      result.panelEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  } catch (error) {
+    console.warn('[ToDo] Could not create goal:', error);
+    const message = error?.message || 'Unable to create goal.';
+    showTaskNotification(message, 'error');
+  }
+}
+
+function openTodoDialog() {
+  const { dialog, backdrop, createBtn, goalContainer } = getTodoDialogElements();
+  if (!dialog || !backdrop) return;
+  ensureStackInTodo(goalContainer);
+  renderTodoList();
+  syncTodoDialogState();
+  dialog.hidden = false;
+  dialog.setAttribute('aria-hidden', 'false');
+  dialog.classList.add('is-open');
+  backdrop.hidden = false;
+  requestAnimationFrame(() => {
+    if (createBtn && !createBtn.disabled) {
+      createBtn.focus({ preventScroll: true });
+    } else {
+      dialog.focus({ preventScroll: true });
+    }
+  });
+}
+
+function closeTodoDialog() {
+  const { dialog, backdrop } = getTodoDialogElements();
+  if (!dialog || !backdrop) return;
+  dialog.hidden = true;
+  dialog.setAttribute('aria-hidden', 'true');
+  dialog.classList.remove('is-open');
+  backdrop.hidden = true;
+  const openBtn = document.getElementById('addTasksPanel');
+  if (openBtn) {
+    openBtn.focus({ preventScroll: true });
+  }
+}
+
+function handleTodoKeydown(evt) {
+  if (evt.key !== 'Escape') return;
+  if (!isTodoDialogOpen()) return;
+  evt.preventDefault();
+  closeTodoDialog();
+}
+
+function ensureStackInTodo(goalContainer) {
+  const stack = document.getElementById('tasksStack');
+  if (!stack || !goalContainer) return;
+  goalContainer.hidden = false;
+  if (stack.parentElement !== goalContainer) {
+    goalContainer.appendChild(stack);
+  }
+}
+
+function setupTodoDialog() {
+  if (todoDialogSetupDone) return;
+  const { dialog, backdrop, createBtn, cancelBtn, closeBtn, goalContainer } = getTodoDialogElements();
+  const openBtn = document.getElementById('addTasksPanel');
+  if (!dialog || !backdrop || !openBtn) return;
+
+  todoDialogSetupDone = true;
+
+  ensureStackInTodo(goalContainer);
+
+  openBtn.addEventListener('click', evt => {
+    evt.preventDefault();
+    openTodoDialog();
+  });
+
+  const dismiss = () => closeTodoDialog();
+  backdrop.addEventListener('click', dismiss);
+  cancelBtn?.addEventListener('click', dismiss);
+  closeBtn?.addEventListener('click', dismiss);
+
+  createBtn?.addEventListener('click', handleTodoAddGoal);
+
+  document.addEventListener('keydown', handleTodoKeydown);
+}
+
+function countPanels() {
+  const { stack } = getPanelStack();
+  return stack ? stack.querySelectorAll('.tasks-panel').length : 0;
+}
+
+function resetPanel(panel) {
+  panel.querySelectorAll('.tasks-list').forEach(list => {
+    list.innerHTML = '';
+    delete list.dataset.panelId;
+  });
+
+  const titleEl = panel.querySelector('.tasks-title');
+  if (titleEl) titleEl.textContent = 'Goal';
+
+  const innerPanels = Array.from(panel.querySelectorAll('.tasks-panel'));
+  innerPanels.forEach(p => { if (p !== panel) p.remove(); });
+
+  const addButtons = Array.from(panel.querySelectorAll('.task-add'));
+  addButtons.slice(1).forEach(btn => btn.remove());
+}
+
+function rebindPanelEvents(panel) {
+  wireHeaderRename(panel);
+  wireHeaderDelete(panel);
+}
+
+function wireAddTaskButtons(panel) {
+  panel.querySelectorAll('.task-add')
+    .forEach(btn => btn.addEventListener('click', onAddTaskClick));
+}
+
+function createPanelFromTemplate({ panelId, title = 'Goal' } = {}) {
+  const { stack, template } = getPanelStack();
+  if (!stack || !template) return null;
+
+  const clone = template.cloneNode(true);
+  resetPanel(clone);
+
+  if (panelId) clone.id = panelId;
+  const cloneList = clone.querySelector('.tasks-list');
+  if (cloneList && panelId) {
+    cloneList.dataset.panelId = panelId;
+  }
+  if (cloneList && !els.tasksList) {
+    els.tasksList = cloneList;
+  }
+
+  const titleEl = clone.querySelector('.tasks-title');
+  if (titleEl) titleEl.textContent = title || 'Goal';
+
+  rebindPanelEvents(clone);
+  wireAddTaskButtons(clone);
+
+  stack.appendChild(clone);
+  placeChipRow();
+  return clone;
+}
+
+async function createPanelWithTitle(title = 'Goal') {
+  const { stack, template } = getPanelStack();
+  if (!stack || !template) throw new Error('Tasks stack not found.');
+
+  ensureChipRowObserver();
+
+  const current = countPanels();
+  if (current >= MAX_PANELS) {
+    throw new Error('Maximum number of goals reached.');
+  }
+
+  let serverPanel = null;
+  try {
+    serverPanel = await apiCreatePanel(title);
+    console.log('[Panels] Created on server:', serverPanel);
+  } catch (e) {
+    console.warn('[Panels] Failed to create on server:', e);
+    serverPanel = { id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, title };
+  }
+
+  const clone = createPanelFromTemplate({ panelId: serverPanel.id, title: serverPanel.title || title || 'Goal' });
+  if (!clone) throw new Error('Unable to create goal panel.');
+  console.log(`[Tasks] Created new panel with ID: ${serverPanel.id}`);
+  clone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  savePanelsToStorage();
+
+  return { panelId: serverPanel.id, panelEl: clone };
+}
+
+// -----------------------------------------------------------------------------
+// Goals Panel Adder (outside the goals panel, below it)
+// -----------------------------------------------------------------------------
+(function mountTasksPanelAdder() {
+  const { stack, addBtn, template } = getPanelStack();
+  if (!stack || !addBtn || !template) return;
+
+  ensureChipRowObserver();
+  setupTodoDialog();
 
 
 
@@ -925,42 +1633,23 @@ function flashSessionError(taskId, message) {
   wireHeaderRename(template);
   wireHeaderDelete(template);
 
-  function countPanels() {
-    return stack.querySelectorAll('.tasks-panel').length;
-  }
-
   function uniquifyIds(panel, index) {
     panel.id = `tasksPanel-${index}`;
     const list = panel.querySelector('.tasks-list[id]');
-    if (list) list.id = `tasksList-${index}`;
+    if (list) {
+      list.id = `tasksList-${index}`;
+      // CRITICAL: Reset panelId so this list is independent
+      list.dataset.panelId = `tasksPanel-${index}`;
+    }
     const createBtn = panel.querySelector('.task-add[id]');
     if (createBtn) createBtn.id = `addTaskBtn-${index}`;
   }
 
-  // One canonical reset that also prevents doubles/nesting
-  function resetPanel(panel) {
-    // 1) Clear any tasks in the cloned panel
-    panel.querySelectorAll('.tasks-list').forEach(list => (list.innerHTML = ''));
-
-    // 2) Reset the header title
-    const titleEl = panel.querySelector('.tasks-title');
-    if (titleEl) titleEl.textContent = 'Task';
-
-    // 3) REMOVE any accidentally nested .tasks-panel inside this panel
-    const innerPanels = Array.from(panel.querySelectorAll('.tasks-panel'));
-    innerPanels.forEach(p => { if (p !== panel) p.remove(); });
-
-    // 4) Ensure there is only ONE "+ Create a Task" button in the panel
-    const addButtons = Array.from(panel.querySelectorAll('.task-add'));
-    addButtons.slice(1).forEach(btn => btn.remove());
-  }
-
   // Rebind header actions for a given panel (no placeholder rows)
   function rebindPanelEvents(panel) {
-    // Wire the header buttons for this panel
     wireHeaderRename(panel);
     wireHeaderDelete(panel);
-  } // <-- close the function
+  }
 
   // Ensure the first (template) panel has its local header actions wired
   rebindPanelEvents(template);
@@ -968,47 +1657,6 @@ function flashSessionError(taskId, message) {
   // Wire the template panel's create button
   template.querySelectorAll('.task-add')
     .forEach(btn => btn.addEventListener('click', onAddTaskClick));
-
-
-  // Outside "+" button: add a brand-new Tasks panel (clone) up to MAX_PANELS
-  addBtn.addEventListener('click', () => {
-    const current = countPanels();
-    if (current >= MAX_PANELS) {
-      addBtn.disabled = true;
-      addBtn.title = 'Maximum of 5 task boxes reached';
-      return;
-    }
-
-    const nextIndex = current + 1;
-
-    // Clone the whole panel box
-    const clone = template.cloneNode(true);
-
-    // Clear any inner tasks + normalize header + dedupe inner "Create a Task" buttons
-    resetPanel(clone);
-
-    // Give the clone unique IDs (the original keeps the global IDs your initTasks uses)
-    uniquifyIds(clone, nextIndex);
-
-    // Wire header actions for this clone
-    rebindPanelEvents(clone);
-
-    // === NEW: wire the "+ Create a Task" button inside the new panel ===
-    clone.querySelectorAll('.task-add')
-      .forEach(btn => btn.addEventListener('click', onAddTaskClick));
-
-    // Mount it
-    stack.appendChild(clone);
-    placeChipRow(); // <<< ADD: reposition "+" after adding a panel
-
-    clone.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    // Cap at MAX_PANELS
-    if (nextIndex >= MAX_PANELS) {
-      addBtn.disabled = true;
-      addBtn.title = 'Maximum of 5 task boxes reached';
-    }
-  });
 
   // end IIFE
 })();

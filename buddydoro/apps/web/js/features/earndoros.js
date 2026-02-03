@@ -100,42 +100,21 @@
   syncBalanceToDOM();
 }
 
-  function isStudyModeActive() {
-    const studyChip = document.querySelector(
-      ".mode-chips button[data-mode='study']"
-    );
-    if (!studyChip) return false;
-
-    return (
-      studyChip.classList.contains("is-active") ||
-      studyChip.getAttribute("aria-pressed") === "true"
-    );
+  function add(amount) {
+    balance += amount;
+    save();
+    topbar?.addDoros?.(amount);
   }
 
-  function getTimerMinutes() {
-    const display = document.getElementById("timerDisplay");
-    if (!display) return 0;
-
-    const text = (display.textContent || "").trim(); // e.g., "25:00"
-    const [mm, ss] = text.split(":");
-    const min = parseInt(mm, 10);
-    const sec = parseInt(ss, 10);
-
-    if (!Number.isFinite(min) || !Number.isFinite(sec)) {
-      return 0;
-    }
-    return min + sec / 60;
+  function resetSession() {
+    active = false;
+    earnedBlocks = 0;
   }
 
-  function flashEarnedBadge(earned) {
-    const chip = document.getElementById("dorosChip");
-    if (!chip) return;
-
-    chip.setAttribute("data-earned-last", `+${earned}`);
-    chip.classList.add("doros-earned");
-
-    if (flashEarnedBadge._timerId) {
-      clearTimeout(flashEarnedBadge._timerId);
+  timer.onStart(({ mode }) => {
+    if (mode === 'focus') {
+      active = true;
+      earnedBlocks = 0;
     }
     flashEarnedBadge._timerId = setTimeout(() => {
       chip.classList.remove("doros-earned");
@@ -207,54 +186,31 @@
     }
   }
 
-  function setupListeners() {
-    const startBtn = document.getElementById("startBtn");
-    const resetBtn = document.getElementById("resetBtn");
-    const modeGroup = document.querySelector(".mode-chips");
-    const timerDisplay = document.getElementById("timerDisplay");
+  timer.onPause(resetSession);
+  timer.onReset(resetSession);
+  timer.onComplete(resetSession);
 
-    // Start button: begin a new Study earning session
-    if (startBtn) {
-      startBtn.addEventListener("click", () => {
-        if (isStudyModeActive()) {
-          state.sessionActive = true;
-          state.sessionMinutesPlanned = getTimerMinutes();
-          state.awardedBlocks = 0;
-        } else {
-          state.sessionActive = false;
-        }
-      });
+  timer.onSummary?.((payload) => {
+    playEarnDorosSound();
+  });
+
+  timer.onTick(({ elapsedSeconds, mode }) => {
+    if (!active || mode !== 'focus') return;
+
+    const blocks = Math.floor(elapsedSeconds / BLOCK_SECONDS);
+    if (blocks > earnedBlocks) {
+      const delta = blocks - earnedBlocks;
+      earnedBlocks = blocks;
+      add(delta * DOROS_PER_BLOCK);
     }
+  });
 
-    // Reset cancels current earning session (but keeps already-earned Doros)
-    if (resetBtn) {
-      resetBtn.addEventListener("click", () => {
-        state.sessionActive = false;
-      });
-    }
-
-    // Changing away from Study cancels current earning session
-    if (modeGroup) {
-      modeGroup.addEventListener("click", (evt) => {
-        const btn = evt.target.closest("button[data-mode]");
-        if (!btn) return;
-        if (btn.dataset.mode !== "study") {
-          state.sessionActive = false;
-        }
-      });
-    }
-
-    // Watch timer display for changes; on each change, compute elapsed time
-    if (timerDisplay && "MutationObserver" in window) {
-      const observer = new MutationObserver(() => {
-        handleTimerTick();
-      });
-
-      observer.observe(timerDisplay, {
-        childList: true,
-        characterData: true,
-        subtree: true
-      });
+  return {
+    getBalance: () => balance,
+    spend(amount) {
+      balance = Math.max(0, balance - Math.max(0, amount | 0));
+      save();
+      topbar?.setDoros?.(balance);
     }
   }
 
@@ -309,10 +265,4 @@
     setBalance,
     _state: state
   };
-
-  window.EarnDoros = EarnDoros;
-
-  window.addEventListener('DOMContentLoaded', () => {
-    EarnDoros.init();
-  });
-})();
+}

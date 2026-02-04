@@ -16,6 +16,7 @@ if (!authToken) {
 import { initTopbar } from './features/topbar.js';
 import { initTimer } from './features/timer.js';
 import { initStore } from './features/store.js';
+import { initDiamondStore } from './features/diamondStore.js';
 import { initTasks, getActiveTaskId } from './features/tasks.js';
 
 // document.addEventListener('DOMContentLoaded', () => {
@@ -117,7 +118,10 @@ initStore({
 });
 
 
-// ----- 5) Tasks ---------------------------------------------------------------
+// ----- 5) Diamond Store -------------------------------------------------------
+initDiamondStore();
+
+// ----- 6) Tasks ---------------------------------------------------------------
 await initTasks({
   onActiveTaskChange: () => {
     // Enable/disable Start button depending on whether a task is selected

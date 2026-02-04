@@ -28,6 +28,7 @@
 
   <link rel="stylesheet" href="../styles/earndoros.css" />
   <link rel="stylesheet" href="../styles/diamond.css" />
+  <link rel="stylesheet" href="../styles/diamondStore.css" />
 
   <link rel="stylesheet" href="../styles/dragon.css" />
   <link rel="stylesheet" href="../styles/topbar.css" />
@@ -301,6 +302,27 @@
     <div class="store-footer">
       <button id="useSelectedBtn" class="btn-primary" type="button">Use Selected</button>
       <button id="storeCloseBottom" class="btn-secondary" type="button">Close</button>
+    </div>
+  </section>
+
+  <!-- Diamond Store dialog (Buy Diamonds) -->
+  <div id="diamondStoreBackdrop" class="backdrop" hidden></div>
+
+  <section id="diamondStoreDialog" class="diamond-store-panel" role="dialog" aria-modal="true" aria-labelledby="diamondStoreTitle" hidden>
+    <div class="diamond-store-header">
+      <div class="diamond-store-left">
+        <img src="./assets/artwork/DiamondIcon.png" alt="Diamond" class="diamond-store-title-icon" />
+        <h2 id="diamondStoreTitle">Buy Diamonds</h2>
+      </div>
+      <div class="diamond-store-balance">
+        <img src="./assets/artwork/DiamondIcon.png" alt="Diamond" class="diamond-store-balance-icon" />
+        <span id="diamondStoreBalance">0</span>
+      </div>
+      <button id="diamondStoreClose" class="diamond-store-close" aria-label="Close diamond store">&times;</button>
+    </div>
+
+    <div id="diamondStoreList" class="diamond-store-list" aria-live="polite">
+      <!-- Diamond packs dynamically rendered here -->
     </div>
   </section>
 

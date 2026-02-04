@@ -32,6 +32,139 @@ function closeGreetMenu({ focusTrigger = true } = {}) {
 }
 function toggleGreetMenu() { greetMenuOpen ? closeGreetMenu() : openGreetMenu(); }
 
+// ---------- Logout modal ----------
+let logoutBtnEl = null;
+let logoutBackdropEl = null;
+let logoutDialogEl = null;
+let logoutCancelEl = null;
+let logoutConfirmEl = null;
+let logoutLastFocusEl = null;
+let logoutModalOpen = false;
+let logoutModalCleanup = [];
+
+function ensureLogoutModal() {
+  if (logoutBackdropEl) return;
+
+  // Backdrop
+  logoutBackdropEl = document.createElement('div');
+  logoutBackdropEl.id = 'logoutModalBackdrop';
+  logoutBackdropEl.className = 'bd-modal-backdrop';
+  logoutBackdropEl.hidden = true;
+
+  // Dialog
+  logoutDialogEl = document.createElement('div');
+  logoutDialogEl.className = 'bd-modal';
+  logoutDialogEl.setAttribute('role', 'dialog');
+  logoutDialogEl.setAttribute('aria-modal', 'true');
+  logoutDialogEl.setAttribute('aria-labelledby', 'logoutModalTitle');
+  logoutDialogEl.setAttribute('aria-describedby', 'logoutModalDesc');
+
+  logoutDialogEl.innerHTML = `
+    <h2 class="bd-modal-title" id="logoutModalTitle">Log out?</h2>
+    <p class="bd-modal-desc" id="logoutModalDesc">You’ll be sent back to the login page.</p>
+    <div class="bd-modal-actions">
+      <button type="button" class="bd-modal-btn secondary" id="logoutCancelBtn">Cancel</button>
+      <button type="button" class="bd-modal-btn primary" id="logoutConfirmBtn">Log out</button>
+    </div>
+  `;
+
+  logoutBackdropEl.appendChild(logoutDialogEl);
+  document.body.appendChild(logoutBackdropEl);
+
+  logoutCancelEl = logoutDialogEl.querySelector('#logoutCancelBtn');
+  logoutConfirmEl = logoutDialogEl.querySelector('#logoutConfirmBtn');
+
+  // Click outside closes
+  logoutBackdropEl.addEventListener('click', (e) => {
+    
+    if (e.target === logoutBackdropEl) closeLogoutModal({ restoreFocus: true });
+
+    window.location.href = 'index.html';
+  });
+
+  // Prevent clicks inside the dialog from bubbling to the backdrop
+  logoutDialogEl.addEventListener('click', (e) => e.stopPropagation());
+
+
+  logoutCancelEl?.addEventListener('click', () => {
+    closeLogoutModal({ restoreFocus: true })
+    window.location.href = 'index.html'
+  });
+
+  logoutConfirmEl?.addEventListener('click', () => {
+    // Clear any stored auth/session data
+    localStorage.removeItem('displayName');
+    localStorage.removeItem('authToken'); // if you use one
+    sessionStorage.clear();
+
+    window.location.href = 'login.html';
+  });
+}
+
+function openLogoutModal() {
+  ensureLogoutModal();
+  if (!logoutBackdropEl || logoutModalOpen) return;
+
+  logoutModalOpen = true;
+  logoutLastFocusEl = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+  // Close any open menus so layering is clean
+  closeGreetMenu({ focusTrigger: false });
+
+  logoutBackdropEl.hidden = false;
+  document.body.classList.add('modal-open');
+
+  // Focus a safe target
+  (logoutConfirmEl || logoutCancelEl || logoutDialogEl)?.focus?.({ preventScroll: true });
+
+  const onKeyDown = (e) => {
+    if (!logoutModalOpen) return;
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeLogoutModal({ restoreFocus: true });
+      return;
+    }
+
+    // Basic focus trap
+    if (e.key === 'Tab') {
+      const focusables = [logoutCancelEl, logoutConfirmEl].filter(Boolean);
+      if (!focusables.length) return;
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  };
+
+  document.addEventListener('keydown', onKeyDown, true);
+  logoutModalCleanup = [() => document.removeEventListener('keydown', onKeyDown, true)];
+}
+
+function closeLogoutModal({ restoreFocus = false } = {}) {
+  if (!logoutBackdropEl || !logoutModalOpen) return;
+
+  logoutModalOpen = false;
+  logoutBackdropEl.hidden = true;
+  document.body.classList.remove('modal-open');
+
+  logoutModalCleanup.forEach(fn => { try { fn(); } catch { } });
+  logoutModalCleanup = [];
+
+  if (restoreFocus && logoutLastFocusEl) {
+    logoutLastFocusEl.focus({ preventScroll: true });
+  }
+}
+
+
 export function spendDoros(amount) {
   dorosBalance = Math.max(0, dorosBalance - Math.max(0, amount | 0));
   paintDoros();
@@ -53,6 +186,11 @@ export function initTopbar({ userName = 'Joe', onOpenStore } = {}) {
   paintDoros();
 
   greetChip?.addEventListener('click', toggleGreetMenu);
+
+  // Greeting dropdown → Log out (custom modal)
+  logoutBtnEl = document.getElementById('logoutBtn');
+  logoutBtnEl?.addEventListener('click', () => openLogoutModal());
+
 
   greetMenu?.addEventListener('click', (e) => {
   const item = e.target.closest('.greet-menu-item');
@@ -189,6 +327,7 @@ export function initTopbar({ userName = 'Joe', onOpenStore } = {}) {
       closeDiamondMenu();
     }
   });
+
  diamondMenuEl?.addEventListener('click', (e) => {
     const item =
       e.target instanceof Element
@@ -207,6 +346,9 @@ export function initTopbar({ userName = 'Joe', onOpenStore } = {}) {
       openStoreCb('diamonds');
     }
   });
+
+  
+
 
   return { getDoros, addDoros, spendDoros };
 }

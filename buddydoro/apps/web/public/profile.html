@@ -1,41 +1,83 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Profile Settings • BuddyDoro</title>
+
+  <!-- Core styles -->
   <link rel="stylesheet" href="../styles/base.css" />
   <link rel="stylesheet" href="../styles/layout2.css" />
   <link rel="stylesheet" href="../styles/components.css" />
   <link rel="stylesheet" href="../styles/topbar.css" />
   <link rel="stylesheet" href="../styles/themes.css" />
-  <link rel="stylesheet" href="../styles/settings-pages.css" />
 
-  <title>Profile Settings</title>
+  <!-- Page styles (new) -->
+  <link rel="stylesheet" href="../styles/profileSettings.css" />
+
+  <!-- Background Image -->
+  <link rel="preload" as="image" href="./assets/artwork/BackgroundDay.jpg" />
+
 </head>
 
-<body>
-  <h1 class="settings-title">Profile Settings</h1>
+<body class="bd-page">
+  <!-- Top bar (optional if you want it on settings pages too)
+       If you don't want the topbar here, delete this header.
+  -->
 
-  <div class="settings-actions">
-    <a href="./index.html" class="btn-secondary" style="display:inline-block; text-decoration:none;">← Back</a>
-  </div>
-
-  <form id="profileForm">
-    <div class="settings-row">
-      <label for="nameInput">Display name</label><br />
-      <input id="nameInput" name="name" type="text" autocomplete="name" />
+  <header class="bd-settings-top">
+    <a href="./index.html" class="bd-back-link" aria-label="Back to home">← Back</a>
+    <div class="bd-settings-header">
+      <h1 class="bd-settings-title">Profile Settings</h1>
+      <p class="bd-settings-subtitle">Update how your name appears in BuddyDoro.</p>
     </div>
+  </header>
 
-    <div class="settings-actions">
-      <button type="submit" class="btn-primary">Save</button>
-    </div>
-  </form>
+  <main class="bd-settings-shell">
+    <section class="bd-card" aria-labelledby="profileCardTitle">
+      <h2 id="profileCardTitle" class="bd-card-title">Display name</h2>
 
-  <p id="profileMsg"></p>
+      <form id="profileForm" class="bd-form" novalidate>
+        <div class="bd-field">
+          <label for="nameInput" class="bd-label">Name</label>
+          <input
+            id="nameInput"
+            name="name"
+            type="text"
+            autocomplete="name"
+            maxlength="32"
+            placeholder="e.g., Melanie"
+            class="bd-input"
+            aria-describedby="nameHint"
+          />
+          <div id="nameHint" class="bd-hint">
+            This is shown in your greeting and profile.
+          </div>
+        </div>
 
+        <div class="bd-actions">
+          <button type="submit" class="bd-btn bd-btn-primary" id="saveBtn">
+            Save changes
+          </button>
 
+          <a href="./index.html" class="bd-btn bd-btn-secondary">
+            Cancel
+          </a>
+        </div>
+
+        <!-- Status message area -->
+        <p id="profileMsg" class="bd-msg is-info" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- Optional: small helper card for UX clarity -->
+    <section class="bd-card bd-card-muted" aria-label="Tip">
+      <p class="bd-tip">
+        Tip: Keep it short—this name appears on the top-right greeting chip.
+      </p>
+    </section>
+  </main>
   <script type="module" src="../js/pages/profileSettings.js"></script>
 </body>
-
 </html>

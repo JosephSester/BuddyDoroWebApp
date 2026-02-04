@@ -9,9 +9,23 @@ function requireToken() {
   return token;
 }
 
-function setMsg(el, text, ok = true) {
-  el.textContent = text;
-  el.style.color = ok ? 'green' : 'crimson';
+// Backward-compatible message helper:
+// - Adds theme classes (if you styled them)
+// - ALSO sets a fallback color so you always see feedback
+function setMsg(el, text, type = 'info') {
+  if (!el) return;
+  el.textContent = text || '';
+
+  el.classList.remove('is-info', 'is-success', 'is-error');
+  if (type === 'success') el.classList.add('is-success');
+  else if (type === 'error') el.classList.add('is-error');
+  else el.classList.add('is-info');
+
+  // fallback colors (so feedback is always visible)
+  el.style.color =
+    type === 'success' ? 'green' :
+    type === 'error' ? 'crimson' :
+    '#2b2213';
 }
 
 async function fetchMe(token) {
@@ -44,22 +58,54 @@ window.addEventListener('DOMContentLoaded', async () => {
   const nameInput = document.getElementById('nameInput');
   const msgEl = document.getElementById('profileMsg');
 
+  // Works whether or not you added id="saveBtn"
+  const saveBtn = form?.querySelector('button[type="submit"]');
+
   try {
     const me = await fetchMe(token);
     nameInput.value = me.name || '';
   } catch (err) {
-    setMsg(msgEl, err.message, false);
+    setMsg(msgEl, err.message, 'error');
   }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    setMsg(msgEl, 'Saving...', true);
+
+    const name = (nameInput.value || '').trim();
+
+    if (!name) {
+      setMsg(msgEl, 'Please enter a display name.', 'error');
+      nameInput.focus();
+      return;
+    }
+
+    setMsg(msgEl, 'Saving...', 'info');
+
+    // Disable while saving (safe)
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.dataset.prevText = saveBtn.textContent;
+      saveBtn.textContent = 'Saving...';
+    }
+    nameInput.disabled = true;
 
     try {
-      const result = await updateProfile(token, { name: nameInput.value });
-      setMsg(msgEl, result.message || 'Saved!', true);
+      // ✅ Same payload style as your working version
+      const result = await updateProfile(token, { name });
+
+      // cache for greeting
+      localStorage.setItem('displayName', name);
+
+      setMsg(msgEl, result.message || 'Saved!', 'success');
     } catch (err) {
-      setMsg(msgEl, err.message, false);
+      setMsg(msgEl, err.message, 'error');
+    } finally {
+      nameInput.disabled = false;
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = saveBtn.dataset.prevText || 'Save';
+        delete saveBtn.dataset.prevText;
+      }
     }
   });
 });

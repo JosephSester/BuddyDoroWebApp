@@ -1,5 +1,5 @@
 // earndoros.js
-const BLOCK_SECONDS = 1 * 60;
+const BLOCK_SECONDS = 5 * 60;
 const DOROS_PER_BLOCK = 50;
 
 // Earn Doros sound effect

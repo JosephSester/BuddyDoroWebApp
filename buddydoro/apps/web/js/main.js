@@ -23,39 +23,65 @@ initScene({
 });
 initDragon?.();
 
-// ---- Topbar -----------------------------------------------------
-async function initUserTopbar() {
-  try {
-    const res = await fetch('http://localhost:3000/api/auth/me', {
-      headers: { Authorization: 'Bearer ' + authToken },
-    });
-    if (!res.ok) throw new Error('Auth lookup failed');
-    const user = await res.json();
-    if (user?.name) localStorage.setItem('userName', user.name);
-    return initTopbar({
-      userName: user?.name || localStorage.getItem('userName') || 'Player',
-      startingDoros: user?.doros ?? 0,
-    });
-  } catch {
-    return initTopbar({
-      userName: localStorage.getItem('userName') || 'Player',
-      startingDoros: 0,
-    });
-  }
-}
-
-const topbar = await initUserTopbar();
-
-// ---- Timer + EarnDoros ------------------------------------------
+// Timer
 const timer = initTimer({
   onStart: () => topbar?.setTimerRunning?.(true),
   onPause: () => topbar?.setTimerRunning?.(false),
   onReset: () => topbar?.setTimerRunning?.(false),
   onComplete: () => topbar?.setTimerRunning?.(false),
 });
-const earnDoros = initEarnDoros(timer, topbar);
 
-// ---- Store ------------------------------------------------------
+// ---- Topbar + EarnDoros -----------------------------------------------------
+async function initUserTopbarAndEarnDoros() {
+  try {
+    const res = await fetch('http://localhost:3000/api/auth/me', {
+      headers: { Authorization: 'Bearer ' + authToken },
+    });
+
+    if (!res.ok) throw new Error('Auth lookup failed');
+
+    const user = await res.json();
+
+    if (user?.name) {
+      localStorage.setItem('userName', user.name);
+    }
+
+    const topbar = initTopbar({
+      userName: user?.name || localStorage.getItem('userName') || 'Player',
+      startingDoros: user?.doros ?? 0,
+      onOpenStore: () => {
+        // your store open logic if needed
+      }
+    });
+
+    const earnDoros = initEarnDoros(timer, topbar);
+
+    window.earnDoros = earnDoros;
+
+    // This is all you need — topbar will paint the pill automatically
+    earnDoros.setBalance(user?.doros ?? 0);
+
+    // Force greeting update only (keep this, it's safe)
+    const greetTextEl = document.getElementById('greetText');
+    if (greetTextEl && user?.name) {
+      greetTextEl.textContent = `Hello, ${user.name}`;
+    }
+
+    return { topbar, earnDoros };
+  } catch (err) {
+    console.error('User fetch failed:', err);
+
+    const topbar = initTopbar({ userName: 'Player', startingDoros: 0 });
+    const earnDoros = initEarnDoros(timer, topbar);
+    earnDoros.setBalance(0);
+
+    return { topbar, earnDoros };
+  }
+}
+
+const { topbar, earnDoros } = await initUserTopbarAndEarnDoros();
+
+// Store
 initStore({
   getDoros: () => earnDoros.getBalance(),
   spendDoros: amount => earnDoros.spend(amount),

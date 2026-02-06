@@ -398,7 +398,7 @@ export function initTimer(hooks = {}) {
     if (timerLaunchBackdrop) timerLaunchBackdrop.hidden = false;
     document.addEventListener('click', handleDocumentClick);
     document.addEventListener('keydown', handleKeydown);
-    if (timerLaunchMinutes) requestAnimationFrame(() => timerLaunchMinutes.focus({ preventScroll: true }));
+    if (timerLaunchMenu) requestAnimationFrame(() => timerLaunchMenu.focus({ preventScroll: true }));
   };
 
   const wireMenu = () => {

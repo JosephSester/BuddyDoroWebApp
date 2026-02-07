@@ -98,7 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Save the token if login succeeds (must match apiClient.js)
       localStorage.setItem('authToken', data.token);
-      localStorage.setItem('userId', data.userId); 
+      localStorage.setItem('userId', data.userId);
+      if (data.name) localStorage.setItem('userName', data.name);
 
       console.log('Login successful! Redirecting to main app...');
       window.location.href = 'index.html';

@@ -1,6 +1,6 @@
 // apps/web/js/features/tasks.js
 // Full-featured Tasks module (create/select/delete + session editing)
-// Exposes: initTasks({ onActiveTaskChange, onShouldStopTimer, onTaskEstimate }), getActiveTaskId(), getActiveTask()
+// Exposes: initTasks({ onActiveTaskChange, onShouldStopTimer, onTaskEstimate, onSubtaskEstimate }), getActiveTaskId(), getActiveTask()
 
 // INTEGRATION: Import API service for backend communication
 import { fetchTasks, createTask, updateTask, deleteTask as apiDeleteTask } from '../api/taskService.js';
@@ -16,6 +16,7 @@ import { createSubtasksSection, createSubtasksToggle, deleteTaskSubtasks, getSub
 let onActiveTaskChange = () => { };
 let onShouldStopTimer = () => { };
 let onTaskEstimate = null;
+let onSubtaskEstimate = null;
 
 export async function initTasks(opts = {}) {
   onActiveTaskChange = typeof opts.onActiveTaskChange === 'function'
@@ -24,32 +25,28 @@ export async function initTasks(opts = {}) {
     ? opts.onShouldStopTimer : () => { };
   onTaskEstimate = typeof opts.onTaskEstimate === 'function'
     ? opts.onTaskEstimate : null;
+  onSubtaskEstimate = typeof opts.onSubtaskEstimate === 'function'
+    ? opts.onSubtaskEstimate : null;
 
-  // Default to first panel's ids (keeps old behavior if present)
+  // Default panel elements (may be null when no panels exist yet)
   els.addTaskBtn = document.getElementById('addTaskBtn');
   els.tasksList = document.getElementById('tasksList');
-
-  // Set panel ID for the first panel's task list
-  if (els.tasksList) {
-    els.tasksList.dataset.panelId = 'tasksPanel-1';
-  }
 
   // === Sync panels with server first (fallback to local) ===
   let savedPanels = loadPanelsFromStorage();
   try {
     let apiPanels = await fetchPanels();
-    if (!Array.isArray(apiPanels) || apiPanels.length === 0) {
-      const created = await apiCreatePanel('Goal');
-      apiPanels = [created];
+    if (!Array.isArray(apiPanels)) apiPanels = [];
+
+    if (apiPanels.length === 0) {
+      localStorage.setItem(PANELS_STORAGE_KEY, JSON.stringify([]));
+      savedPanels = [];
+    } else {
+      const normalized = apiPanels.map((p, idx) => ({ panelId: String(p.id), title: p.title || 'Goal', order: Number.isFinite(p.order) ? p.order : idx }));
+      localStorage.setItem(PANELS_STORAGE_KEY, JSON.stringify(normalized));
+      savedPanels = normalized;
+      console.log('[Panels] Synced from server:', normalized);
     }
-    const normalized = apiPanels.map((p, idx) => ({ panelId: String(p.id), title: p.title || 'Goal', order: Number.isFinite(p.order) ? p.order : idx }));
-    localStorage.setItem(PANELS_STORAGE_KEY, JSON.stringify(normalized));
-    savedPanels = normalized;
-    // Set first panel dataset to the first server panel id
-    if (els.tasksList && savedPanels[0]) {
-      els.tasksList.dataset.panelId = savedPanels[0].panelId;
-    }
-    console.log('[Panels] Synced from server:', normalized);
   } catch (e) {
     console.warn('[Panels] Server sync failed, using local panels if any:', e);
   }
@@ -57,57 +54,28 @@ export async function initTasks(opts = {}) {
   // === Restore panels from localStorage first ===
   // (By here, savedPanels likely reflect server state)
   console.log('[Init] savedPanels result:', savedPanels);
-  if (savedPanels && savedPanels.length > 1) {
-    const stack = document.getElementById('tasksStack');
-    const template = stack?.querySelector('.tasks-panel');
+  if (savedPanels && savedPanels.length > 0) {
+    const { stack, template } = getPanelStack();
 
     console.log('[Init] Found stack:', !!stack, 'Found template:', !!template);
     console.log('[Init] Current panels in DOM:', stack?.querySelectorAll('.tasks-panel').length);
 
     if (stack && template) {
-      // Keep first panel, restore additional panels
-      for (let i = 1; i < savedPanels.length; i++) {
-        const panel = savedPanels[i];
-        console.log(`[Init] Restoring panel ${i}:`, panel);
-        const clone = template.cloneNode(true);
+      stack.innerHTML = '';
+      savedPanels.forEach(panel => {
+        createPanelFromTemplate({ panelId: panel.panelId, title: panel.title });
+      });
 
-        // Set panelId and title
-        clone.id = panel.panelId;
-        const list = clone.querySelector('.tasks-list');
-        if (list) {
-          list.id = `tasksList-${i + 1}`;
-          list.dataset.panelId = panel.panelId;
-          list.innerHTML = ''; // Clear any tasks
-        }
-
-        const titleEl = clone.querySelector('.tasks-title');
-        if (titleEl) titleEl.textContent = panel.title;
-
-        const createBtn = clone.querySelector('.task-add');
-        if (createBtn) {
-          createBtn.id = `addTaskBtn-${i + 1}`;
-        }
-
-        // Wire header actions and create button for this restored panel
-        clone.querySelectorAll('.task-add').forEach(btn => {
-          btn.addEventListener('click', onAddTaskClick);
-        });
-
-        // Need to call these after the functions are defined - will wire after IIFE
-        stack.appendChild(clone);
-      }
-
-      // Update first panel title if saved
-      if (savedPanels[0]) {
-        const firstTitleEl = template.querySelector('.tasks-title');
-        if (firstTitleEl) firstTitleEl.textContent = savedPanels[0].title;
+      const firstList = stack.querySelector('.tasks-list');
+      if (firstList) {
+        els.tasksList = firstList;
       }
 
       console.log(`[Init] Restored ${savedPanels.length} panels from storage`);
       console.log('[Init] Panels now in DOM:', stack?.querySelectorAll('.tasks-panel').length);
     }
   } else {
-    console.log('[Init] No panels to restore or only 1 panel');
+    console.log('[Init] No panels to restore');
   }
 
   // === Wire ALL existing "+ Create a Task" buttons ===
@@ -119,6 +87,8 @@ export async function initTasks(opts = {}) {
     wireHeaderRename(panel);
     wireHeaderDelete(panel);
   });
+
+  setupTodoDialog();
 
   // INTEGRATION: Load tasks from API
   try {
@@ -184,6 +154,38 @@ export function getActiveTask() {
   return tasks.find(t => String(t.id) === String(activeTaskId)) || null;
 }
 
+export async function createPlanFromAI(plan) {
+  if (!plan || !Array.isArray(plan.tasks) || plan.tasks.length === 0) {
+    throw new Error('Plan is empty.');
+  }
+
+  const title = String(plan.title || 'Goal').trim().slice(0, 100) || 'Goal';
+  const panel = await createPanelWithTitle(title);
+  const panelId = panel?.panelId || panel?.id;
+  if (!panelId) throw new Error('Unable to create goal panel.');
+
+  for (const task of plan.tasks) {
+    const taskTitle = String(task.title || '').trim();
+    if (!taskTitle) continue;
+    const estimate = Number.isFinite(Number(task.estimate)) ? Math.max(1, Math.round(Number(task.estimate))) : CREATE_DEFAULT_ESTIMATE;
+
+    const created = await addTask(taskTitle, estimate, { panelId });
+    const subtasks = Array.isArray(task.subtasks) ? task.subtasks : [];
+    if (created && subtasks.length) {
+      const mapped = subtasks.map(sub => ({
+        id: makeSubtaskId(),
+        title: String(sub.title || 'Subtask').trim().slice(0, 80) || 'Subtask',
+        estimate: Number.isFinite(Number(sub.estimate)) ? Math.max(1, Math.round(Number(sub.estimate))) : null,
+        done: false
+      }));
+      setSubtasks(created.id, mapped);
+    }
+  }
+
+  renderAllTasks();
+  showNotification('AI plan added as a new goal.', 'success');
+}
+
 // -----------------------------------------------------------------------------
 // State
 // -----------------------------------------------------------------------------
@@ -200,6 +202,8 @@ let createTaskCtx = null;
 const SESSION_MAX = 999;
 const CREATE_NAME_MAX = 80;
 const CREATE_DEFAULT_ESTIMATE = 50;
+const MAX_PANELS = 5;
+let todoDialogSetupDone = false;
 
 let domIdCounter = 0;
 const makeDomId = (prefix = 'id') => `${prefix}-${Date.now()}-${++domIdCounter}`;
@@ -452,14 +456,6 @@ function wireHeaderDelete(panel) {
     const titleEl = panel.querySelector('.tasks-title');
     const name = (titleEl?.textContent || 'this goal').trim() || 'this goal';
 
-    // prevent deleting the last remaining panel
-    const stack = panel.closest('#tasksStack') || document;
-    const total = stack.querySelectorAll('.tasks-panel').length;
-    if (total <= 1) {
-      alert('You must keep at least one goal.');
-      return;
-    }
-
     const ok = confirm(`Are you sure you want to delete "${name}"?`);
     if (!ok) return;
 
@@ -591,8 +587,10 @@ function createTaskCard(task) {
   card.append(main, right);
 
   // Subtasks UI: Create subtasks section and toggle button
+  const handleSubtaskEstimate = onSubtaskEstimate || onTaskEstimate;
+
   const subsSection = createSubtasksSection(task, {
-    onSetTimerFromEstimate: onTaskEstimate,
+    onSetTimerFromEstimate: handleSubtaskEstimate,
     onChange: renderAllTasks,
   });
 
@@ -607,11 +605,11 @@ function createTaskCard(task) {
       const sub = { id: makeSubtaskId(), title: title.trim(), estimate, done: false };
       const next = [...getSubtasks(task.id), sub];
       setSubtasks(task.id, next);
-      renderList(task, subsSection.list, { onSetTimerFromEstimate: onTaskEstimate, onChange: renderAllTasks });
+      renderList(task, subsSection.list, { onSetTimerFromEstimate: handleSubtaskEstimate, onChange: renderAllTasks });
       subsSection.wrapInner.hidden = false;
       subToggle.setAttribute('aria-expanded', 'true');
     },
-    onSetTimerFromEstimate: onTaskEstimate,
+    onSetTimerFromEstimate: handleSubtaskEstimate,
     onChange: renderAllTasks,
   });
   right.insertBefore(subToggle, del);
@@ -719,6 +717,7 @@ function renderAllTasks() {
   updateActiveTaskVisuals();
   // consumer decides what to do with start button, etc.
   notifyActiveChange();
+  renderTodoList();
 }
 
 // -----------------------------------------------------------------------------
@@ -893,7 +892,7 @@ function startCreateTask(initial = {}) {
   const estimateInputId = makeDomId('createTaskEstimate');
   const estimateLabel = document.createElement('label');
   estimateLabel.className = 'task-create-label';
-  estimateLabel.textContent = 'Estimate';
+  estimateLabel.textContent = 'Sessions';
   estimateLabel.setAttribute('for', estimateInputId);
   const estimateInput = document.createElement('input');
   estimateInput.type = 'number';
@@ -903,7 +902,7 @@ function startCreateTask(initial = {}) {
   estimateInput.step = '1';
   estimateInput.inputMode = 'numeric';
   estimateInput.value = String(initialEstimate);
-  estimateInput.setAttribute('aria-label', 'Estimated sessions');
+  estimateInput.setAttribute('aria-label', 'Sessions');
   estimateInput.id = estimateInputId;
   estimateField.append(estimateLabel, estimateInput);
 
@@ -1009,13 +1008,13 @@ function validateCreateTask(ctx, { forceShow = false } = {}) {
   const rawEstimate = ctx.estimateInput.value.trim();
   let estimateValue = null;
   if (!message) {
-    if (rawEstimate === '') { message = 'Estimate is required.'; }
+    if (rawEstimate === '') { message = 'Sessions is required.'; }
     else {
       const estNumber = Number(rawEstimate);
-      if (!Number.isFinite(estNumber)) message = 'Estimate must be a number.';
-      else if (!Number.isInteger(estNumber)) message = 'Estimate must be a whole number.';
-      else if (estNumber < 1) message = 'Estimate must be at least 1.';
-      else if (estNumber > SESSION_MAX) message = `Estimate must be ${SESSION_MAX} or less.`;
+      if (!Number.isFinite(estNumber)) message = 'Sessions must be a number.';
+      else if (!Number.isInteger(estNumber)) message = 'Sessions must be a whole number.';
+      else if (estNumber < 1) message = 'Sessions must be at least 1.';
+      else if (estNumber > SESSION_MAX) message = `Sessions must be ${SESSION_MAX} or less.`;
       else estimateValue = estNumber;
     }
   }
@@ -1158,7 +1157,7 @@ function startSessionEdit(task, bubble) {
   bubble.appendChild(liveRegion);
 
   const completedField = createSessionField('Completed', task.done);
-  const estimateField = createSessionField('Estimate', task.total);
+  const estimateField = createSessionField('Sessions', task.total);
   bubble.append(completedField.wrapper, estimateField.wrapper);
 
   const errorEl = document.createElement('div');
@@ -1224,7 +1223,7 @@ function commitSessionEdit() {
     showSessionError(completedResult.error, ctx);
     completedInput.focus(); completedInput.select(); return;
   }
-  const estimateResult = readSessionValue(estimateInput, 'Estimate');
+  const estimateResult = readSessionValue(estimateInput, 'Sessions');
   if (estimateResult.error) {
     showSessionError(estimateResult.error, ctx);
     estimateInput.focus(); estimateInput.select(); return;
@@ -1234,7 +1233,7 @@ function commitSessionEdit() {
   const estimateVal = estimateResult.value;
 
   if (completedVal > estimateVal) {
-    showSessionError('Completed cannot exceed estimate.', ctx);
+    showSessionError('Completed cannot exceed sessions.', ctx);
     completedInput.focus(); completedInput.select(); return;
   }
 
@@ -1330,44 +1329,309 @@ function flashSessionError(taskId, message) {
 }
 
 // -----------------------------------------------------------------------------
-// Goals Panel Adder (outside the goals panel, below it)
+// Panel creation helpers (shared by AI + UI)
 // -----------------------------------------------------------------------------
-(function mountTasksPanelAdder() {
-  const MAX_PANELS = 5;
+function getPanelStack() {
   const stack = document.querySelector('#tasksStack');
-  const addBtn = document.querySelector('#addTasksPanel');
-  if (!stack || !addBtn) return;
-
-  // First panel is the template
-  const template = stack.querySelector('.tasks-panel');
-  if (!template) return;
-
-  // <<< ADD: keep the outside "+" chip aligned under the stack >>>
+  const templateEl = document.getElementById('tasksPanelTemplate');
+  const template = templateEl?.content?.querySelector('.tasks-panel') || stack?.querySelector('.tasks-panel') || null;
   const chipRow = document.querySelector('.tasks-chip-row');
+  const addBtn = document.querySelector('#addTasksPanel');
+  return { stack, template, chipRow, addBtn, templateEl };
+}
 
-  function placeChipRow() {
-    if (!chipRow || !stack) return;
-    const r = stack.getBoundingClientRect();
-    chipRow.style.position = 'absolute';
-    chipRow.style.right = '3vw';
-    chipRow.style.top = `${Math.round(window.scrollY + r.bottom + 12)}px`;
-  }
+function placeChipRow() {
+  const { chipRow } = getPanelStack();
+  if (!chipRow) return;
+  chipRow.style.position = 'static';
+  chipRow.style.right = '';
+  chipRow.style.top = '';
+}
 
-  // initial placement + keep in sync on resize/stack size changes
+let chipRowObserverAttached = false;
+function ensureChipRowObserver() {
+  if (chipRowObserverAttached) return;
+  const { stack } = getPanelStack();
+  if (!stack) return;
+  chipRowObserverAttached = true;
   placeChipRow();
   new ResizeObserver(() => placeChipRow()).observe(stack);
   window.addEventListener('resize', placeChipRow);
-  // <<< /ADD >>>
+}
+
+function getTodoDialogElements() {
+  return {
+    dialog: document.getElementById('todoDialog'),
+    backdrop: document.getElementById('todoBackdrop'),
+    createBtn: document.getElementById('todoCreateTask'),
+    cancelBtn: document.getElementById('todoCancel'),
+    closeBtn: document.getElementById('todoClose'),
+    taskList: document.getElementById('todoTaskList'),
+    noGoalMsg: document.getElementById('todoNoGoalMessage'),
+    goalContainer: document.getElementById('todoGoalContainer'),
+  };
+}
+
+function isTodoDialogOpen() {
+  const { dialog } = getTodoDialogElements();
+  return Boolean(dialog && dialog.hasAttribute('aria-hidden') && dialog.getAttribute('aria-hidden') === 'false');
+}
+
+const TODO_ESCAPE_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const escapeHtml = (str) => String(str).replace(/[&<>"']/g, ch => TODO_ESCAPE_MAP[ch]);
+
+function resolveTodoPanelContext() {
+  const { stack } = getPanelStack();
+  if (!stack) return null;
+  let list = els.tasksList;
+  if (!list || !document.contains(list)) {
+    list = stack.querySelector('.tasks-list');
+  }
+  if (!list) return null;
+  let panelId = list.dataset.panelId || list.closest('.tasks-panel')?.id || null;
+  if (!panelId) {
+    panelId = makeDomId('panel');
+    list.dataset.panelId = panelId;
+  }
+  return { list, panelId };
+}
+
+function renderTodoList() {
+  const { taskList, noGoalMsg } = getTodoDialogElements();
+  if (!taskList) return;
+  const ctx = resolveTodoPanelContext();
+  if (!ctx) {
+    taskList.innerHTML = '';
+    if (noGoalMsg) noGoalMsg.hidden = false;
+    return;
+  }
+
+  const panelTasks = tasks.filter(t => String(t.panelId) === String(ctx.panelId));
+  taskList.innerHTML = '';
+  panelTasks.forEach(task => {
+    const li = document.createElement('li');
+    li.className = 'todo-task-item';
+    li.innerHTML = `<span>${escapeHtml(task.name)}</span><span class="todo-task-meta">${task.done}/${task.total}</span>`;
+    taskList.appendChild(li);
+  });
+  if (noGoalMsg) noGoalMsg.hidden = true;
+}
+
+function syncTodoDialogState() {
+  const { createBtn, noGoalMsg, goalContainer } = getTodoDialogElements();
+  const ctx = resolveTodoPanelContext();
+  const hasGoal = Boolean(ctx);
+  const atLimit = countPanels() >= MAX_PANELS;
+
+  if (createBtn) {
+    createBtn.disabled = atLimit;
+  }
+
+  if (goalContainer) {
+    goalContainer.hidden = !hasGoal;
+  }
+
+  if (noGoalMsg) {
+    noGoalMsg.hidden = hasGoal;
+  }
+
+  if (hasGoal) {
+    renderTodoList();
+  }
+}
+
+async function handleTodoAddGoal() {
+  const { createBtn } = getTodoDialogElements();
+  if (createBtn && createBtn.disabled) return;
+  try {
+    const result = await createPanelWithTitle('Goal');
+    renderTodoList();
+    syncTodoDialogState();
+    if (result?.panelEl) {
+      result.panelEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  } catch (error) {
+    console.warn('[ToDo] Could not create goal:', error);
+    const message = error?.message || 'Unable to create goal.';
+    showTaskNotification(message, 'error');
+  }
+}
+
+function openTodoDialog() {
+  const { dialog, backdrop, createBtn, goalContainer } = getTodoDialogElements();
+  if (!dialog || !backdrop) return;
+  ensureStackInTodo(goalContainer);
+  renderTodoList();
+  syncTodoDialogState();
+  dialog.hidden = false;
+  dialog.setAttribute('aria-hidden', 'false');
+  dialog.classList.add('is-open');
+  backdrop.hidden = false;
+  requestAnimationFrame(() => {
+    if (createBtn && !createBtn.disabled) {
+      createBtn.focus({ preventScroll: true });
+    } else {
+      dialog.focus({ preventScroll: true });
+    }
+  });
+}
+
+function closeTodoDialog() {
+  const { dialog, backdrop } = getTodoDialogElements();
+  if (!dialog || !backdrop) return;
+  dialog.hidden = true;
+  dialog.setAttribute('aria-hidden', 'true');
+  dialog.classList.remove('is-open');
+  backdrop.hidden = true;
+  const openBtn = document.getElementById('addTasksPanel');
+  if (openBtn) {
+    openBtn.focus({ preventScroll: true });
+  }
+}
+
+function handleTodoKeydown(evt) {
+  if (evt.key !== 'Escape') return;
+  if (!isTodoDialogOpen()) return;
+  evt.preventDefault();
+  closeTodoDialog();
+}
+
+function ensureStackInTodo(goalContainer) {
+  const stack = document.getElementById('tasksStack');
+  if (!stack || !goalContainer) return;
+  goalContainer.hidden = false;
+  if (stack.parentElement !== goalContainer) {
+    goalContainer.appendChild(stack);
+  }
+}
+
+function setupTodoDialog() {
+  if (todoDialogSetupDone) return;
+  const { dialog, backdrop, createBtn, cancelBtn, closeBtn, goalContainer } = getTodoDialogElements();
+  const openBtn = document.getElementById('addTasksPanel');
+  if (!dialog || !backdrop || !openBtn) return;
+
+  todoDialogSetupDone = true;
+
+  ensureStackInTodo(goalContainer);
+
+  openBtn.addEventListener('click', evt => {
+    evt.preventDefault();
+    openTodoDialog();
+  });
+
+  const dismiss = () => closeTodoDialog();
+  backdrop.addEventListener('click', dismiss);
+  cancelBtn?.addEventListener('click', dismiss);
+  closeBtn?.addEventListener('click', dismiss);
+
+  createBtn?.addEventListener('click', handleTodoAddGoal);
+
+  document.addEventListener('keydown', handleTodoKeydown);
+}
+
+function countPanels() {
+  const { stack } = getPanelStack();
+  return stack ? stack.querySelectorAll('.tasks-panel').length : 0;
+}
+
+function resetPanel(panel) {
+  panel.querySelectorAll('.tasks-list').forEach(list => {
+    list.innerHTML = '';
+    delete list.dataset.panelId;
+  });
+
+  const titleEl = panel.querySelector('.tasks-title');
+  if (titleEl) titleEl.textContent = 'Goal';
+
+  const innerPanels = Array.from(panel.querySelectorAll('.tasks-panel'));
+  innerPanels.forEach(p => { if (p !== panel) p.remove(); });
+
+  const addButtons = Array.from(panel.querySelectorAll('.task-add'));
+  addButtons.slice(1).forEach(btn => btn.remove());
+}
+
+function rebindPanelEvents(panel) {
+  wireHeaderRename(panel);
+  wireHeaderDelete(panel);
+}
+
+function wireAddTaskButtons(panel) {
+  panel.querySelectorAll('.task-add')
+    .forEach(btn => btn.addEventListener('click', onAddTaskClick));
+}
+
+function createPanelFromTemplate({ panelId, title = 'Goal' } = {}) {
+  const { stack, template } = getPanelStack();
+  if (!stack || !template) return null;
+
+  const clone = template.cloneNode(true);
+  resetPanel(clone);
+
+  if (panelId) clone.id = panelId;
+  const cloneList = clone.querySelector('.tasks-list');
+  if (cloneList && panelId) {
+    cloneList.dataset.panelId = panelId;
+  }
+  if (cloneList && !els.tasksList) {
+    els.tasksList = cloneList;
+  }
+
+  const titleEl = clone.querySelector('.tasks-title');
+  if (titleEl) titleEl.textContent = title || 'Goal';
+
+  rebindPanelEvents(clone);
+  wireAddTaskButtons(clone);
+
+  stack.appendChild(clone);
+  placeChipRow();
+  return clone;
+}
+
+async function createPanelWithTitle(title = 'Goal') {
+  const { stack, template } = getPanelStack();
+  if (!stack || !template) throw new Error('Tasks stack not found.');
+
+  ensureChipRowObserver();
+
+  const current = countPanels();
+  if (current >= MAX_PANELS) {
+    throw new Error('Maximum number of goals reached.');
+  }
+
+  let serverPanel = null;
+  try {
+    serverPanel = await apiCreatePanel(title);
+    console.log('[Panels] Created on server:', serverPanel);
+  } catch (e) {
+    console.warn('[Panels] Failed to create on server:', e);
+    serverPanel = { id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, title };
+  }
+
+  const clone = createPanelFromTemplate({ panelId: serverPanel.id, title: serverPanel.title || title || 'Goal' });
+  if (!clone) throw new Error('Unable to create goal panel.');
+  console.log(`[Tasks] Created new panel with ID: ${serverPanel.id}`);
+  clone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  savePanelsToStorage();
+
+  return { panelId: serverPanel.id, panelEl: clone };
+}
+
+// -----------------------------------------------------------------------------
+// Goals Panel Adder (outside the goals panel, below it)
+// -----------------------------------------------------------------------------
+(function mountTasksPanelAdder() {
+  const { stack, addBtn, template } = getPanelStack();
+  if (!stack || !addBtn || !template) return;
+
+  ensureChipRowObserver();
+  setupTodoDialog();
 
 
 
   // Make sure the header buttons work on the first panel
   wireHeaderRename(template);
   wireHeaderDelete(template);
-
-  function countPanels() {
-    return stack.querySelectorAll('.tasks-panel').length;
-  }
 
   function uniquifyIds(panel, index) {
     panel.id = `tasksPanel-${index}`;
@@ -1381,34 +1645,11 @@ function flashSessionError(taskId, message) {
     if (createBtn) createBtn.id = `addTaskBtn-${index}`;
   }
 
-  // One canonical reset that also prevents doubles/nesting
-  function resetPanel(panel) {
-    // 1) Clear any tasks in the cloned panel
-    panel.querySelectorAll('.tasks-list').forEach(list => {
-      list.innerHTML = '';
-      // CRITICAL: Remove inherited panelId so it gets reassigned
-      delete list.dataset.panelId;
-    });
-
-    // 2) Reset the header title
-    const titleEl = panel.querySelector('.tasks-title');
-    if (titleEl) titleEl.textContent = 'Goal';
-
-    // 3) REMOVE any accidentally nested .tasks-panel inside this panel
-    const innerPanels = Array.from(panel.querySelectorAll('.tasks-panel'));
-    innerPanels.forEach(p => { if (p !== panel) p.remove(); });
-
-    // 4) Ensure there is only ONE "+ Create a Task" button in the panel
-    const addButtons = Array.from(panel.querySelectorAll('.task-add'));
-    addButtons.slice(1).forEach(btn => btn.remove());
-  }
-
   // Rebind header actions for a given panel (no placeholder rows)
   function rebindPanelEvents(panel) {
-    // Wire the header buttons for this panel
     wireHeaderRename(panel);
     wireHeaderDelete(panel);
-  } // <-- close the function
+  }
 
   // Ensure the first (template) panel has its local header actions wired
   rebindPanelEvents(template);
@@ -1416,66 +1657,6 @@ function flashSessionError(taskId, message) {
   // Wire the template panel's create button
   template.querySelectorAll('.task-add')
     .forEach(btn => btn.addEventListener('click', onAddTaskClick));
-
-
-  // Outside "+" button: add a brand-new Tasks panel (clone) up to MAX_PANELS
-  addBtn.addEventListener('click', async () => {
-    const current = countPanels();
-    if (current >= MAX_PANELS) {
-      addBtn.disabled = true;
-      addBtn.title = 'Maximum of 5 goals reached';
-      return;
-    }
-
-    const nextIndex = current + 1;
-
-    // Create panel on server first
-    let serverPanel = null;
-    try {
-      serverPanel = await apiCreatePanel('Goal');
-      console.log('[Panels] Created on server:', serverPanel);
-    } catch (e) {
-      console.warn('[Panels] Failed to create on server:', e);
-      // Fallback: create with local id
-      serverPanel = { id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, title: 'Goal' };
-    }
-
-    // Clone the whole panel box
-    const clone = template.cloneNode(true);
-
-    // Clear any inner tasks + normalize header + dedupe inner "Create a Task" buttons
-    resetPanel(clone);
-
-    // Give the clone the server's panelId
-    clone.id = serverPanel.id;
-    const cloneList = clone.querySelector('.tasks-list');
-    if (cloneList) {
-      cloneList.dataset.panelId = serverPanel.id;
-      console.log(`[Tasks] Created new panel with ID: ${serverPanel.id}`);
-    }
-
-    // Wire header actions for this clone
-    rebindPanelEvents(clone);
-
-    // === NEW: wire the "+ Create a Task" button inside the new panel ===
-    clone.querySelectorAll('.task-add')
-      .forEach(btn => btn.addEventListener('click', onAddTaskClick));
-
-    // Mount it
-    stack.appendChild(clone);
-    placeChipRow(); // <<< ADD: reposition "+" after adding a panel
-
-    clone.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    // Save panel structure to localStorage
-    savePanelsToStorage();
-
-    // Cap at MAX_PANELS
-    if (nextIndex >= MAX_PANELS) {
-      addBtn.disabled = true;
-      addBtn.title = 'Maximum of 5 goals reached';
-    }
-  });
 
   // end IIFE
 })();

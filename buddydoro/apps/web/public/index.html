@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="../styles/diamond.css" />
   <link rel="stylesheet" href="../styles/timer.css" />
   <link rel="stylesheet" href="../styles/tasks.css" />
+  <link rel="stylesheet" href="../styles/ai-plan.css" />
   <link rel="stylesheet" href="../styles/store.css" />
   <link rel="stylesheet" href="../styles/animations.css" />
 
@@ -64,9 +65,6 @@
 
   <!-- UI overlay -->
   <div class="ui-layer">
-    <div class="brand-logo" role="img" aria-label="BuddyDoro brand">
-      <img src="./assets/artwork/BuddyDoroName.png" alt="BuddyDoro" />
-    </div>
 
     <!-- Top-right header (RIGHT → LEFT: Greeting, Profile, Doros, Store) -->
     <header class="topbar" aria-label="User header">
@@ -98,30 +96,22 @@
 
         <!-- Diamond chip -->
 
-<div class="doros-dropdown">
-  <button class="chip glass-chip diamond-chip" id="diamondChip" type="button"
-          aria-label="Diamonds balance" aria-haspopup="true" aria-expanded="false"
-          aria-controls="diamondMenu">
+        <div class="doros-dropdown">
+          <button class="chip glass-chip diamond-chip" id="diamondChip" type="button" aria-label="Diamonds balance"
+            aria-haspopup="true" aria-expanded="false" aria-controls="diamondMenu">
 
-    <img
-  src="./assets/artwork/DiamondIcon.png"
-  alt="Diamonds"
-  class="diamond-icon"
-/>
+            <img src="./assets/artwork/DiamondIcon.png" alt="Diamonds" class="diamond-icon" />
 
-    <span id="diamondAmount" class="diamond-amount">0</span>
-    <span class="diamond-label">Diamonds</span>
-  </button>
+            <span id="diamondAmount" class="diamond-amount">0</span>
+            <span class="diamond-label">Diamonds</span>
+          </button>
 
-  <div class="doros-menu" id="diamondMenu" role="menu" hidden>
-    <button type="button"
-            class="doros-menu-item"
-            role="menuitem"
-            data-menu-action="buy-diamonds">
-      Buy Diamonds
-    </button>
-  </div>
-</div>
+          <div class="doros-menu" id="diamondMenu" role="menu" hidden>
+            <button type="button" class="doros-menu-item" role="menuitem" data-menu-action="buy-diamonds">
+              Buy Diamonds
+            </button>
+          </div>
+        </div>
 
 
 
@@ -173,15 +163,25 @@
             <button type="button" class="greet-menu-item" role="menuitem" id="logoutBtn">Log Out</button>
           </div>
         </div>
+
+        <button id="menuButton" class="chip glass-chip menu-chip" type="button" aria-label="Open navigation menu"
+          title="Menu">
+          <svg class="menu-chip-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+            <line x1="6" y1="10" x2="26" y2="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            <line x1="6" y1="16" x2="26" y2="16" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            <line x1="6" y1="22" x2="26" y2="22" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+          </svg>
+        </button>
       </div>
     </header>
 
 
     <!-- Tasks stack (flow layout) — single top-level panel, no nesting >>> -->
     <section class="tasks-wrap" aria-label="Tasks section">
-      <div id="tasksStack" class="tasks-stack">
-        <!-- First panel (template) — top-level child of #tasksStack -->
-        <div id="tasksPanel-1" class="tasks-panel" aria-label="Tasks">
+      <div id="tasksStack" class="tasks-stack"></div>
+
+      <template id="tasksPanelTemplate">
+        <div class="tasks-panel" aria-label="Tasks">
           <div class="tasks-header">
             <div class="tasks-title">Goal</div>
             <div class="tasks-header-actions">
@@ -200,19 +200,81 @@
             </div>
           </div>
 
-          <div id="tasksList" class="tasks-list" role="listbox" aria-activedescendant=""></div>
-          <button id="addTaskBtn" class="task-add" type="button">＋ Create a Task</button>
+          <div class="tasks-list" role="listbox" aria-activedescendant=""></div>
+          <button class="task-add" type="button">
+            <svg class="task-add-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+              <line x1="24" y1="12" x2="24" y2="36" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+              <line x1="12" y1="24" x2="36" y2="24" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            </svg>
+            Create a Task
+          </button>
         </div>
-      </div>
+      </template>
 
       <!-- "Add goal" chip must be a SIBLING of #tasksStack (not inside a .tasks-panel) -->
       <div class="tasks-chip-row">
-        <button id="addTasksPanel" class="chip gold add-chip" type="button" aria-label="Add a goal" title="Add a goal">
-          <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M12 5v14M5 12h14" fill="none" stroke="#2b2213" stroke-width="3.4" stroke-linecap="round"
-              stroke-linejoin="round" />
+        <button id="addTasksPanel" class="chip glass-chip todo-chip" type="button" aria-haspopup="dialog"
+          aria-controls="todoDialog" title="Open To Do menu">
+          <svg class="todo-chip-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <rect x="12" y="10" width="24" height="28" rx="6" ry="6" fill="none" stroke="currentColor"
+              stroke-width="3" />
+            <line x1="17" y1="10" x2="17" y2="38" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            <line x1="15" y1="16" x2="17" y2="16" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            <line x1="15" y1="22" x2="17" y2="22" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            <polyline points="20 26 24 30 32 20" fill="none" stroke="currentColor" stroke-width="3"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="sr-only">Open To Do menu</span>
+        </button>
+        <button id="aiPlanBtn" class="chip glass-chip ai-plan-chip" type="button" aria-label="Generate plan with AI"
+          title="Generate plan with AI">
+          AI Plan
+        </button>
+        <button id="timerChip" class="chip glass-chip timer-chip" type="button" aria-label="Open timer"
+          aria-haspopup="dialog" aria-controls="timerLaunchMenu" title="Timer">
+          <svg class="timer-chip-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="3" />
+            <line x1="24" y1="13" x2="24" y2="24" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            <line x1="24" y1="24" x2="32" y2="28" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
           </svg>
         </button>
+      </div>
+
+      <div id="timerLaunchBackdrop" class="backdrop timer-launch-backdrop" hidden></div>
+      <div id="timerLaunchMenu" class="timer-launch-panel" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+        <div class="timer-launch-form">
+          <div class="timer-launch-title">Timer mode</div>
+
+          <ul class="timer-launch-modes" role="radiogroup" aria-label="Timer mode">
+            <li class="timer-mode-item">
+              <input id="timerModeFocus" class="timer-mode-option" type="radio" name="timerMode" data-mode="focus" />
+              <label class="timer-mode-label" for="timerModeFocus">Focus</label>
+            </li>
+            <li class="timer-mode-item">
+              <input id="timerModeBreak" class="timer-mode-option" type="radio" name="timerMode" data-mode="break" />
+              <label class="timer-mode-label" for="timerModeBreak">Break (no doros)</label>
+            </li>
+          </ul>
+
+          <div id="timerLaunchError" class="timer-launch-error" hidden></div>
+
+          <div class="timer-launch-actions">
+            <button type="button" id="timerLaunchOk" class="btn-primary">OK</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="timerDurationBackdrop" class="backdrop timer-duration-backdrop" hidden></div>
+      <div id="timerDurationMenu" class="timer-duration-panel" role="dialog" aria-modal="true" aria-hidden="true"
+        hidden>
+        <div class="timer-duration-title">Set minutes</div>
+        <div class="timer-duration-value">
+          <span id="timerDurationValue">25</span> min
+        </div>
+        <input id="timerDurationSlider" class="timer-duration-slider" type="range" min="1" max="180" step="1" />
+        <div class="timer-duration-actions">
+          <button type="button" id="timerDurationOk" class="btn-primary">Start</button>
+        </div>
       </div>
     </section>
     <!-- <<< REPLACEMENT END <<< -->
@@ -224,50 +286,101 @@
     <!-- Timer & controls (right) -->
     <div class="right-ui">
       <div class="timer-card" aria-live="polite">
-        <div id="modeLabel" class="timer-label">Study Timer</div>
+        <div id="modeLabel" class="timer-label">Idle</div>
         <div id="timerDisplay" class="timer-value">25:00</div>
-
-        <!-- 3-dot trigger on the bottom of the circle -->
-        <button id="timerMenuBtn" class="btn-primary timer-menu-trigger" type="button" aria-haspopup="true"
-          aria-expanded="false" aria-controls="timerMenu" aria-label="Timer options">
-          <span class="timer-menu-dots" aria-hidden="true"></span>
-        </button>
-
-        <!-- Dropdown panel -->
-        <div id="timerMenu" class="timer-menu-panel" role="menu" hidden>
-          <form id="timerMenuForm" class="timer-menu-form">
-            <div class="timer-menu-field">
-              <label class="timer-menu-label" for="timerStudyInput">Study (min)</label>
-              <input id="timerStudyInput" class="timer-menu-input" type="number" min="1" max="180" step="1"
-                inputmode="numeric" />
-            </div>
-            <div class="timer-menu-field">
-              <label class="timer-menu-label" for="timerBreakInput">Break (min)</label>
-              <input id="timerBreakInput" class="timer-menu-input" type="number" min="1" max="180" step="1"
-                inputmode="numeric" />
-            </div>
-
-            <div id="timerMenuError" class="timer-menu-error" hidden></div>
-
-            <div class="timer-menu-actions">
-              <button type="submit" class="btn-primary">Save</button>
-              <button type="button" id="timerMenuCancel" class="btn-secondary">Cancel</button>
-            </div>
-          </form>
-        </div>
       </div>
 
       <div class="btn-row">
-        <button id="startBtn" class="btn-primary" type="button">Start Timer</button>
-        <button id="resetBtn" class="btn-secondary" type="button" disabled>Reset</button>
-      </div>
-
-      <div class="mode-chips" role="group" aria-label="Timer mode">
-        <button class="chip is-active" data-mode="study" aria-pressed="true">Study</button>
-        <button class="chip" data-mode="break" aria-pressed="false">Break</button>
+        <button id="startBtn" class="btn-primary" type="button">Pause</button>
+        <button id="endBtn" class="btn-secondary" type="button">End</button>
       </div>
     </div>
   </div>
+
+  <!-- Timer summary dialog -->
+  <div id="timerSummaryBackdrop" class="backdrop" hidden></div>
+  <section id="timerSummaryDialog" class="timer-summary-panel" role="dialog" aria-modal="true"
+    aria-labelledby="timerSummaryTitle" aria-hidden="true" hidden>
+    <div class="timer-summary-header">
+      <h2 id="timerSummaryTitle">Congratulations!</h2>
+    </div>
+    <div class="timer-summary-body">
+      <img class="timer-summary-illustration" src="assets/artwork/CelebrationDragon.png" alt="Celebration dragon" />
+      <p class="timer-summary-row">Minutes: <span id="timerSummaryMinutes">0</span></p>
+      <p class="timer-summary-row">Doros earned: <span id="timerSummaryDoros">0</span></p>
+
+      <div id="timerBreakPrompt" class="timer-break-prompt" hidden>
+      </div>
+    </div>
+    <div class="timer-summary-actions">
+      <button id="timerSummaryRestart" class="btn-primary" type="button">Restart</button>
+      <button id="timerSummaryBreak" class="btn-secondary" type="button">Break</button>
+      <button id="timerSummaryHome" class="btn-secondary" type="button">Home</button>
+    </div>
+  </section>
+
+  <div id="breakSummaryBackdrop" class="backdrop" hidden></div>
+  <section id="breakSummaryDialog" class="timer-summary-panel break-summary-panel" role="dialog" aria-modal="true"
+    aria-labelledby="breakSummaryTitle" aria-hidden="true" hidden>
+    <div class="timer-summary-header">
+      <h2 id="breakSummaryTitle">Break is over!</h2>
+    </div>
+    <div class="timer-summary-body">
+      <img class="timer-summary-illustration" src="assets/artwork/BreakDragon.png" alt="Buddy Doro ready to focus" />
+      <p class="timer-summary-row">You relaxed for <span id="breakSummaryMinutes">0</span> minutes.</p>
+      <p class="timer-summary-row">Time to jump back into focus.</p>
+    </div>
+    <div class="timer-summary-actions">
+      <button id="breakSummaryResume" class="btn-primary" type="button">Resume Focus</button>
+      <button id="breakSummaryLater" class="btn-secondary" type="button">Later</button>
+    </div>
+  </section>
+
+  <div id="todoBackdrop" class="backdrop" hidden></div>
+  <section id="todoDialog" class="timer-summary-panel todo-panel" role="dialog" aria-modal="true"
+    aria-labelledby="todoTitle" aria-hidden="true" tabindex="-1" hidden>
+    <div class="timer-summary-header todo-header">
+      <h2 id="todoTitle">TO DO</h2>
+      <button id="todoClose" class="icon-btn" type="button" aria-label="Close To Do menu">&times;</button>
+    </div>
+    <div class="timer-summary-body todo-body">
+      <p class="todo-description">Keep track of what you need to tackle next.</p>
+      <p id="todoNoGoalMessage" class="todo-empty" hidden>You need a goal before you can add tasks.</p>
+      <div id="todoGoalContainer" class="todo-goal-container" hidden></div>
+      <ul id="todoTaskList" class="todo-task-list" aria-live="polite"></ul>
+    </div>
+    <div class="timer-summary-actions todo-actions">
+      <button id="todoCreateTask" class="btn-primary" type="button">Add Goal</button>
+      <button id="todoCancel" class="btn-secondary" type="button">Cancel</button>
+    </div>
+  </section>
+
+  <!-- AI Plan dialog -->
+  <div id="aiPlanBackdrop" class="backdrop" hidden></div>
+  <section id="aiPlanDialog" class="ai-plan-panel" role="dialog" aria-modal="true" aria-labelledby="aiPlanTitle"
+    aria-hidden="true" hidden>
+    <div class="ai-plan-header">
+      <h2 id="aiPlanTitle">Generate plan with AI</h2>
+      <button id="aiPlanClose" class="icon-btn" type="button" aria-label="Close AI planner">&times;</button>
+    </div>
+
+    <div class="ai-plan-body">
+      <label class="ai-plan-label" for="aiGoalInput">Describe your goal</label>
+      <textarea id="aiGoalInput" class="ai-plan-textarea" rows="4"
+        placeholder="Example: Learn React in 2 weeks"></textarea>
+      <div class="ai-plan-actions">
+        <button id="aiGenerateBtn" class="btn-primary" type="button">Generate</button>
+        <span class="ai-plan-hint">Edit tasks and estimates before creating the plan.</span>
+      </div>
+      <p id="aiPlanDescription" class="ai-plan-description"></p>
+      <div id="aiPlanPreview" class="ai-plan-preview" aria-live="polite"></div>
+    </div>
+
+    <div class="ai-plan-footer">
+      <button id="aiAddTaskBtn" class="btn-secondary" type="button">Add task</button>
+      <button id="aiCreatePlanBtn" class="btn-primary" type="button">Create plan</button>
+    </div>
+  </section>
 
   <!-- Store dialog (window) -->
   <div id="storeBackdrop" class="backdrop" hidden></div>
@@ -342,7 +455,7 @@
   <script src="../js/features/moon.js"></script>
 
   <!-- Earn Doros logic -->
-  <script src="../js/features/earndoros.js"></script>
+  <script type="module" src="../js/features/earndoros.js"></script>
 
   <!-- Diamond balance logic -->
   <script src="../js/features/diamond.js"></script>

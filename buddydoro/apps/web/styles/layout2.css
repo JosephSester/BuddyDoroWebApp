@@ -9,12 +9,40 @@
   z-index: 10;
 }
 
+/* Logo in upper left corner */
+.logo-container {
+  position: absolute;
+  top: 10px;
+  left: 3vw;
+  z-index: 15;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  height: 80px;
+}
+
+.logo {
+  height: 100%;
+  max-height: 80px;
+  width: auto;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
 /* Topbar */
 .topbar {
   position: relative;
   margin: 10px 3vw 0 0;
   z-index: 12;
   pointer-events: auto;
+  display: flex;
+  align-items: center;
 }
 
 .top-chips {
@@ -56,8 +84,8 @@
   display: none;
 }
 
-.tasks-chip-row.is-timer-running #aiPlanBtn,
-.tasks-chip-row.is-timer-running #timerChip {
+.tasks-chip-row.is-timer-active #aiPlanBtn,
+.tasks-chip-row.is-timer-active #timerChip {
   display: none;
 }
 
@@ -77,6 +105,20 @@
   align-items: center;
   gap: 14px;
   pointer-events: auto;
+}
+
+.focus-panel-slot {
+  width: min(calc(90vw - 56px), 364px);
+  margin: 16px 0 0 auto;
+  box-sizing: border-box;
+}
+
+.focus-panel-slot .tasks-panel {
+  margin: 0;
+}
+
+.focus-panel-slot .tasks-list {
+  max-height: 52vh;
 }
 
 /* Timer card box */
@@ -131,6 +173,8 @@
   width: 100%;
   height: auto;
   z-index: 30;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
 /* Store panel scrolls internally */
@@ -143,6 +187,8 @@
   overflow-y: auto;
   z-index: 31;
   pointer-events: auto;
+  opacity: 1;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 /* Store two-column layout */

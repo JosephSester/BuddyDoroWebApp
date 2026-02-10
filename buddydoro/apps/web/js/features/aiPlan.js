@@ -1,6 +1,6 @@
 // apps/web/js/features/aiPlan.js
 import { generatePlan } from '../api/aiService.js';
-import { createPlanFromAI } from './tasks.js';
+import { createPlanFromAI } from './taskfeature/index.js';
 import { showNotification, setBusy } from '../utils/notifications.js';
 
 const MAX_GOAL_LENGTH = 200;
@@ -21,14 +21,12 @@ function normalizePlan(rawPlan, fallbackGoal) {
         description,
         tasks: tasks.map((task, index) => {
             const taskTitle = sanitizeText(task?.title, `Task ${index + 1}`).slice(0, 80) || `Task ${index + 1}`;
-            const estimate = Number.isFinite(Number(task?.estimate)) ? Math.max(1, Math.round(Number(task.estimate))) : 1;
             const subtasks = Array.isArray(task?.subtasks) ? task.subtasks : [];
             return {
                 title: taskTitle,
-                estimate,
                 subtasks: subtasks.map((sub, subIndex) => ({
                     title: sanitizeText(sub?.title, `Subtask ${subIndex + 1}`).slice(0, 80) || `Subtask ${subIndex + 1}`,
-                    estimate: Number.isFinite(Number(sub?.estimate)) ? Math.max(1, Math.round(Number(sub.estimate))) : 15
+                    estimate: null
                 }))
             };
         })
@@ -49,22 +47,13 @@ function buildTaskRow(task, taskIndex, onChange, onAddSubtask, onDeleteTask, onD
     titleInput.placeholder = 'Task title';
     titleInput.addEventListener('input', () => onChange(taskIndex, 'title', titleInput.value));
 
-    const estimateInput = document.createElement('input');
-    estimateInput.type = 'number';
-    estimateInput.className = 'ai-plan-input ai-plan-estimate';
-    estimateInput.min = '1';
-    estimateInput.max = '999';
-    estimateInput.step = '1';
-    estimateInput.value = String(task.estimate || 1);
-    estimateInput.addEventListener('input', () => onChange(taskIndex, 'estimate', estimateInput.value));
-
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button';
     deleteBtn.className = 'ai-plan-remove';
     deleteBtn.textContent = 'Remove';
     deleteBtn.addEventListener('click', () => onDeleteTask(taskIndex));
 
-    header.append(titleInput, estimateInput, deleteBtn);
+    header.append(titleInput, deleteBtn);
 
     const subHeader = document.createElement('div');
     subHeader.className = 'ai-plan-subheader';
@@ -94,22 +83,13 @@ function buildTaskRow(task, taskIndex, onChange, onAddSubtask, onDeleteTask, onD
         subTitleInput.placeholder = 'Subtask title';
         subTitleInput.addEventListener('input', () => onChange(taskIndex, `subtask-title-${subIndex}`, subTitleInput.value));
 
-        const subEstimateInput = document.createElement('input');
-        subEstimateInput.type = 'number';
-        subEstimateInput.className = 'ai-plan-input ai-plan-estimate';
-        subEstimateInput.min = '1';
-        subEstimateInput.max = '180';
-        subEstimateInput.step = '1';
-        subEstimateInput.value = String(subtask.estimate || 15);
-        subEstimateInput.addEventListener('input', () => onChange(taskIndex, `subtask-estimate-${subIndex}`, subEstimateInput.value));
-
         const subDeleteBtn = document.createElement('button');
         subDeleteBtn.type = 'button';
         subDeleteBtn.className = 'ai-plan-remove';
         subDeleteBtn.textContent = 'Remove';
         subDeleteBtn.addEventListener('click', () => onDeleteSubtask(taskIndex, subIndex));
 
-        row.append(subTitleInput, subEstimateInput, subDeleteBtn);
+        row.append(subTitleInput, subDeleteBtn);
         subList.appendChild(row);
     });
 
@@ -173,25 +153,16 @@ export function initAiPlan() {
                     if (!draft || !draft.tasks[idx]) return;
                     if (field === 'title') {
                         draft.tasks[idx].title = sanitizeText(value, draft.tasks[idx].title);
-                    } else if (field === 'estimate') {
-                        const parsed = Math.max(1, Math.round(Number(value || 1)));
-                        draft.tasks[idx].estimate = Number.isFinite(parsed) ? parsed : 1;
                     } else if (field.startsWith('subtask-title-')) {
                         const subIndex = Number(field.replace('subtask-title-', ''));
                         if (draft.tasks[idx].subtasks[subIndex]) {
                             draft.tasks[idx].subtasks[subIndex].title = sanitizeText(value, draft.tasks[idx].subtasks[subIndex].title);
                         }
-                    } else if (field.startsWith('subtask-estimate-')) {
-                        const subIndex = Number(field.replace('subtask-estimate-', ''));
-                        if (draft.tasks[idx].subtasks[subIndex]) {
-                            const parsed = Math.max(1, Math.round(Number(value || 1)));
-                            draft.tasks[idx].subtasks[subIndex].estimate = Number.isFinite(parsed) ? parsed : 1;
-                        }
                     }
                 },
                 (idx) => {
                     if (!draft || !draft.tasks[idx]) return;
-                    draft.tasks[idx].subtasks.push({ title: 'New subtask', estimate: 15 });
+                    draft.tasks[idx].subtasks.push({ title: 'New subtask', estimate: null });
                     renderPreview();
                 },
                 (idx) => {
@@ -245,7 +216,7 @@ export function initAiPlan() {
         if (!draft) {
             draft = { title: sanitizeText(goalInput.value, 'Goal') || 'Goal', description: '', tasks: [] };
         }
-        draft.tasks.push({ title: 'New task', estimate: 1, subtasks: [] });
+        draft.tasks.push({ title: 'New task', subtasks: [] });
         renderPreview();
     });
 

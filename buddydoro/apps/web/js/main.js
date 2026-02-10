@@ -3,10 +3,12 @@
 import { initScene } from './features/scene.js';
 import { initDragon } from './features/dragon.js';
 import { initTopbar } from './features/topbar.js';
-import { initTimer } from './features/timer.js';
+import { initTimer } from './features/timerFeature/index.js';
+import { initManualPomodoroLogic } from './features/timerFeature/manualPomodoroLogic.js';
+import { initTaskPomodoroLogic } from './features/timerFeature/taskPomodoroLogic.js';
 import { initEarnDoros } from './features/earndoros.js';
 import { initStore } from './features/store.js';
-import { initTasks, getActiveTask } from './features/tasks.js';
+import { initTasks, getActiveTask } from './features/taskfeature/index.js';
 import { initAiPlan } from './features/aiPlan.js';
 
 // ---- Auth guard -------------------------------------------------
@@ -25,10 +27,81 @@ initDragon?.();
 
 // Timer
 const timer = initTimer({
-  onStart: () => topbar?.setTimerRunning?.(true),
-  onPause: () => topbar?.setTimerRunning?.(false),
-  onReset: () => topbar?.setTimerRunning?.(false),
-  onComplete: () => topbar?.setTimerRunning?.(false),
+  onStart: () => topbar?.setTimerActive?.(true),
+  onPause: () => topbar?.setTimerActive?.(true),
+  onReset: () => topbar?.setTimerActive?.(true),
+  onComplete: () => topbar?.setTimerActive?.(true),
+  onStop: () => topbar?.setTimerActive?.(false),
+});
+
+const focusPanelSlot = document.getElementById('focusPanelSlot');
+const todoButton = document.getElementById('addTasksPanel');
+let currentFocusTask = null;
+
+const setTodoButtonVisible = (visible) => {
+  if (!todoButton) return;
+  todoButton.style.display = visible ? '' : 'none';
+};
+
+const clearFocusPanel = ({ clearTask = false } = {}) => {
+  if (!focusPanelSlot) return;
+  focusPanelSlot.innerHTML = '';
+  focusPanelSlot.hidden = true;
+  if (clearTask) currentFocusTask = null;
+};
+
+const showFocusPanel = (task) => {
+  if (!focusPanelSlot || !task) return;
+  currentFocusTask = task;
+  const panelId = task.panelId ? String(task.panelId) : null;
+  if (!panelId) return;
+
+  const panel = document.getElementById(panelId)
+    || document.querySelector(`.tasks-list[data-panel-id="${panelId}"]`)?.closest('.tasks-panel');
+  if (!panel) return;
+
+  const clone = panel.cloneNode(true);
+  clone.removeAttribute('id');
+  clone.classList.add('focus-panel');
+  clone.querySelectorAll('.task-add').forEach(btn => btn.remove());
+  clone.querySelectorAll('.tasks-header-actions').forEach(el => el.remove());
+
+  focusPanelSlot.innerHTML = '';
+  focusPanelSlot.appendChild(clone);
+  focusPanelSlot.hidden = false;
+};
+
+const taskPomodoro = initTaskPomodoroLogic({
+  timer,
+  onFocusStart: ({ task }) => showFocusPanel(task),
+  onFocusStop: () => clearFocusPanel({ clearTask: true }),
+});
+
+const manualPomodoro = initManualPomodoroLogic({
+  timer,
+});
+
+timer.onStart(({ mode }) => {
+  if (mode === 'break') {
+    clearFocusPanel();
+  }
+});
+
+timer.onSummaryBreak(() => clearFocusPanel());
+timer.onSummaryHome(() => clearFocusPanel({ clearTask: true }));
+timer.onBreakLater(() => clearFocusPanel({ clearTask: true }));
+timer.onBreakResume(() => {
+  if (currentFocusTask) showFocusPanel(currentFocusTask);
+});
+
+timer.setLaunchHandler?.((mode) => {
+  if (mode === 'focus') {
+    taskPomodoro.stop?.();
+    clearFocusPanel({ clearTask: true });
+    timer.stop();
+    manualPomodoro.startManualFocus?.();
+    return;
+  }
 });
 
 // ---- Topbar + EarnDoros -----------------------------------------------------
@@ -88,21 +161,18 @@ initStore({
 });
 
 // ---- Tasks ------------------------------------------------------
-const sessionsToSeconds = sessions =>
-  Math.max(1, Number(sessions || 1)) *
-  timer.getFocusDefaultMinutes() *
-  60;
-
 await initTasks({
-  onActiveTaskChange: () => {
+  onActiveTaskChange: async () => {
     const task = getActiveTask();
-    if (task) {
-      timer.setPlannedFocusDuration(sessionsToSeconds(task.total));
-    } else {
-      timer.setPlannedFocusDuration(null);
-    }
+    manualPomodoro.stop?.();
+    timer.stop();
+    await taskPomodoro.handleActiveTaskChange(task);
   },
-  onShouldStopTimer: () => timer.stop(),
+  onShouldStopTimer: () => {
+    taskPomodoro.stop();
+    manualPomodoro.stop();
+    timer.stop();
+  },
   onTaskEstimate: minutes =>
     minutes > 0 && timer.setPlannedFocusDuration(minutes * 60),
   onSubtaskEstimate: minutes =>

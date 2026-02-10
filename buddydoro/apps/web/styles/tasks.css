@@ -31,9 +31,18 @@
 .todo-panel {
   width: min(90vw, 420px);
   padding: 26px 28px 24px;
-  background: linear-gradient(135deg, #efe3ff 0%, #b896ff 100%);
-  border: 2px solid rgba(136, 92, 186, .85);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, .24), inset 0 0 0 6px rgba(202, 175, 255, .3);
+  background:
+    radial-gradient(150px circle at 50% 42%, rgba(255, 255, 255, .4), rgba(245, 240, 230, .15) 70%),
+    linear-gradient(135deg, rgba(222, 196, 160, .45) 0%, rgba(194, 178, 140, .35) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 2px solid rgba(194, 178, 140, .4);
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, .24),
+    inset 0 0 0 1px rgba(245, 240, 230, .25),
+    0 0 20px rgba(194, 178, 140, .2);
+  opacity: 1;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .todo-header {
@@ -73,13 +82,25 @@
 .todo-task-item {
   padding: 10px 14px;
   border-radius: 16px;
-  border: 2px solid rgba(136, 92, 186, .55);
-  background: rgba(240, 230, 255, .92);
+  border: 2px solid rgba(194, 178, 140, .35);
+  background: rgba(245, 240, 230, .3);
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
   font-weight: 700;
   display: flex;
   justify-content: space-between;
   gap: 12px;
   color: #2b2213;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease, backdrop-filter 0.2s ease;
+  cursor: pointer;
+}
+
+.todo-task-item:hover {
+  background: rgba(245, 240, 230, .45);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(194, 178, 140, .25);
 }
 
 .todo-task-meta {
@@ -119,12 +140,19 @@
   border-radius: 28px;
   color: #2b2213;
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .55), rgba(255, 255, 255, .12) 70%),
-    rgba(255, 255, 255, .08);
-  border: 2px solid rgba(224, 162, 51, .85);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, .25), inset 0 0 0 6px rgba(255, 210, 100, .22);
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .45), rgba(255, 255, 255, .1) 70%),
+    linear-gradient(135deg, rgba(255, 220, 100, .45) 0%, rgba(242, 185, 66, .35) 100%);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 2px solid rgba(255, 220, 100, .5);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, .25),
+    inset 0 0 0 1px rgba(255, 255, 255, .2),
+    0 0 20px rgba(255, 210, 100, .3);
   z-index: 10;
   pointer-events: auto;
+  opacity: 1;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .tasks-list {
@@ -142,10 +170,14 @@
   gap: 12px;
   padding: 10px 14px;
   border-radius: 18px;
-  border: 2px solid #e0a233;
-  background: rgba(255, 235, 160, .40);
+  border: 2px solid rgba(160, 160, 180, .35);
+  background:
+    radial-gradient(120px circle at 50% 42%, rgba(255, 255, 255, .4), rgba(255, 255, 255, .1) 70%),
+    linear-gradient(135deg, rgba(203, 213, 225, .45) 0%, rgba(148, 163, 184, .35) 100%);
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
   box-shadow: 0 6px 14px rgba(0, 0, 0, .12);
-  transition: box-shadow .2s ease, transform .1s ease, background .2s ease;
+  transition: box-shadow .25s ease, transform .2s ease, background .25s ease, backdrop-filter .2s ease;
 }
 
 .task-main {
@@ -174,14 +206,22 @@
 }
 
 .task-card.is-hover {
-  background: rgba(255, 239, 180, .55);
+  background:
+    radial-gradient(120px circle at 50% 42%, rgba(255, 255, 255, .45), rgba(255, 255, 255, .15) 70%),
+    linear-gradient(135deg, rgba(203, 213, 225, .55) 0%, rgba(148, 163, 184, .45) 100%);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
   transform: translateY(-1px);
   box-shadow: 0 10px 18px rgba(0, 0, 0, .16);
 }
 
 .task-card.is-active {
-  border-color: #ffb400;
-  background: rgba(255, 238, 180, .75);
+  border-color: rgba(100, 116, 139, .5);
+  background:
+    radial-gradient(120px circle at 50% 42%, rgba(255, 255, 255, .5), rgba(255, 255, 255, .18) 70%),
+    linear-gradient(135deg, rgba(203, 213, 225, .6) 0%, rgba(148, 163, 184, .5) 100%);
+  backdrop-filter: blur(12px) saturate(170%);
+  -webkit-backdrop-filter: blur(12px) saturate(170%);
   box-shadow: 0 12px 22px rgba(0, 0, 0, .2);
 }
 
@@ -200,6 +240,13 @@
   font-weight: 700;
   background: rgba(255, 255, 255, .95);
   min-width: 180px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-title-input:focus {
+  outline: none;
+  border-color: rgba(224, 162, 51, .7);
+  box-shadow: 0 0 0 2px rgba(255, 210, 100, .25);
 }
 
 .task-title-save,
@@ -211,11 +258,28 @@
   cursor: pointer;
   border: 1px solid rgba(43, 34, 19, .35);
   background: rgba(255, 255, 255, .8);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.task-title-save:hover,
+.task-title-cancel:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .15);
+  filter: brightness(1.02);
+}
+
+.task-title-save:active,
+.task-title-cancel:active {
+  transform: translateY(0);
 }
 
 .task-title-save {
-  border-color: #e0a233;
-  background: linear-gradient(#ffd36b, #f2b942);
+  border: 2px solid rgba(255, 255, 255, .6);
+  background:
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
+    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
 }
 
 
@@ -223,8 +287,12 @@
   font-weight: 800;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 2px solid #e0a233;
-  background: rgba(255, 235, 160, .75);
+  border: 2px solid rgba(255, 255, 255, .6);
+  background:
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
+    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   min-width: 64px;
   text-align: center;
   box-shadow: 0 6px 14px rgba(0, 0, 0, .10);
@@ -342,12 +410,15 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  align-items: flex-start;
   font-size: 12px;
   font-weight: 700;
   color: #2b2213;
 }
 
 .task-create-label {
+  align-self: flex-start;
+  text-align: left;
   letter-spacing: .3px;
 }
 
@@ -407,8 +478,12 @@
 }
 
 .task-create-save {
-  border: 2px solid #e0a233;
-  background: linear-gradient(#ffd36b, #f2b942);
+  border: 2px solid rgba(255, 255, 255, .6);
+  background:
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
+    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   color: #2b2213;
   box-shadow: 0 6px 14px rgba(0, 0, 0, .16);
 }
@@ -460,8 +535,12 @@
   display: grid;
   place-items: center;
   border-radius: 999px;
-  border: 2px solid #e0a233;
-  background: linear-gradient(#ffd36b, #f2b942);
+  border: 2px solid rgba(255, 255, 255, .6);
+  background:
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
+    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   color: #2b2213;
   box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
   cursor: pointer;
@@ -486,7 +565,7 @@
   height: 18px;
 }
 
-/* Create button (gold pill) */
+/* Create button (white shiny glass) */
 .tasks-panel .task-add,
 button.task-add {
   -webkit-appearance: none;
@@ -495,9 +574,12 @@ button.task-add {
   width: 100%;
   padding: 12px 18px;
   border-radius: 999px;
-  border: 2px solid #e0a233;
-  background-image: linear-gradient(#ffd36b, #f2b942);
-  background-color: #f2b942;
+  border: 2px solid rgba(255, 255, 255, .6);
+  background:
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
+    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   color: #2b2213;
   font-weight: 800;
   font-size: 18px;
@@ -561,16 +643,19 @@ button.task-add:disabled {
   letter-spacing: .2px;
 }
 
-/* small round gold button with a pencil */
+/* small round white glass button with a pencil */
 .task-title-edit {
   appearance: none;
   width: 36px;
   height: 36px;
   min-width: 36px;
   border-radius: 999px;
-  border: 2px solid #e0a233;
-  background-image: linear-gradient(#ffd36b, #f2b942);
-  background-color: #f2b942;
+  border: 2px solid rgba(255, 255, 255, .6);
+  background:
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
+    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   color: #2b2213;
   display: grid;
   place-items: center;
@@ -606,7 +691,7 @@ button.task-add:disabled {
   /* small gap between pencil and trash */
 }
 
-/* Gold circular delete (trash) button — matches pencil styling */
+/* White glass circular delete (trash) button — matches pencil styling */
 .task-title-delete {
   -webkit-appearance: none;
   appearance: none;
@@ -616,8 +701,12 @@ button.task-add:disabled {
   border-radius: 999px;
   display: grid;
   place-items: center;
-  border: 2px solid #e0a233;
-  background: linear-gradient(#ffd36b, #f2b942);
+  border: 2px solid rgba(255, 255, 255, .6);
+  background:
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
+    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   color: #2b2213;
   box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
   cursor: pointer;
@@ -663,9 +752,13 @@ button.task-add:disabled {
 .subtask-toggle {
   -webkit-appearance: none;
   appearance: none;
-  background: rgba(255, 245, 210, .55);
+  background:
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
+    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   color: #2b2213;
-  border: 1px solid rgba(224, 162, 51, .6);
+  border: 2px solid rgba(255, 255, 255, .6);
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -722,8 +815,12 @@ button.task-add:disabled {
 .subtask-add {
   -webkit-appearance: none;
   appearance: none;
-  border: 1px solid #e0a233;
-  background: linear-gradient(#ffe8a6, #f5c85a);
+  border: 2px solid rgba(255, 255, 255, .6);
+  background:
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
+    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
   color: #2b2213;
   border-radius: 10px;
   padding: 6px 10px;

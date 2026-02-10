@@ -19,6 +19,11 @@ export function initTimerSummary({
 
     const close = () => {
         if (!canRender) return;
+        const active = document.activeElement;
+        if (timerSummaryDialog && active && timerSummaryDialog.contains(active)) {
+            const fallback = document.getElementById('timerChip') || document.body;
+            fallback?.focus?.();
+        }
         timerSummaryDialog.hidden = true;
         timerSummaryDialog.classList.remove('is-open');
         timerSummaryDialog.setAttribute('aria-hidden', 'true');
@@ -83,6 +88,11 @@ export function initBreakSummary({
 
     const close = () => {
         if (!canRender) return;
+        const active = document.activeElement;
+        if (breakDialog && active && breakDialog.contains(active)) {
+            const fallback = document.getElementById('timerChip') || document.body;
+            fallback?.focus?.();
+        }
         breakDialog.hidden = true;
         breakDialog.classList.remove('is-open');
         breakDialog.setAttribute('aria-hidden', 'true');

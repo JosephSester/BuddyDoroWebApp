@@ -2,7 +2,7 @@
 // FRONTEND TASK SERVICE
 // Location: apps/web/js/api/taskService.js
 // Purpose: High-level task operations using the backend API
-// Used by: Frontend code (tasks.js) to save/load tasks
+// Used by: Frontend code (taskfeature) to save/load tasks
 // ============================================================
 
 import { apiGet, apiPost, apiPut, apiDelete } from './apiClient.js';

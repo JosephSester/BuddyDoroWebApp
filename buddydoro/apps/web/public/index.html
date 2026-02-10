@@ -66,6 +66,11 @@
   <!-- UI overlay -->
   <div class="ui-layer">
 
+    <!-- Logo in upper left corner -->
+    <div class="logo-container">
+      <img src="./assets/artwork/BuddyDoroName.png" alt="Buddy Doro" class="logo" />
+    </div>
+
     <!-- Top-right header (RIGHT → LEFT: Greeting, Profile, Doros, Store) -->
     <header class="topbar" aria-label="User header">
       <div class="top-chips">
@@ -240,36 +245,14 @@
         </button>
       </div>
 
-      <div id="timerLaunchBackdrop" class="backdrop timer-launch-backdrop" hidden></div>
-      <div id="timerLaunchMenu" class="timer-launch-panel" role="dialog" aria-modal="true" aria-hidden="true" hidden>
-        <div class="timer-launch-form">
-          <div class="timer-launch-title">Timer mode</div>
-
-          <ul class="timer-launch-modes" role="radiogroup" aria-label="Timer mode">
-            <li class="timer-mode-item">
-              <input id="timerModeFocus" class="timer-mode-option" type="radio" name="timerMode" data-mode="focus" />
-              <label class="timer-mode-label" for="timerModeFocus">Focus</label>
-            </li>
-            <li class="timer-mode-item">
-              <input id="timerModeBreak" class="timer-mode-option" type="radio" name="timerMode" data-mode="break" />
-              <label class="timer-mode-label" for="timerModeBreak">Break (no doros)</label>
-            </li>
-          </ul>
-
-          <div id="timerLaunchError" class="timer-launch-error" hidden></div>
-
-          <div class="timer-launch-actions">
-            <button type="button" id="timerLaunchOk" class="btn-primary">OK</button>
-          </div>
-        </div>
-      </div>
+      <div id="focusPanelSlot" class="focus-panel-slot" hidden></div>
 
       <div id="timerDurationBackdrop" class="backdrop timer-duration-backdrop" hidden></div>
       <div id="timerDurationMenu" class="timer-duration-panel" role="dialog" aria-modal="true" aria-hidden="true"
         hidden>
-        <div class="timer-duration-title">Set minutes</div>
+        <div id="timerDurationTitle" class="timer-duration-title">Set minutes</div>
         <div class="timer-duration-value">
-          <span id="timerDurationValue">25</span> min
+          <input id="timerDurationValue" type="number" min="1" max="180" value="25" />
         </div>
         <input id="timerDurationSlider" class="timer-duration-slider" type="range" min="1" max="180" step="1" />
         <div class="timer-duration-actions">
@@ -285,8 +268,8 @@
 
     <!-- Timer & controls (right) -->
     <div class="right-ui">
+      <div id="modeLabel" class="timer-label">Idle</div>
       <div class="timer-card" aria-live="polite">
-        <div id="modeLabel" class="timer-label">Idle</div>
         <div id="timerDisplay" class="timer-value">25:00</div>
       </div>
 
@@ -294,6 +277,7 @@
         <button id="startBtn" class="btn-primary" type="button">Pause</button>
         <button id="endBtn" class="btn-secondary" type="button">End</button>
       </div>
+
     </div>
   </div>
 
@@ -333,6 +317,36 @@
     <div class="timer-summary-actions">
       <button id="breakSummaryResume" class="btn-primary" type="button">Resume Focus</button>
       <button id="breakSummaryLater" class="btn-secondary" type="button">Later</button>
+    </div>
+  </section>
+
+  <div id="pomodoroConfirmBackdrop" class="backdrop" hidden></div>
+  <section id="pomodoroConfirmDialog" class="timer-summary-panel" role="dialog" aria-modal="true"
+    aria-labelledby="pomodoroConfirmTitle" aria-hidden="true" tabindex="-1" hidden>
+    <div class="timer-summary-header">
+      <h2 id="pomodoroConfirmTitle">Confirm focus time</h2>
+    </div>
+    <div class="timer-summary-body">
+      <p id="pomodoroConfirmText" class="timer-summary-row"></p>
+    </div>
+    <div class="timer-summary-actions">
+      <button id="pomodoroConfirmCancel" class="btn-secondary" type="button">Cancel</button>
+      <button id="pomodoroConfirmOk" class="btn-primary" type="button">OK</button>
+    </div>
+  </section>
+
+  <div id="breakConfirmBackdrop" class="backdrop" hidden></div>
+  <section id="breakConfirmDialog" class="timer-summary-panel" role="dialog" aria-modal="true"
+    aria-labelledby="breakConfirmTitle" aria-hidden="true" tabindex="-1" hidden>
+    <div class="timer-summary-header">
+      <h2 id="breakConfirmTitle">Take a break?</h2>
+    </div>
+    <div class="timer-summary-body">
+      <p id="breakConfirmText" class="timer-summary-row">Do you want to take a break?</p>
+    </div>
+    <div class="timer-summary-actions">
+      <button id="breakConfirmCancel" class="btn-secondary" type="button">No</button>
+      <button id="breakConfirmOk" class="btn-primary" type="button">Yes</button>
     </div>
   </section>
 

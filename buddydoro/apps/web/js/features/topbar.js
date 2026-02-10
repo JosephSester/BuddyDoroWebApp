@@ -8,7 +8,7 @@ let greetTextEl, dorosAmountEl, greetChip, greetMenu, menuButton;
 let openStoreCb = null;
 
 function paintDoros() {
-  
+
   if (!dorosAmountEl) {
     console.warn('dorosAmountEl not found — cannot paint Doros');
     return;
@@ -26,7 +26,7 @@ function paintDoros() {
 let greetMenuOpen = false;
 let greetCleanup = [];
 let menuHidden = false;
-let timerRunning = false;
+let timerActive = false;
 
 function setTasksChipRowHidden(hidden) {
   const row = document.querySelector('.tasks-chip-row');
@@ -38,7 +38,7 @@ function setTasksChipRowHidden(hidden) {
 function updateTasksChipRowVisibility() {
   const row = document.querySelector('.tasks-chip-row');
   if (row) {
-    row.classList.toggle('is-timer-running', timerRunning);
+    row.classList.toggle('is-timer-active', timerActive);
   }
   setTasksChipRowHidden(menuHidden || greetMenuOpen);
 }
@@ -48,8 +48,8 @@ function toggleTasksChipRow() {
   updateTasksChipRowVisibility();
 }
 
-function setTimerRunningState(isRunning) {
-  timerRunning = Boolean(isRunning);
+function setTimerActiveState(isActive) {
+  timerActive = Boolean(isActive);
   updateTasksChipRowVisibility();
 }
 
@@ -84,7 +84,7 @@ function closeGreetMenu({ focusTrigger = true } = {}) {
   greetMenuOpen = false;
   greetMenu.hidden = true;
   greetChip?.setAttribute('aria-expanded', 'false');
-  greetCleanup.forEach(fn => { try { fn(); } catch {} });
+  greetCleanup.forEach(fn => { try { fn(); } catch { } });
   greetCleanup = [];
   updateTasksChipRowVisibility();
   if (focusTrigger && greetChip) greetChip.focus({ preventScroll: true });
@@ -181,7 +181,7 @@ export function initTopbar({ userName = 'Player', startingDoros = 0, onOpenStore
     dorosChipBtn.setAttribute('aria-expanded', 'false');
     if (dropdown) dropdown.removeAttribute('data-open');
     if (dorosMenuEl) dorosMenuEl.hidden = true;
-    cleaners.forEach(fn => { try { fn(); } catch {} });
+    cleaners.forEach(fn => { try { fn(); } catch { } });
     cleaners = [];
     if (focusChip) dorosChipBtn.focus({ preventScroll: true });
   }
@@ -262,7 +262,7 @@ export function initTopbar({ userName = 'Player', startingDoros = 0, onOpenStore
     diamondChipBtn.setAttribute('aria-expanded', 'false');
     if (diamondDropdown) diamondDropdown.removeAttribute('data-open');
     diamondMenuEl.hidden = true;
-    diamondCleaners.forEach(fn => { try { fn(); } catch {} });
+    diamondCleaners.forEach(fn => { try { fn(); } catch { } });
     diamondCleaners = [];
     if (focusChip) diamondChipBtn.focus({ preventScroll: true });
   }
@@ -296,5 +296,5 @@ export function initTopbar({ userName = 'Player', startingDoros = 0, onOpenStore
     }
   });
 
-  return { getDoros, addDoros, spendDoros, setTimerRunning: setTimerRunningState, setDoros };
+  return { getDoros, addDoros, spendDoros, setTimerActive: setTimerActiveState, setTimerRunning: setTimerActiveState, setDoros };
 }

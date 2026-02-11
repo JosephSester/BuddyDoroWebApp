@@ -20,7 +20,7 @@
 }
 
 .timer-card {
-  width: clamp(350px, 16vw, 180px);
+  width: clamp(120px, 16vw, 180px);
   aspect-ratio: 1;
   border-radius: 50%;
   display: flex;
@@ -728,7 +728,7 @@
 
 .timer-value {
   font-weight: 800;
-  font-size: clamp(70px, 4.5vw, 40px);
+  font-size: clamp(28px, 4.5vw, 40px);
   letter-spacing: 1px;
   line-height: 1;
   transform: translateY(0);

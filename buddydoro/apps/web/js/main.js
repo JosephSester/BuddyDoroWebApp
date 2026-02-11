@@ -50,7 +50,7 @@ async function initUserTopbarAndEarnDoros() {
       userName: user?.name || localStorage.getItem('userName') || 'Player',
       startingDoros: user?.doros ?? 0,
       onOpenStore: () => {
-        // your store open logic if needed
+        
       }
     });
 
@@ -58,7 +58,6 @@ async function initUserTopbarAndEarnDoros() {
 
     window.earnDoros = earnDoros;
 
-    // This is all you need — topbar will paint the pill automatically
     earnDoros.setBalance(user?.doros ?? 0);
 
     // Force greeting update only (keep this, it's safe)
@@ -66,6 +65,24 @@ async function initUserTopbarAndEarnDoros() {
     if (greetTextEl && user?.name) {
       greetTextEl.textContent = `Hello, ${user.name}`;
     }
+
+    const injectLife = () => {
+      const lc = window.LifeCircle;
+      if (lc && typeof lc.setLife === 'function') {
+        lc.setLife({
+          current: user?.life?.current ?? 14,
+          max: user?.life?.max ?? 14,
+          lastCareAt: user?.lastCareAt || null
+        });
+        lc.startDecay();
+        console.log('Injected real life values:', user?.life);
+      } else {
+        console.log('LifeCircle not ready yet, retrying...');
+        setTimeout(injectLife, 100); // retry every 100ms
+      }
+    };
+
+    injectLife();
 
     return { topbar, earnDoros };
   } catch (err) {

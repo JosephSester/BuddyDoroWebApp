@@ -103,11 +103,29 @@ router.get('/me', async (req, res) => {
     const user = await User.findById(decoded.userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
+    // Compute current life based on time since last care
+    const now = new Date();
+    const elapsedMs = now - user.lastCareAt;
+    const steps = Math.floor(elapsedMs / (6 * 60 * 60 * 1000)); // 6 hours
+    const decayedCurrent = Math.max(0, user.life.current - steps);
+
+    // Update the stored current if it changed
+    if (decayedCurrent !== user.life.current) {
+      user.life.current = decayedCurrent;
+      await user.save();
+    }
+
     return res.json({
       userId: user._id,
       name: user.name,
       doros: user.doros,
-      diamonds: user.diamonds
+      diamonds: user.diamonds,
+      life: {
+        current: user.life.current,
+        max: user.life.max
+      },
+      lastCareAt: user.lastCareAt,
+      lastActiveAt: user.lastActiveAt,
     });
 
   } catch (err) {

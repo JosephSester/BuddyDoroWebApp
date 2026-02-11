@@ -1,96 +1,71 @@
-/* apps/web/js/features/lifecircle.js
- * Life Circle widget + persistence + 6-hour decay unless cared for.
- * Public API (global):
- *   LifeCircle.init({ initial?: number, size?: number, altPrefix?: string, mount?: selector|HTMLElement })
- *   LifeCircle.set(n)         // force set 0..14
- *   LifeCircle.get()          // read current (0..14)
- *   LifeCircle.increment(d)   // +/- delta, clamped
- *   LifeCircle.markCare(kind) // 'food' | 'water' | 'medicine' etc.; resets decay clock and restores +1 (optional)
- */
+// lifecircle.js
+// Life Circle widget + client-side decay + backend persistence
 
 (function () {
-  // ------------------------------
-  // Config
-  // ------------------------------
   const MAX_LIFE = 14;
   const MIN_LIFE = 0;
-  const DECAY_INTERVAL_MS = 6 * 60 * 60 * 1000; // every 6 hours
-  const STORAGE_KEYS = {
-    value: 'life.value',
-    lastCareAt: 'life.lastCareAt',
+  const DECAY_INTERVAL_MS = 60 * 1000; // ← test with 60 seconds; production: 6 * 60 * 60 * 1000
+  const LOCAL_KEYS = {
+    lastCareAt: 'buddyDoro.life.lastCareAtMs',
+    lastDecay: 'buddyDoro.life.lastDecayMs'
   };
 
-  // ------------------------------
-  // Utilities
-  // ------------------------------
-  const clamp = n => Math.max(MIN_LIFE, Math.min(MAX_LIFE, n | 0));
+  let isInitializedFromDB = false;
+  let lastAppliedSteps = 0;
+  let lastDecayMs = Date.now();
+  let $root = null, $img = null;
+  let current = null;
+  let maxLife = null;
+  let size = 120;
+  let altPrefix = 'Life';
+  let mountedInScene = false;
+  let lastCareAtMs = Date.now();
+  let tickerId = 0;
 
   function imgPathFor(value) {
     const base = './assets/artwork/LifeCircle/';
     if (value <= MIN_LIFE) return base + 'LifeZero.png';
-    if (value >= MAX_LIFE) return base + 'LifeFull.png';
+    if (value >= maxLife) return base + 'LifeFull.png';
     return base + `Life${value}.png`;
   }
 
   function preloadAll() {
-    const list = [imgPathFor(0)];
-    for (let i = 1; i < MAX_LIFE; i++) list.push(imgPathFor(i));
-    list.push(imgPathFor(MAX_LIFE));
+    const list = [];
+    for (let i = 0; i <= MAX_LIFE; i++) list.push(imgPathFor(i));
     list.forEach(src => { const im = new Image(); im.src = src; });
   }
 
-  function nowMs() { return Date.now(); }
-
-  function loadState() {
-    const rawVal = localStorage.getItem(STORAGE_KEYS.value);
-    const rawCare = localStorage.getItem(STORAGE_KEYS.lastCareAt);
-    const value = rawVal == null ? MAX_LIFE : clamp(+rawVal);
-    const lastCareAt = rawCare == null ? nowMs() : +rawCare;
-    return { value, lastCareAt };
-  }
-
-  function saveState(value, lastCareAt) {
-    localStorage.setItem(STORAGE_KEYS.value, String(clamp(value)));
-    localStorage.setItem(STORAGE_KEYS.lastCareAt, String(lastCareAt));
-  }
-
-  // Given lastCareAt and base life, compute what life *should* be now
-  function computeLifeFromClock(baseValue, lastCareAt) {
-    const elapsed = Math.max(0, nowMs() - lastCareAt);
-    const steps = Math.floor(elapsed / DECAY_INTERVAL_MS); // 0,1,2...
-    return clamp(baseValue - steps);
-  }
-
-  // ------------------------------
-  // DOM + placement
-  // ------------------------------
-  let $root = null, $img = null;
-  let current = MAX_LIFE, size = 120, altPrefix = 'Life';
-  let mountedInScene = false;
-  let lastCareAtMs = nowMs();
-  let tickerId = 0;
-
   function render() {
     if (!$img) return;
-    const src = imgPathFor(current);
+
+    const src = imgPathFor(current) + '?t=' + Date.now(); // cache-buster
+    console.log('render: setting img src to', src);
+
     $img.src = src;
-    $img.alt = `${altPrefix} ${current} / ${MAX_LIFE}`;
-    $img.classList.remove('lc-swap'); void $img.offsetWidth; $img.classList.add('lc-swap');
-    if ($root) $root.setAttribute('data-life', String(current));
-    $root && ($root.title = `${current} / ${MAX_LIFE}`);
+    $img.alt = `${altPrefix} ${current} / ${maxLife}`;
+    $img.classList.remove('lc-swap');
+    void $img.offsetWidth; // force reflow
+    $img.classList.add('lc-swap');
+
+    if ($root) {
+      $root.setAttribute('data-life', String(current));
+      $root.title = `${current} / ${maxLife}`;
+    }
+
+    // Extra force repaint
+    $root.style.opacity = '0.99';
+    void $root.offsetWidth;
+    $root.style.opacity = '1';
   }
 
   function findDragonEl() {
-    return (
-      document.getElementById('dragon') ||
-      document.querySelector('.dragon') ||
-      document.querySelector('img[alt*="Dragon" i]') ||
-      Array.from(document.images).find(im => /dragon/i.test(im.src)) ||
-      null
-    );
+    return document.getElementById('dragon') ||
+           document.querySelector('.dragon') ||
+           document.querySelector('img[alt*="Dragon" i]') ||
+           Array.from(document.images).find(im => /dragon/i.test(im.src)) ||
+           null;
   }
 
-  // Position under dragon (you tuned to 0.48 X and 0.20 Y)
   function positionUnderDragon() {
     if (!$root) return;
 
@@ -101,8 +76,8 @@
     const dRect = dragon.getBoundingClientRect();
     const sRect = scene.getBoundingClientRect();
 
-    const targetX = dRect.left + dRect.width * 0.48;   // horizontal bias
-    const targetY = dRect.bottom - dRect.height * 0.20; // vertical raise
+    const targetX = dRect.left + dRect.width * 0.48;
+    const targetY = dRect.bottom - dRect.height * 0.20;
 
     const left = targetX - sRect.left - size * 0.5;
     const top  = targetY - sRect.top  - size * 0.5;
@@ -113,33 +88,52 @@
 
   function onResize() { positionUnderDragon(); }
 
-  // ------------------------------
   // Decay scheduler
-  // ------------------------------
-  function recalcFromClock() {
-    // Recompute expected life from lastCareAt
-    const expected = computeLifeFromClock(MAX_LIFE, lastCareAtMs);
-    // Keep whichever is *lower*: expected decay vs locally stored current
-    // (prevents "jumping up" unless markCare() is called)
-    const next = Math.min(current, expected);
-    if (next !== current) {
-      current = next;
-      saveState(current, lastCareAtMs);
-      render();
-    }
+  function computeLifeFromClock(baseValue, lastCareAtMs) {
+    const elapsed = Math.max(0, Date.now() - lastCareAtMs);
+    const steps = Math.floor(elapsed / DECAY_INTERVAL_MS);
+    return Math.max(MIN_LIFE, baseValue - steps);
   }
+
+  function recalcFromClock() {
+  console.log('recalcFromClock running — current time:', new Date().toISOString());
+
+  if (current === null || maxLife === null) {
+    console.log('recalc skipped — life values not initialized yet');
+    return;
+  }
+
+  const now = Date.now();
+  const elapsed = now - lastActiveMs;
+  const totalSteps = Math.floor(elapsed / DECAY_INTERVAL_MS);
+
+  if (totalSteps > 0) {
+    console.log(`Applying ${totalSteps} decay steps at once (offline catch-up)`);
+
+    current = Math.max(MIN_LIFE, current - totalSteps);
+
+    // Reset to now after catch-up
+    lastActiveMs = now;
+    localStorage.setItem('buddyDoro.life.lastActiveAtMs', String(lastActiveMs));
+
+    render();
+    syncLifeToBackend(current);
+  } else {
+    console.log('No decay needed yet');
+  }
+}
 
   function startTicker() {
     stopTicker();
-    // Re-check often enough to catch the tick close to real time without wasting CPU.
-    // Once per minute is fine.
-    tickerId = window.setInterval(recalcFromClock, 60 * 1000);
-    // Run once at start, and when tab becomes visible.
-    recalcFromClock();
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) recalcFromClock();
-    });
-    window.addEventListener('focus', recalcFromClock);
+
+    if (!isInitializedFromDB) {
+      console.log('startTicker: Waiting for DB values before starting decay');
+      return;
+    }
+
+    console.log('startTicker: Starting decay timer (interval:', DECAY_INTERVAL_MS / 1000, 'seconds)');
+    recalcFromClock(); // immediate check
+    tickerId = window.setInterval(recalcFromClock, DECAY_INTERVAL_MS); // match decay interval
   }
 
   function stopTicker() {
@@ -149,9 +143,44 @@
     }
   }
 
-  // ------------------------------
-  // Public API
-  // ------------------------------
+  // Backend sync
+  async function syncLifeToBackend(newCurrent, resetDecay = false, lastDecayMs) {
+    const oldCurrent = current;
+    current = Math.max(0, Math.min(maxLife, newCurrent));
+
+    render();
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('No token');
+
+      const body = { current };
+      if (resetDecay) body.resetDecay = true;
+      body.lastDecay = new Date(lastDecayMs);
+
+      const res = await fetch('http://localhost:3000/api/user/life', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!res.ok) throw new Error(`PATCH failed: ${res.status}`);
+
+      const data = await res.json();
+      current = data.life.current;
+      maxLife = data.life.max;
+      
+      render();
+    } catch (err) {
+      console.error('Life sync failed:', err);
+      current = oldCurrent;
+      render();
+    }
+  }
+
   const LifeCircle = {
     init(opts = {}) {
       preloadAll();
@@ -159,7 +188,6 @@
       size = Number.isFinite(opts.size) ? opts.size : 120;
       altPrefix = typeof opts.altPrefix === 'string' ? opts.altPrefix : 'Life';
 
-      // mount or auto-create inside #scene
       let mountEl = null;
       if (opts.mount) {
         mountEl = typeof opts.mount === 'string' ? document.querySelector(opts.mount) : opts.mount;
@@ -184,21 +212,14 @@
       $img.loading = 'lazy';
       $root.appendChild($img);
 
-      // Load persisted state (or defaults on first run)
-      const { value: storedValue, lastCareAt } = loadState();
-      lastCareAtMs = lastCareAt;
-      const expected = computeLifeFromClock(storedValue, lastCareAtMs);
-      current = clamp(expected);
-
-      // If no stored entries existed (first run), ensure full life now.
-      if (localStorage.getItem(STORAGE_KEYS.value) == null) {
-        current = MAX_LIFE;
-        lastCareAtMs = nowMs();
-        saveState(current, lastCareAtMs);
+      const storedCare = localStorage.getItem(LOCAL_KEYS.lastCareAt);
+      if (storedCare) {
+        lastCareAtMs = Number(storedCare);
+        console.log('Loaded offline lastCareAtMs from localStorage:', lastCareAtMs);
       }
 
       render();
-      LifeCircle.setBreathing(true); // enable gentle breathing loop
+      LifeCircle.setBreathing(true);
 
       if (mountedInScene) {
         $root.style.position = 'absolute';
@@ -208,39 +229,89 @@
         window.addEventListener('load', positionUnderDragon);
       }
 
-      startTicker();
+      // Do NOT start ticker here — wait for setLife/startDecay
     },
 
-    set(n) {
-      const next = clamp(n);
-      if (next === current) return;
-      current = next;
-      saveState(current, lastCareAtMs);
+    // Called from main.js after /me fetch
+    setLife({ current: newCurrent, max: newMax, lastCareAt, lastActiveAt }) {
+      if (newCurrent === undefined || newMax === undefined) {
+        console.error('setLife called without current/max — using defaults');
+        current = MAX_LIFE;
+        maxLife = MAX_LIFE;
+      } else {
+        current = Math.max(0, Math.min(MAX_LIFE, newCurrent));
+        maxLife = Math.max(1, Math.min(MAX_LIFE, newMax));
+      }
+
+      // Load local timestamps
+      const storedActive = localStorage.getItem('buddyDoro.life.lastActiveAtMs');
+      const localActiveMs = storedActive ? Number(storedActive) : null;
+
+      // DB timestamp
+      const dbActiveMs = lastActiveAt ? new Date(lastActiveAt).getTime() : null;
+
+     // Prefer local if newer (offline session end)
+      if (localActiveMs && (!dbActiveMs || localActiveMs > dbActiveMs)) {
+        lastActiveMs = localActiveMs;
+      } else if (dbActiveMs) {
+        lastActiveMs = dbActiveMs;
+      } else {
+        lastActiveMs = Date.now();
+      }
+
+      // On login: reset to now (new session start) — decay only counts offline time since last close
+      lastActiveMs = Date.now();
+      localStorage.setItem('buddyDoro.life.lastActiveAtMs', String(lastActiveMs));
+
+      console.log('setLife: lastActiveMs reset to now on login:', new Date(lastActiveMs).toISOString());
+
+      // lastCareAt logic remains for healing reset
+      // ... your existing lastCareAt logic ...
+
+      lastAppliedSteps = 0;
+
+      isInitializedFromDB = true;
+      console.log('setLife: DB values loaded, decay can start now');
+
+      // Immediate catch-up from lastActiveMs (offline time since close)
+      recalcFromClock();
+
       render();
     },
 
-    get() { return current; },
+    get() {
+      return { current, max: maxLife };
+    },
 
     increment(delta) {
-      const d = typeof delta === 'number' ? delta : 1;
-      LifeCircle.set(current + d);
+      syncLifeToBackend(current + delta);
     },
 
-    /** Turn breathing animation on/off */
     setBreathing(on = true) {
-    if (!$root) return;
-    $root.classList.toggle('is-breathing', !!on);
+      if (!$root) return;
+      $root.classList.toggle('is-breathing', !!on);
     },
 
-
-    // Log care, reset decay clock, and (optionally) heal +1.
-    // Pass a kind string if you want to audit later; unused here but kept for clarity.
     markCare(kind = 'care', heal = true) {
-      lastCareAtMs = nowMs();
-      if (heal && current < MAX_LIFE) current = current + 1;
-      current = clamp(current);
-      saveState(current, lastCareAtMs);
-      render();
+      console.log('Care given:', kind);
+      lastCareAtMs = Date.now();
+      lastAppliedSteps = 0;
+      localStorage.setItem(LOCAL_KEYS.lastCareAt, String(lastCareAtMs));
+      const newCurrent = heal && current < maxLife ? current + 1 : current;
+      syncLifeToBackend(newCurrent, true);
+    },
+
+    render() {
+      render(); // calls internal render
+    },
+
+    startDecay() {
+      if (current === null || maxLife === null) {
+        console.warn('startDecay: Cannot start — life values not set yet');
+        return;
+      }
+      console.log('startDecay: Starting decay timer now that DB values are loaded');
+      startTicker();
     }
   };
 

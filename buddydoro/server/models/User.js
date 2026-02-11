@@ -42,6 +42,14 @@ const userSchema = new mongoose.Schema({
     default: 14,
     min: 1}
   },
+  lastCareAt: {  
+    type: Date,
+    default: Date.now
+  },
+  lastActiveAt: {
+    type: Date,
+    default: Date.now
+  },
 
   //User preferences
 

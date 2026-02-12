@@ -117,11 +117,11 @@ initStore({
   }
 });
 
-
-// ----- 5) Diamond Store -------------------------------------------------------
+// ----- Diamond Store ----------------------------------------------------------
 initDiamondStore();
 
-// ----- 6) Tasks ---------------------------------------------------------------
+
+// ----- 5) Tasks ---------------------------------------------------------------
 await initTasks({
   onActiveTaskChange: () => {
     // Enable/disable Start button depending on whether a task is selected

@@ -1,5 +1,4 @@
 /* ---------- UI overlay ---------- */
-.ui-layer{ position:fixed; inset:0; z-index:10; pointer-events:none; }
 .brand-logo{ position:absolute; top:-13vh; left:3vw; max-width:min(400px, 36vw); pointer-events:none; z-index:12; }
 .brand-logo img{ width:100%; height:auto; display:block; filter:drop-shadow(0 6px 14px rgba(0,0,0,.35)); }
 

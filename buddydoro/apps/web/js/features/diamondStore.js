@@ -21,10 +21,24 @@ export function initDiamondStore() {
   // Hide the top balance indicator in the diamond store header
   balance.parentElement?.setAttribute('hidden', '');
 
+  let selectedPack = null;
+  let currentView = 'packs'; // 'packs' or 'payment'
+
   // No quantity controls: each pack is bought as a single unit
 
-  function render() {
+  function renderPacks() {
     list.innerHTML = "";
+
+    // Remove payment view class if present
+    dialog.classList.remove('payment-view');
+
+    const header = dialog.querySelector('.diamond-store-header');
+    const headerLeft = header?.querySelector('.diamond-store-left');
+    const headerTitle = header?.querySelector('#diamondStoreTitle');
+    const headerBackBtn = header?.querySelector('.payment-back-btn');
+
+    if (headerBackBtn) headerBackBtn.remove();
+    if (headerTitle) headerTitle.textContent = 'Buy Diamonds';
 
     DIAMOND_PACKS.forEach((pack, idx) => {
       const row = document.createElement("div");
@@ -50,22 +64,116 @@ export function initDiamondStore() {
       const buyBtn = row.querySelector(".diamond-buy-btn");
 
       buyBtn.onclick = () => {
-        const totalDiamonds = pack.amount * qty;
-        const currentBalance = Number(balance.textContent || "0");
-        balance.textContent = currentBalance + totalDiamonds;
-        render();
+        selectedPack = { ...pack, totalPrice };
+        currentView = 'payment';
+        renderPayment();
       };
 
       list.appendChild(row);
     });
   }
 
+  function renderPayment() {
+    if (!selectedPack) return;
+
+    const diamondLabel = selectedPack.amount === 1 ? 'Diamond' : 'Diamonds';
+
+    dialog.classList.add('payment-view');
+
+    list.innerHTML = `
+      <div class="payment-header">
+        <h3 class="payment-title">Secure Payment for BuddyDoro</h3>
+      </div>
+
+      <div class="payment-container">
+        <div class="payment-summary">
+          <img src="${selectedPack.image}" class="payment-diamond-icon" />
+          <h3>+${selectedPack.amount} ${diamondLabel}</h3>
+          <p class="payment-balance">Balance Due: $${selectedPack.totalPrice}</p>
+        </div>
+
+        <div class="payment-methods-label">Select payment method:</div>
+        <div class="payment-methods">
+          <button class="payment-method-btn" data-method="card">
+            <div class="payment-method-content">
+              <div class="payment-logos">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" class="payment-logo" alt="Visa" />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="payment-logo" alt="Mastercard" />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg" class="payment-logo" alt="Amex" />
+              </div>
+              <div class="payment-method-name">Credit / Debit Card</div>
+            </div>
+          </button>
+
+          <button class="payment-method-btn" data-method="paypal">
+            <div class="payment-method-content">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" class="payment-logo-single" alt="PayPal" />
+              <div class="payment-method-name">PayPal</div>
+            </div>
+          </button>
+
+          <button class="payment-method-btn" data-method="venmo">
+            <div class="payment-method-content">
+              <img src="./assets/artwork/Venmo_logo.png" class="payment-logo-single" alt="Venmo" />
+              <div class="payment-method-name">Venmo</div>
+            </div>
+          </button>
+
+          <button class="payment-method-btn" data-method="other">
+            <div class="payment-method-content">
+              <span class="payment-method-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
+                  <rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="2" />
+                  <path d="M3 10h18" stroke="currentColor" stroke-width="2" />
+                  <path d="M7 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+              </span>
+              <div class="payment-method-name">Other</div>
+            </div>
+          </button>
+        </div>
+
+        <button class="payment-cancel-btn btn-secondary">Cancel</button>
+      </div>
+    `;
+
+    const paymentBtns = list.querySelectorAll('.payment-method-btn');
+    paymentBtns.forEach(btn => {
+      btn.onclick = () => {
+        const method = btn.dataset.method;
+        processPayment(method);
+      };
+    });
+
+    const cancelBtn = list.querySelector('.payment-cancel-btn');
+    if (cancelBtn) {
+      cancelBtn.onclick = () => {
+        currentView = 'packs';
+        selectedPack = null;
+        renderPacks();
+      };
+    }
+  }
+
+  function processPayment(method) {
+    // Simulate payment processing
+    const currentBalance = Number(balance.textContent || "0");
+    balance.textContent = currentBalance + selectedPack.amount;
+
+    // Show success and return to packs
+    alert(`Payment successful! You received ${selectedPack.amount} diamonds via ${method}.`);
+    currentView = 'packs';
+    selectedPack = null;
+    renderPacks();
+  }
+
   function open() {
+    currentView = 'packs';
+    selectedPack = null;
     backdrop.hidden = false;
     dialog.hidden = false;
     document.body.style.overflow = "hidden";
-    render();
-    updatePreview();
+    renderPacks();
     // Mirror Store UX: mark chip expanded and close dropdown menu
     if (diamondChip) diamondChip.setAttribute('aria-expanded', 'true');
     if (diamondMenu) diamondMenu.hidden = true;
@@ -77,6 +185,8 @@ export function initDiamondStore() {
     backdrop.hidden = true;
     dialog.hidden = true;
     document.body.style.overflow = "";
+    currentView = 'packs';
+    selectedPack = null;
     if (diamondChip) diamondChip.setAttribute('aria-expanded', 'false');
     if (diamondChip) diamondChip.focus();
   }

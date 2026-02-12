@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     passwordToggle.addEventListener('click', () => {
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
       passwordInput.setAttribute('type', type);
-      
+
       const icon = passwordToggle.querySelector('i');
       if (icon) {
         icon.classList.toggle('fa-eye', type === 'password');
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmPasswordToggle.addEventListener('click', () => {
       const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
       confirmPasswordInput.setAttribute('type', type);
-      
+
       const icon = confirmPasswordToggle.querySelector('i');
       if (icon) {
         icon.classList.toggle('fa-eye', type === 'password');
@@ -62,55 +62,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Sign Up Form Submission Logic ---
   signupForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  const name = nameInput.value.trim();
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
-  const confirmPassword = confirmPasswordInput.value.trim();
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    const confirmPassword = confirmPasswordInput.value.trim();
 
-  if (!name || !email || !password || !confirmPassword) {
-    showSignupError('Please fill out all fields.');
-    return;
-  }
-
-  if (!validateEmail(email)) {
-    showSignupError('Please enter a valid email address.');
-    return;
-  }
-
-  if (password.length < 6) {
-    showSignupError('Password must be at least 6 characters long.');
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    showSignupError('Passwords do not match.');
-    return;
-  }
-
-
-  try {
-    // Send data to backend
-    const res = await fetch('http://localhost:3000/api/auth/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({name, email, password, confirmPassword}) // match your backend fields
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showSignupError(data.message || 'Sign-up failed');
+    if (!name || !email || !password || !confirmPassword) {
+      showSignupError('Please fill out all fields.');
       return;
     }
 
-    console.log('User created successfully! Redirecting to login...');
-    window.location.href = 'login.html';
+    if (!validateEmail(email)) {
+      showSignupError('Please enter a valid email address.');
+      return;
+    }
 
-  } catch (err) {
-    console.error(err);
-    showSignupError('Server unreachable');
-  }
+    if (password.length < 6) {
+      showSignupError('Password must be at least 6 characters long.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      showSignupError('Passwords do not match.');
+      return;
+    }
+
+
+    try {
+      // Send data to backend
+      const res = await fetch('http://localhost:3000/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, confirmPassword }) // match your backend fields
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showSignupError(data.message || 'Sign-up failed');
+        return;
+      }
+
+      localStorage.setItem('userName', name);
+      console.log('User created successfully! Redirecting to login...');
+      window.location.href = 'login.html';
+
+    } catch (err) {
+      console.error(err);
+      showSignupError('Server unreachable');
+    }
   });
 });

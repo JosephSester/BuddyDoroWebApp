@@ -160,6 +160,15 @@ export function initStore({ getDoros, spendDoros }) {
           setBusy(false);
           showNotification(`Purchased ${it.name}!`, 'success');
           renderInventory();
+
+          const el = document.getElementById('dorosAmount');
+          if (el) {
+            // Re-query current balance from earnDoros (safest)
+            const currentBalance = window.earnDoros?.getBalance?.() ?? 0;
+            el.textContent = currentBalance.toLocaleString('en-US');
+            console.log('Forced Doros pill update to:', currentBalance);
+          }
+
         } catch (error) {
           setBusy(false);
           showNotification(`Failed to buy ${it.name}`, 'error');

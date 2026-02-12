@@ -1,31 +1,38 @@
 /* ---------- PAGE LAYOUT / GEOMETRY (Page Scroll Enabled) ---------- */
 
 
-:root { --brand-top: -120px; } /* adjust logo vertical position */
-
 /* UI overlay now in normal flow */
 .ui-layer {
-  position: relative;      
+  position: relative;
   width: 100%;
-  pointer-events: auto;    
+  pointer-events: auto;
   z-index: 10;
 }
 
-/* Brand logo */
-.ui-layer .brand-logo {
-  position: relative;
-  top: calc(env(safe-area-inset-top, 0px) + var(--brand-top));
-  left: 48px;
-  width: clamp(320px, 44vw, 400px);
-  max-width: none;
-  pointer-events: none;
-  z-index: 12;
+/* Logo in upper left corner */
+.logo-container {
+  position: absolute;
+  top: 10px;
+  left: 3vw;
+  z-index: 15;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  height: 80px;
 }
 
-.ui-layer .brand-logo img {
-  width: 100%;
-  height: auto;
+.logo {
+  height: 100%;
+  max-height: 80px;
+  width: auto;
   display: block;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
 /* Topbar */
@@ -34,6 +41,8 @@
   margin: 10px 3vw 0 0;
   z-index: 12;
   pointer-events: auto;
+  display: flex;
+  align-items: center;
 }
 
 .top-chips {
@@ -67,14 +76,23 @@
 /* New task button placement & click fix */
 .tasks-chip-row {
   position: relative;
-  z-index: 20;
+  z-index: 6;
   margin-top: 16px;
+}
+
+.tasks-chip-row.is-hidden {
+  display: none;
+}
+
+.tasks-chip-row.is-timer-active #aiPlanBtn,
+.tasks-chip-row.is-timer-active #timerChip {
+  display: none;
 }
 
 #addTasksPanel {
   pointer-events: auto;
   position: relative;
-  z-index: 21;
+  z-index: 7;
 }
 
 /* Right column with timer + controls */
@@ -87,6 +105,20 @@
   align-items: center;
   gap: 14px;
   pointer-events: auto;
+}
+
+.focus-panel-slot {
+  width: min(calc(90vw - 56px), 364px);
+  margin: 16px 0 0 auto;
+  box-sizing: border-box;
+}
+
+.focus-panel-slot .tasks-panel {
+  margin: 0;
+}
+
+.focus-panel-slot .tasks-list {
+  max-height: 52vh;
 }
 
 /* Timer card box */
@@ -131,7 +163,9 @@
   z-index: 5;
 }
 
-.timer-menu-panel.is-open { display: flex; }
+.timer-menu-panel.is-open {
+  display: flex;
+}
 
 /* Store dialog/backdrop */
 .backdrop {
@@ -139,17 +173,22 @@
   width: 100%;
   height: auto;
   z-index: 30;
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
 /* Store panel scrolls internally */
 .store-panel {
   position: relative;
-  margin: 30vh auto 0 auto; /* top spacing & horizontal centering */
+  margin: 30vh auto 0 auto;
+  /* top spacing & horizontal centering */
   width: min(980px, 92vw);
   max-height: 78vh;
   overflow-y: auto;
   z-index: 31;
   pointer-events: auto;
+  opacity: 1;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 /* Store two-column layout */
@@ -179,15 +218,27 @@
     width: 88vw;
   }
 
-  .mode-chips { flex-wrap: wrap; justify-content: center; }
-  .top-chips { flex-wrap: wrap; gap: 10px; }
+  .mode-chips {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .top-chips {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 
   .store-panel {
     margin: 4vh auto 0 auto;
     width: 94vw;
   }
 
-  .store-content { grid-template-columns: 1fr; }
-  .inventory-column { border-left: none; padding-left: 0; }
-}
+  .store-content {
+    grid-template-columns: 1fr;
+  }
 
+  .inventory-column {
+    border-left: none;
+    padding-left: 0;
+  }
+}

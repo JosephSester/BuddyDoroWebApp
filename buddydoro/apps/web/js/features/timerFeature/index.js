@@ -129,7 +129,7 @@ export function initTimer(hooks = {}) {
     });
 
     menus.wireMenu();
-    ui.hideTimer();
+    ui.showTimer();
     ui.updateUI();
 
     return {

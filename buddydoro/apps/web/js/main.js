@@ -8,6 +8,7 @@ import { initManualPomodoroLogic } from './features/timerFeature/manualPomodoroL
 import { initTaskPomodoroLogic } from './features/timerFeature/taskPomodoroLogic.js';
 import { initEarnDoros } from './features/earndoros.js';
 import { initStore } from './features/store.js';
+import { initDiamondStore } from './features/diamondStore.js';
 import { initTasks, getActiveTask } from './features/taskfeature/index.js';
 import { initAiPlan } from './features/aiPlan.js';
 
@@ -19,18 +20,6 @@ if (!authToken) {
 }
 
 // UI features
-import { initTopbar } from './features/topbar.js';
-import { initTimer } from './features/timer.js';
-import { initStore } from './features/store.js';
-import { initDiamondStore } from './features/diamondStore.js';
-import { initTasks, getActiveTaskId } from './features/tasks.js';
-
-// document.addEventListener('DOMContentLoaded', () => {
-//   initStore({
-//     getDoros,
-//     spendDoros
-//   });
-// });
 
 // ----- 1) Background & dragon -------------------------------------------------
 // ---- Scene ------------------------------------------------------

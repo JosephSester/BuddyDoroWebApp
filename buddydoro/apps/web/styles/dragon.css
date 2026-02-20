@@ -27,6 +27,44 @@
   height: auto;
 }
 
+/* ✅ Only nudge SKIN images upward (default dragon stays the same) */
+/*#dragon img[src*="/Skins/"],
+#dragon img[src*="\\Skins\\"] {
+  transform: translateY(-100px); /* tweak this value */
+/* } */
+
+/* ---- Default baseline for skins (start at 0, then tweak each) ---- */
+#dragon img[src$="/Skins/Alien.png"],
+#dragon img[src$="/Skins/Axolotyl.png"],
+#dragon img[src$="/Skins/Bigfoot.png"],
+#dragon img[src$="/Skins/Butterfly.png"],
+#dragon img[src$="/Skins/Capybara.png"],
+#dragon img[src$="/Skins/DragonSkin.png"],
+#dragon img[src$="/Skins/Frog.png"],
+#dragon img[src$="/Skins/PrayingMantis.png"],
+#dragon img[src$="/Skins/Robot.png"],
+#dragon img[src$="/Skins/RockCreature.png"],
+#dragon img[src$="/Skins/Vampire.png"],
+#dragon img[src$="/Skins/Werewolf.png"] {
+  transform: translateY(0px); /* <-- baseline; change per-skin below */
+}
+
+/* ---- Individual per-skin tweaks (edit numbers as you test) ---- */
+/* Negative = move UP, Positive = move DOWN */
+
+#dragon img[src$="/Skins/Alien.png"]          { transform: translateY(-100px); }
+#dragon img[src$="/Skins/Axolotyl.png"]       { transform: translateY(-50px); }
+#dragon img[src$="/Skins/Bigfoot.png"]        { transform: translateY(-90px); }
+#dragon img[src$="/Skins/Butterfly.png"]      { transform: translateY(-50px); }
+#dragon img[src$="/Skins/Capybara.png"]       { transform: translateY(-70px); }
+#dragon img[src$="/Skins/DragonSkin.png"]     { transform: translateY(0px); }
+#dragon img[src$="/Skins/Frog.png"]           { transform: translateY(-10px); }
+#dragon img[src$="/Skins/PrayingMantis.png"]  { transform: translateY(-100px); }
+#dragon img[src$="/Skins/Robot.png"]          { transform: translateY(-80px); }
+#dragon img[src$="/Skins/RockCreature.png"]   { transform: translateY(-80px); }
+#dragon img[src$="/Skins/Vampire.png"]        { transform: translateY(-100px); }
+#dragon img[src$="/Skins/Werewolf.png"]       { transform: translateY(-60px); }
+
 /* Optional: a utility to hide the dragon (e.g., during transitions) */
 .dragon.is-hidden {
   display: none;

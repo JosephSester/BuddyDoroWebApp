@@ -2,6 +2,8 @@
 import { fetchInventory, purchaseItem, useItem, inventoryToMap} from '../api/inventoryService.js';
 import { showNotification, setBusy } from '../utils/notifications.js';
 import { fetchCatalog } from '../api/storeService.js';
+import { setDragonSkin } from './dragon.js';
+
 
 console.log('[Store Init] storeChip:', !!document.getElementById('storeChip'));
 console.log('[Store Init] storeDialog:', !!document.getElementById('storeDialog'));
@@ -24,8 +26,28 @@ export function initStore({ getDoros, spendDoros }) {
   let selectedSku = null;
   let allItems = [];           // ← Loaded from API
   let itemsByCategory = {};    // ← Grouped for tabs
-
   const inventory = new Map();
+
+  const SKINS = [
+  'Alien.png',
+  'Axolotyl.png',
+  'Bigfoot.png',
+  'Butterfly.png',
+  'Capybara.png',
+  'DragonSkin.png',
+  'Frog.png',
+  'PrayingMantis.png',
+  'Robot.png',
+  'RockCreature.png',
+  'Vampire.png',
+  'Werewolf.png'
+];
+
+function niceNameFromFile(filename) {
+  return filename
+    .replace('.png', '')
+    .replace(/([a-z])([A-Z])/g, '$1 $2');
+}
 
   if (!storeChip) {
     console.error('[Store] storeChip not found');
@@ -104,16 +126,71 @@ export function initStore({ getDoros, spendDoros }) {
   storeCloseBottom?.addEventListener('click', closeStore);
 
   tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => {
-        t.classList.toggle('is-active', t === tab);
-        t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
-      });
-      currentCat = tab.dataset.cat;
-      selectedSku = null;
-      renderCatalog(itemsByCategory[currentCat] || []);
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => {
+      t.classList.toggle('is-active', t === tab);
+      t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
     });
+
+    const cat = tab.dataset.cat;
+
+    // NEW: Skins tab renders the skins catalog inside the store window.
+    if (cat === 'skins') {
+      currentCat = 'skins';
+      selectedSku = null;
+      renderSkinsCatalog();   // <-- you will add this function in store.js
+      return;
+    }
+
+    // Normal store category behavior
+    currentCat = cat;
+    selectedSku = null;
+    renderCatalog(itemsByCategory[currentCat] || []);
   });
+});
+
+    function renderSkinsCatalog() {
+    grid.innerHTML = '';
+
+    // If you later want “selected skin” highlighting, use selectedSku
+    SKINS.forEach(file => {
+      const name = niceNameFromFile(file);
+      const card = document.createElement('div');
+      card.className = 'card skin-card';
+      card.dataset.sku = file;
+
+      card.innerHTML = `
+        <div class="skin-thumb">
+          <img src="./assets/artwork/Skins/${file}" alt="${name}" />
+
+        </div>
+        <div class="item-name">${name}</div>
+        <div class="item-price">Skin</div>
+        <div class="item-actions">
+          <button class="use-btn" type="button">Equip</button>
+        </div>
+      `;
+
+      // Equip button
+      card.querySelector('.use-btn').addEventListener('click', () => {
+        // For now: open = closed = same image until you add closed-eye versions
+        setDragonSkin({ open: `Skins/${file}`, closed: `Skins/${file}` });
+        showNotification(`${name} equipped! 🐉✨`, 'success');
+      });
+
+      // Optional: click card (select highlight)
+      card.addEventListener('click', (e) => {
+        if (e.target.tagName.toLowerCase() === 'button') return;
+        selectedSku = (selectedSku === file) ? null : file;
+        highlightSelection();
+      });
+
+      grid.appendChild(card);
+    });
+
+    highlightSelection();
+  }
+
 
   function renderCatalog(categoryItems = []) {
     grid.innerHTML = '';
@@ -262,6 +339,12 @@ export function initStore({ getDoros, spendDoros }) {
     const evt = new CustomEvent('store:itemUsed', { detail });
     window.dispatchEvent(evt);
   }
+
+  function emitOpenSkins() {
+    const evt = new CustomEvent('store:openSkins');
+    window.dispatchEvent(evt);
+  }
+
 
   // Optional: keep this for manual use button if you want to keep it
   useBtn?.addEventListener('click', () => {

@@ -8,11 +8,21 @@
 
 .store-panel {
   position: fixed;
-  inset: auto 50% 30vh auto;
-  transform: translateX(50%);
+
+  /* IMPORTANT: clear any old inset/bottom anchoring */
+  inset: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+
+  /* Anchor from the TOP so it grows downward */
+  top: -190px !important;        /* move higher/lower here */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+
   width: min(980px, 92vw);
-  max-height: 78vh;
+  max-height: calc(100vh - 120px);
   overflow: auto;
+
   border-radius: 28px;
   z-index: 31;
   border: 2px solid rgba(194, 178, 140, .4);
@@ -28,6 +38,11 @@
   color: #2b2213;
   pointer-events: auto;
 }
+
+
+
+
+
 
 .store-header {
   display: flex;
@@ -115,6 +130,11 @@
   outline-offset: 2px;
 }
 
+/* NEW: Skins tab (keeps the same style; class is here if you want to customize later) */
+.category-tabs .tab-skins {
+  /* no special styling needed yet */
+}
+
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -178,6 +198,24 @@
 .card button:active {
   transform: translateY(0);
 }
+
+/* --- Skins tab cards (reuse existing .card look) --- */
+.card.skin-card .skin-thumb {
+  width: 100%;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.card.skin-card .skin-thumb img {
+  max-width: 90px;
+  max-height: 90px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,.18));
+}
+
 
 .buy-btn {
   background: linear-gradient(#ffd36b, #f2b942);

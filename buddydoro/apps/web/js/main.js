@@ -13,7 +13,7 @@ import { initTasks, getActiveTask } from './features/taskfeature/index.js';
 import { initAiPlan } from './features/aiPlan.js';
 
 // ---- Auth guard -------------------------------------------------
-const authToken = localStorage.getItem('authToken');
+const authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
 if (!authToken) {
   window.location.href = 'login.html';
   throw new Error('Not authenticated');

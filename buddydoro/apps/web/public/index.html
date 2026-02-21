@@ -51,7 +51,8 @@
   <!-- Background night/day switch (transition helper) -->
   <link rel="stylesheet" href="../styles/backgroundnight.css" />
 
-
+  <!-- Logout Modal -->
+  <link rel="stylesheet" href="../styles/logoutModal.css"
   <!-- Theme last so it can override colors if needed -->
   <link rel="stylesheet" href="../styles/themes.css" />
 </head>
@@ -160,9 +161,9 @@
           </button>
           <div id="greetMenu" class="greet-menu" role="menu" hidden>
             <div class="greet-menu-section" role="none">
-              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/account">Account
+              <button type="button" class="greet-menu-item" role="menuitem" data-nav="./account.html">Account
                 Settings</button>
-              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/profile">Profile
+              <button type="button" class="greet-menu-item" role="menuitem" data-nav="./profile.html">Profile
                 Settings</button>
             </div>
             <hr class="greet-menu-divider" />
@@ -474,7 +475,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       Rain.init({ mount: '#scene', density: 0.7, speed: 1.0, wind: 0.5 });
 
-      <!-- >>> NEW: schedule ~10 random 5-minute showers per day -->
+      // NEW: schedule ~10 random 5-minute showers per day 
       Rain.enableRandomDaily({
         timesPerDay: 10,              // ~10 times/day
         durationMs: 5 * 60 * 1000,    // 5 minutes each

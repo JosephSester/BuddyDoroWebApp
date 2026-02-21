@@ -155,17 +155,22 @@ export function initDiamondStore() {
     }
   }
 
-  function processPayment(method) {
-    // Simulate payment processing
-    const currentBalance = Number(balance.textContent || "0");
-    balance.textContent = currentBalance + selectedPack.amount;
+  async function processPayment(method) {
+    try {
+      await Diamonds.addDiamond(selectedPack.amount);
 
-    // Show success and return to packs
-    alert(`Payment successful! You received ${selectedPack.amount} diamonds via ${method}.`);
-    currentView = 'packs';
-    selectedPack = null;
-    renderPacks();
+      alert(`Payment successful! You received ${selectedPack.amount} diamonds via ${method}.`);
+
+      currentView = 'packs';
+      selectedPack = null;
+      renderPacks();
+
+    } catch (err) {
+      console.error(err);
+      alert('Payment failed.');
+    }
   }
+
 
   function open() {
     currentView = 'packs';

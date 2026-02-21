@@ -30,6 +30,27 @@ router.patch('/doros', authMiddleware, async (req, res) => {
   }
 });
 
+router.patch('/diamonds', authMiddleware, async (req, res) => {
+  try {
+    const { delta } = req.body;
+
+    if (typeof delta !== 'number' || isNaN(delta)) {
+      return res.status(400).json({ error: 'delta must be a number' });
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.diamonds = Math.max(0, (user.diamonds || 0) + delta);
+    await user.save();
+
+    res.json({ diamonds: user.diamonds });
+  } catch (err) {
+    console.error('PATCH /user/diamonds error:', err);
+    res.status(500).json({ error: 'Failed to update Diamonds' });
+  }
+});
+
 // // Optional: GET for current balance (if you want redundancy)
 // router.get('/doros', authMiddleware, async (req, res) => {
 //   const user = await User.findById(req.user.userId);

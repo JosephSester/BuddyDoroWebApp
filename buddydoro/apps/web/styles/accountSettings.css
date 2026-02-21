@@ -1,0 +1,252 @@
+/* =========================================================
+   Account Settings (BuddyDoro themed, security tone)
+   - Glass cards with gold trim (on-brand)
+   - Slightly calmer/stronger contrast than Profile page
+   - Clear form hierarchy + accessible focus
+   ========================================================= */
+
+.bd-page{
+  position: relative;
+  min-height: 100vh;
+  padding: 24px;
+  color: #2b2213;
+
+  /* Background artwork (same as app) */
+  background-image: url("../public/assets/artwork/BackgroundDay.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Darken background slightly so security UI reads clearly */
+.bd-page::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.28));
+  z-index: -1;
+}
+
+/* =========================================================
+   Header row: back button + centered title/subtitle
+   ========================================================= */
+
+.bd-settings-top{
+  max-width: 760px;
+  margin: 0 auto 14px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+}
+
+/* spacer column keeps title centered */
+.bd-settings-top::after{ content: ""; }
+
+.bd-back-link{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 900;
+  color: #2b2213;
+
+  border: 2px solid rgba(224,162,51,.85);
+  background: radial-gradient(120px circle at 50% 42%, rgba(255,255,255,.55), rgba(255,255,255,.12) 70%), rgba(255,255,255,.08);
+  box-shadow: 0 10px 22px rgba(0,0,0,.18), inset 0 0 0 6px rgba(255,210,100,.16);
+}
+
+.bd-back-link:focus-visible{
+  outline: 3px solid #2b2213;
+  outline-offset: 2px;
+}
+
+.bd-settings-header{
+  text-align: center;
+}
+
+.bd-settings-title{
+  margin: 0;
+  font-size: 32px;
+  letter-spacing: .2px;
+}
+
+.bd-settings-subtitle{
+  margin: 6px 0 0;
+  font-weight: 800;
+  opacity: .85;
+}
+
+/* =========================================================
+   Layout shell
+   ========================================================= */
+
+.bd-settings-shell{
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   Cards (slightly “firmer” than profile page)
+   ========================================================= */
+
+.bd-card{
+  border-radius: 22px;
+  padding: 18px;
+  margin-bottom: 14px;
+
+  /* Calmer glass background: more opaque for sensitive forms */
+  background: radial-gradient(200px circle at 35% 15%, rgba(255,255,255,.75), rgba(255,255,255,.18) 72%), rgba(255,255,255,.92);
+  border: 2px solid rgba(224,162,51,.85);
+  box-shadow: 0 16px 36px rgba(0,0,0,.22), inset 0 0 0 5px rgba(255,210,100,.14);
+}
+
+.bd-card-muted{
+  background: radial-gradient(200px circle at 35% 15%, rgba(255,255,255,.65), rgba(255,255,255,.14) 72%), rgba(255,255,255,.86);
+  border-color: rgba(224,162,51,.55);
+}
+
+.bd-card-title{
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: .2px;
+}
+
+/* =========================================================
+   Form fields
+   ========================================================= */
+
+.bd-form{ display: block; }
+
+.bd-field{
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.bd-label{
+  font-weight: 950;
+  font-size: 14px;
+}
+
+/* Inputs: clean, high-contrast, “secure” */
+.bd-input{
+  height: 48px;
+  border-radius: 14px;
+  padding: 0 14px;
+
+  border: 2px solid rgba(43,34,19,.28);
+  background: rgba(255,255,255,.98);
+  font-weight: 850;
+  color: #2b2213;
+
+  box-shadow: inset 0 4px 10px rgba(0,0,0,.09);
+}
+
+.bd-input::placeholder{
+  color: rgba(43,34,19,.45);
+  font-weight: 700;
+}
+
+/* Strong focus ring for accessibility */
+.bd-input:focus-visible{
+  outline: 3px solid rgba(231,195,90,.62);
+  outline-offset: 2px;
+  border-color: rgba(224,162,51,.85);
+}
+
+.bd-hint{
+  font-size: 12px;
+  font-weight: 750;
+  opacity: .82;
+}
+
+/* Stronger hint for sensitive explanation */
+.bd-hint-strong{
+  font-weight: 900;
+  opacity: .9;
+}
+
+/* =========================================================
+   Actions + buttons
+   ========================================================= */
+
+.bd-actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.bd-btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 950;
+  border: 2px solid transparent;
+  user-select: none;
+}
+
+.bd-btn-primary{
+  border-color: #e0a233;
+  background: linear-gradient(#ffd36b,#f2b942);
+  color: #2b2213;
+  box-shadow: 0 10px 22px rgba(0,0,0,.18);
+}
+
+.bd-btn-secondary{
+  border-color: rgba(43,34,19,.22);
+  background: rgba(255,255,255,.70);
+  color: #2b2213;
+  box-shadow: 0 10px 18px rgba(0,0,0,.12);
+}
+
+.bd-btn:active{ transform: translateY(1px); }
+
+.bd-btn:focus-visible{
+  outline: 3px solid #2b2213;
+  outline-offset: 2px;
+}
+
+/* Disabled state for save button while saving */
+.bd-btn[disabled]{
+  opacity: .65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================================
+   Status message (success/error/info)
+   ========================================================= */
+
+.bd-msg{
+  margin: 10px 0 0;
+  font-weight: 950;
+  min-height: 18px;
+}
+
+.bd-msg.is-info{ color: rgba(43,34,19,.85); }
+.bd-msg.is-success{ color: #1f6b2a; }
+.bd-msg.is-error{ color: #b22f1e; }
+
+.bd-input:disabled{ opacity: .75; }
+
+/* =========================================================
+   Mobile tightening
+   ========================================================= */
+
+@media (max-width: 520px){
+  .bd-page{ padding: 16px; }
+  .bd-settings-title{ font-size: 26px; }
+  .bd-card{ padding: 16px; }
+}

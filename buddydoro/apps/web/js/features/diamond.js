@@ -1,48 +1,70 @@
-// diamond.js
-const STORAGE_KEY = 'buddyDoro.diamondBalance';
+let diamondBalance = 0;
 
 function formatNumber(num) {
   return Number(num || 0).toLocaleString();
 }
 
 function getBalance() {
-  return Number(localStorage.getItem(STORAGE_KEY)) || 0;
+  return diamondBalance;
 }
 
 function setBalance(amount) {
-  localStorage.setItem(STORAGE_KEY, amount);
+  diamondBalance = Math.max(0, Number(amount) || 0);
   updateUI();
 }
 
-function add(amount) {
-  setBalance(getBalance() + amount);
+async function changeBalance(delta) {
+
+  if (delta === 0) return;
+
+    const oldBalance = diamondBalance;
+    diamondBalance += delta;
+    updateUI();
+
+  try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('No auth token');
+
+      const res = await fetch('http://localhost:3000/api/user/diamonds', {
+        method: 'PATCH',
+        headers: {
+             'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+           },
+        body: JSON.stringify({ delta })
+     });
+
+    if (!res.ok) throw new Error('Diamond update failed');
+
+    const data = await res.json();
+    setBalance(data.diamonds);
+    updateUI();
+    } catch (err) {
+      console.error('Failed to sync Doros:', err);
+      balance = oldBalance; // Rollback
+      updateUI();
+    }
 }
 
-function spend(amount) {
-  const current = getBalance();
-  if (current < amount) return false;
-  setBalance(current - amount);
+async function addDiamond(amount) {
+  await changeBalance(amount);
+}
+
+async function spendDiamond(amount) {
+  if (diamondBalance < amount) return false;
+  await changeBalance(-amount);
   return true;
 }
 
 function updateUI() {
   const el = document.getElementById('diamondAmount');
-  if (el) el.textContent = formatNumber(getBalance());
-}
-
-function init() {
-  if (localStorage.getItem(STORAGE_KEY) === null) {
-    localStorage.setItem(STORAGE_KEY, '0');
-  }
-  updateUI();
+  if (el) el.textContent = formatNumber(diamondBalance);
 }
 
 window.Diamonds = {
-  init,
   getBalance,
   setBalance,
-  add,
-  spend
+  addDiamond,
+  spendDiamond
 };
 
-document.addEventListener('DOMContentLoaded', init);

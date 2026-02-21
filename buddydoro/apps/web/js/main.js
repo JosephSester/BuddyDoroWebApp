@@ -137,6 +137,9 @@ async function initUserTopbarAndEarnDoros() {
 
     // This is all you need — topbar will paint the pill automatically
     earnDoros.setBalance(user?.doros ?? 0);
+    if (window.Diamonds) {
+      window.Diamonds.setBalance(user?.diamonds ?? 0);
+    }
 
     // Force greeting update only (keep this, it's safe)
     const greetTextEl = document.getElementById('greetText');

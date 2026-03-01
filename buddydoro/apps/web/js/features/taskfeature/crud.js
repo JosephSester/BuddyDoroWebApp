@@ -57,6 +57,7 @@ export function initTaskCrud({ renderAllTasks, onShouldStopTimer } = {}) {
             const [removed] = state.tasks.splice(i, 1);
             if (removed.id === state.activeTaskId) {
                 state.activeTaskId = null;
+                showTaskNotification('Active task deleted — timer stopped.', 'warning');
                 try { onShouldStopTimer?.(); } catch { }
             }
             deleteTaskPanel(id);

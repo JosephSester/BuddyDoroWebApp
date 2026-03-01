@@ -77,6 +77,7 @@ router.post('/login', async (req, res) => {
       name: user.name,
       doros: user.doros,
       diamonds: user.diamonds,
+      hasSeenOnboarding: user.hasSeenOnboarding,
     });
   } catch (err) {
     console.error('Login error:', err);

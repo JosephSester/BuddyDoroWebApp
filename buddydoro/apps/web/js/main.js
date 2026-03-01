@@ -11,6 +11,7 @@ import { initStore } from './features/store.js';
 import { initDiamondStore } from './features/diamondStore.js';
 import { initTasks, getActiveTask } from './features/taskfeature/index.js';
 import { initAiPlan } from './features/aiPlan.js';
+import { API_BASE } from './api/apiClient.js';
 
 // ---- Auth guard -------------------------------------------------
 const authToken = localStorage.getItem('authToken');
@@ -40,6 +41,9 @@ const timer = initTimer({
 
 const focusPanelSlot = document.getElementById('focusPanelSlot');
 const todoButton = document.getElementById('addTasksPanel');
+const tasksStack = document.getElementById('tasksStack');
+const focusTaskNameEl = document.getElementById('focusTaskName');
+const chipRow = document.querySelector('.tasks-chip-row');
 let currentFocusTask = null;
 
 const setTodoButtonVisible = (visible) => {
@@ -52,6 +56,12 @@ const clearFocusPanel = ({ clearTask = false } = {}) => {
   focusPanelSlot.innerHTML = '';
   focusPanelSlot.hidden = true;
   if (clearTask) currentFocusTask = null;
+  if (tasksStack) tasksStack.hidden = false;
+  if (chipRow) chipRow.hidden = false;
+  if (focusTaskNameEl) {
+    focusTaskNameEl.textContent = '';
+    focusTaskNameEl.hidden = true;
+  }
 };
 
 const showFocusPanel = (task) => {
@@ -73,12 +83,39 @@ const showFocusPanel = (task) => {
   focusPanelSlot.innerHTML = '';
   focusPanelSlot.appendChild(clone);
   focusPanelSlot.hidden = false;
+  if (tasksStack) tasksStack.hidden = true;
+  if (chipRow) chipRow.hidden = true;
+  if (focusTaskNameEl) {
+    focusTaskNameEl.textContent = task?.name || '';
+    focusTaskNameEl.hidden = !task?.name;
+  }
+};
+
+let completedFocusSessions = 0;
+const sessionCountEl = document.getElementById('timerSessionCount');
+if (sessionCountEl) sessionCountEl.hidden = false;
+
+const updateSessionCount = () => {
+  if (!sessionCountEl) return;
+  sessionCountEl.textContent = `${completedFocusSessions} session${completedFocusSessions !== 1 ? 's' : ''} done`;
+  sessionCountEl.hidden = false;
 };
 
 const taskPomodoro = initTaskPomodoroLogic({
   timer,
-  onFocusStart: ({ task }) => showFocusPanel(task),
+  onFocusStart: ({ task }) => {
+    completedFocusSessions = 0;
+    updateSessionCount();
+    showFocusPanel(task);
+  },
   onFocusStop: () => clearFocusPanel({ clearTask: true }),
+});
+
+timer.onComplete(({ mode }) => {
+  if (mode === 'focus') {
+    completedFocusSessions++;
+    updateSessionCount();
+  }
 });
 
 const manualPomodoro = initManualPomodoroLogic({
@@ -111,7 +148,7 @@ timer.setLaunchHandler?.((mode) => {
 // ---- Topbar + EarnDoros -----------------------------------------------------
 async function initUserTopbarAndEarnDoros() {
   try {
-    const res = await fetch('http://localhost:3000/api/auth/me', {
+    const res = await fetch(`${API_BASE}/auth/me`, {
       headers: { Authorization: 'Bearer ' + authToken },
     });
 

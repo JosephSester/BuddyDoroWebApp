@@ -1,4 +1,6 @@
 // earndoros.js
+import { API_BASE } from '../api/apiClient.js';
+
 const BLOCK_SECONDS = 5 * 60;
 const DOROS_PER_BLOCK = 50;
 
@@ -36,7 +38,7 @@ export function initEarnDoros(timer, topbar) {
       const token = localStorage.getItem('authToken');
       if (!token) throw new Error('No auth token');
 
-      const res = await fetch('http://localhost:3000/api/user/doros', {
+      const res = await fetch(`${API_BASE}/user/doros`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +108,7 @@ export function initEarnDoros(timer, topbar) {
           const token = localStorage.getItem('authToken');
           if (!token) throw new Error('No token');
 
-          const res = await fetch('http://localhost:3000/api/user/doros', {
+          const res = await fetch(`${API_BASE}/user/doros`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',

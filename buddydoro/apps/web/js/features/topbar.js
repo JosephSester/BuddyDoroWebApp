@@ -25,7 +25,7 @@ function paintDoros() {
 
 let greetMenuOpen = false;
 let greetCleanup = [];
-let menuHidden = false;
+let menuHidden = true;
 let timerActive = false;
 
 function setTasksChipRowHidden(hidden) {

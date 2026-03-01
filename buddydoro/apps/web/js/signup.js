@@ -1,3 +1,5 @@
+import { API_BASE } from './api/apiClient.js';
+
 // Ensure the DOM is fully loaded before running the script
 document.addEventListener('DOMContentLoaded', () => {
   const signupForm = document.getElementById('signupForm');
@@ -92,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       // Send data to backend
-      const res = await fetch('http://localhost:3000/api/auth/signup', {
+      const res = await fetch(`${API_BASE}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, confirmPassword }) // match your backend fields

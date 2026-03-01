@@ -2,6 +2,10 @@
 // LocalStorage helpers for panels and session mapping.
 
 import { PANELS_STORAGE_KEY, TASK_PANEL_MAP_KEY, TASK_SESSIONS_MAP_KEY } from './constants.js';
+import { showNotification } from '../../utils/notifications.js';
+
+const QUOTA_MSG = 'Storage is full — some data may not be saved. Try clearing browser data.';
+const isQuotaError = (e) => e?.name === 'QuotaExceededError' || e?.name === 'NS_ERROR_DOM_QUOTA_REACHED';
 
 export function readTaskPanelMap() {
     try {
@@ -11,7 +15,11 @@ export function readTaskPanelMap() {
 }
 
 export function writeTaskPanelMap(map) {
-    try { localStorage.setItem(TASK_PANEL_MAP_KEY, JSON.stringify(map)); } catch { }
+    try {
+        localStorage.setItem(TASK_PANEL_MAP_KEY, JSON.stringify(map));
+    } catch (e) {
+        if (isQuotaError(e)) showNotification(QUOTA_MSG, 'error');
+    }
 }
 
 export function setTaskPanel(taskId, panelId) {
@@ -35,7 +43,11 @@ export function readTaskSessionsMap() {
 }
 
 export function writeTaskSessionsMap(map) {
-    try { localStorage.setItem(TASK_SESSIONS_MAP_KEY, JSON.stringify(map)); } catch { }
+    try {
+        localStorage.setItem(TASK_SESSIONS_MAP_KEY, JSON.stringify(map));
+    } catch (e) {
+        if (isQuotaError(e)) showNotification(QUOTA_MSG, 'error');
+    }
 }
 
 export function setTaskSessions(taskId, sessions) {
@@ -67,6 +79,7 @@ export function savePanelsToStorage() {
         console.log('[Panels] localStorage now contains:', localStorage.getItem(PANELS_STORAGE_KEY));
     } catch (error) {
         console.error('[Panels] Failed to save panel structure:', error);
+        if (isQuotaError(error)) showNotification(QUOTA_MSG, 'error');
     }
 }
 

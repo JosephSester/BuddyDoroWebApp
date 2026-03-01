@@ -76,7 +76,7 @@
     <header class="topbar" aria-label="User header">
       <div class="top-chips">
 
-        <!-- Store chip (opens window) -->
+          <!-- Store chip (opens window) -->
         <button class="chip glass-chip store-chip" id="storeChip" type="button" aria-haspopup="dialog"
           aria-controls="storeDialog">
           <svg class="store-icon" viewBox="0 0 64 64" aria-hidden="true">
@@ -269,9 +269,11 @@
 
     <!-- Timer & controls (right) -->
     <div class="right-ui">
+      <div id="focusTaskName" class="focus-task-name" hidden></div>
       <div id="modeLabel" class="timer-label">Idle</div>
       <div class="timer-card" aria-live="polite">
         <div id="timerDisplay" class="timer-value">25:00</div>
+        <div id="timerSessionCount" class="timer-session-count">0 sessions done</div>
       </div>
 
       <div class="btn-row">

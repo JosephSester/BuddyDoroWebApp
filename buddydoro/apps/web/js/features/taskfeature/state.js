@@ -11,6 +11,7 @@ export const state = {
     suppressActiveInTodo: false,
     todoDialogSetupDone: false,
     chipRowObserverAttached: false,
+    chipRowObserver: null,
     domIdCounter: 0,
     handlers: {
         onActiveTaskChange: () => { },
@@ -21,4 +22,4 @@ export const state = {
     },
 };
 
-export const makeDomId = (prefix = 'id') => `${prefix}-${Date.now()}-${++state.domIdCounter}`;
+export const makeDomId = (prefix = 'id') => `${prefix}-${++state.domIdCounter}`;

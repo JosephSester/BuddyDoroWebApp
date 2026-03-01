@@ -25,6 +25,7 @@ export async function createTask(text, panelId = 'tasksPanel-1') {
  * Update a task via API
  */
 export async function updateTask(id, updates) {
+    if (id == null) throw new Error('updateTask: id is required');
     return await apiPut(`/tasks/${id}`, updates);
 }
 
@@ -32,6 +33,7 @@ export async function updateTask(id, updates) {
  * Delete a task via API
  */
 export async function deleteTask(id) {
+    if (id == null) throw new Error('deleteTask: id is required');
     return await apiDelete(`/tasks/${id}`);
 }
 

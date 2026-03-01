@@ -75,6 +75,14 @@
   hyphens: auto;
 }
 
+.timer-session-count {
+  font-size: clamp(10px, 1.2vw, 12px);
+  font-weight: 600;
+  color: rgba(43, 34, 19, 0.65);
+  letter-spacing: 0.3px;
+  margin-top: 10px;
+}
+
 .timer-value {
   font-weight: 800;
   font-size: clamp(28px, 4.5vw, 40px);
@@ -968,4 +976,16 @@
 .chip:focus-visible {
   outline: 3px solid #2b2213;
   outline-offset: 2px;
+}
+.focus-task-name {
+  font-weight: 800;
+  font-size: clamp(15px, 2.2vw, 22px);
+  color: #2b2213;
+  text-align: center;
+  max-width: 90%;
+  line-height: 1.3;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  margin-bottom: 2px;
 }

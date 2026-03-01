@@ -62,7 +62,7 @@ export async function initTasks(opts = {}) {
         state.els.tasksList = list;
 
         if (!list.dataset.panelId || list.dataset.panelId === '') {
-            const panelId = panel.id || `panel-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            const panelId = panel.id || crypto.randomUUID();
             list.dataset.panelId = panelId;
             console.log(`[Tasks] Setting panelId: ${panelId} for list`);
         }

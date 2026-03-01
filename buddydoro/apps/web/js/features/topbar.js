@@ -15,7 +15,7 @@ let openStoreCb = null;          // ⭐ UPDATED (will now be assigned)
 
 let greetMenuOpen = false;
 let greetCleanup = [];
-let menuHidden = false;
+let menuHidden = true;
 let timerActive = false;
 
 /* =========================================================

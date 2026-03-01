@@ -58,4 +58,17 @@ router.patch('/diamonds', authMiddleware, async (req, res) => {
 //   res.json({ doros: user.doros });
 // });
 
+router.patch('/onboarding', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    user.hasSeenOnboarding = true;
+    await user.save();
+    res.json({ hasSeenOnboarding: user.hasSeenOnboarding });
+  } catch (err) {
+    console.error('PATCH /user/onboarding error:', err);
+    res.status(500).json({ error: 'Failed to update onboarding status' });
+  }
+});
+
 module.exports = router;

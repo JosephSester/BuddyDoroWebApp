@@ -1,7 +1,7 @@
 // apps/web/js/features/timerFeature/index.js
 // Timer composition root.
 import { DEFAULT_MINUTES, LIMITS, STORAGE_KEYS } from './constants.js';
-import { readStored, writeStored } from './storage.js';
+import { readStored, writeStored, saveTimerSession, loadTimerSession, clearTimerSession } from './storage.js';
 import { formatSeconds } from './format.js';
 import { initTimerSummaries } from './summary.js';
 import { initTimerMenus } from './menu.js';
@@ -131,6 +131,32 @@ export function initTimer(hooks = {}) {
     menus.wireMenu();
     ui.showTimer();
     ui.updateUI();
+
+    // ── Session restore ──────────────────────────────────────────────────────
+    const savedSession = loadTimerSession();
+    if (savedSession) {
+        state.mode = savedSession.mode;
+        state.duration = savedSession.duration;
+        state.remaining = savedSession.remaining;
+        state.labelOverride = savedSession.labelOverride;
+        ui.showTimer();
+        ui.updateUI();
+        const mins = Math.ceil(savedSession.remaining / 60);
+        console.info(`[Timer] Restored ${savedSession.mode} session — ${mins}m remaining (paused)`);
+    }
+
+    // Save to localStorage whenever the timer pauses or the page is about to unload.
+    // Clear it when the session ends cleanly (stop or natural completion).
+    bus.on('onPause', () => {
+        if (state.mode && state.remaining > 60) saveTimerSession(state);
+    });
+    bus.on('onStop',     () => clearTimerSession());
+    bus.on('onComplete', () => clearTimerSession());
+
+    window.addEventListener('beforeunload', () => {
+        if (state.mode && state.remaining > 60) saveTimerSession(state);
+    });
+    // ────────────────────────────────────────────────────────────────────────
 
     return {
         start: controls.start,

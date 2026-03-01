@@ -33,8 +33,18 @@ export function ensureChipRowObserver() {
     if (!stack) return;
     state.chipRowObserverAttached = true;
     placeChipRow();
-    new ResizeObserver(() => placeChipRow()).observe(stack);
+    state.chipRowObserver = new ResizeObserver(() => placeChipRow());
+    state.chipRowObserver.observe(stack);
     window.addEventListener('resize', placeChipRow);
+}
+
+export function disconnectChipRowObserver() {
+    if (state.chipRowObserver) {
+        state.chipRowObserver.disconnect();
+        state.chipRowObserver = null;
+    }
+    window.removeEventListener('resize', placeChipRow);
+    state.chipRowObserverAttached = false;
 }
 
 export function countPanels() {
@@ -242,7 +252,7 @@ export async function createPanelWithTitle({ title = 'Goal', onAddTaskClick = ()
         console.log('[Panels] Created on server:', serverPanel);
     } catch (e) {
         console.warn('[Panels] Failed to create on server:', e);
-        serverPanel = { id: `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, title };
+        serverPanel = { id: crypto.randomUUID(), title };
     }
 
     const clone = createPanelFromTemplate({

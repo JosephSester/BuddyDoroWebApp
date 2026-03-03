@@ -1,0 +1,296 @@
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-topbar);
+  padding: var(--space-3) var(--space-5);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  pointer-events: none;
+}
+
+.topbar > * {
+  pointer-events: auto;
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* ── Chip base (doros, diamonds, store) ──────────────── */
+.chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--color-brown-dark);
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.chip:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.chipIcon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.chipValue {
+  font-weight: var(--fw-extrabold);
+}
+
+/* ── Store chip ──────────────────────────────────────── */
+.storeChip {
+  background: linear-gradient(135deg, var(--color-terracotta-light), var(--color-terracotta));
+  border-color: var(--color-burnt-orange);
+  color: var(--color-cream);
+  box-shadow: var(--shadow-warm);
+}
+
+.storeChip:hover {
+  background: linear-gradient(135deg, var(--color-ochre-light), var(--color-ochre));
+  box-shadow: 0 10px 24px rgba(192, 98, 42, 0.35);
+}
+
+/* ── Greet bubble ────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-topbar) - 1);
+}
+
+/* Wrapper — positions the absolute panel relative to the button */
+.greetWrap {
+  position: relative;
+  z-index: var(--z-topbar);
+}
+
+/*
+ * The pill button.
+ * Panel is position:absolute so it doesn't factor into this button's width.
+ * --pill-width is measured by JS (correct now since panel is out of flow).
+ *
+ * Opening: width expands first (no delay), then panel drops (0.18s delay).
+ * Closing: panel collapses first (no delay), then width shrinks (0.25s delay).
+ */
+.greetBubble {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  width: var(--pill-width, fit-content);
+  white-space: nowrap;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--color-brown-dark);
+  cursor: pointer;
+  /* Closing: width + radius ease back in after content collapses */
+  transition:
+    width     0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.26s,
+    border-radius 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0.22s,
+    border-bottom-color 0.05s ease 0.22s,
+    box-shadow 0.25s ease;
+}
+
+.greetBubble:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Opening: width + radius expand first, then content drops */
+.greetOpen .greetBubble {
+  width: 300px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-bottom-color: transparent;
+  box-shadow: var(--shadow-lg);
+  transition:
+    width     0.3s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+    border-radius 0.25s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+    border-bottom-color 0.05s ease 0.25s,
+    box-shadow 0.25s ease;
+}
+
+.greetAvatar {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-ochre-light), var(--color-terracotta));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: var(--fw-extrabold);
+  color: white;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* ── Dropdown panel — absolute, tracks the button width ─── */
+.panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  /* Start at the same width as the pill, expand to 300px with the button */
+  width: var(--pill-width, fit-content);
+  margin-top: -2px; /* overlap button's bottom border for a seamless join */
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--glass-border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+  /* Closing: content collapses first, then width shrinks with button */
+  transition:
+    width     0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.26s,
+    grid-template-rows 0.22s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+    opacity   0.15s ease 0s;
+}
+
+/* Opening: width expands with button, then content drops */
+.greetOpen .panel {
+  width: 300px;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    width     0.3s cubic-bezier(0.4, 0, 0.2, 1) 0s,
+    grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.26s,
+    opacity   0.25s ease 0.26s;
+}
+
+.panelInner {
+  overflow: hidden;
+}
+
+/* ── Content inside the panel ────────────────────────── */
+.panelHeader {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.panelGreeting {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.greetingLabel {
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-brown-light);
+}
+
+.greetingName {
+  font-family: var(--font-primary);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-brown-dark);
+}
+
+.panelNav {
+  padding: var(--space-2);
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-brown-medium);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navBtn:hover {
+  background: rgba(192, 98, 42, 0.08);
+  color: var(--color-brown-dark);
+}
+
+.navBtn.danger { color: var(--color-dusty-rose); }
+.navBtn.danger:hover { background: rgba(201, 123, 123, 0.10); }
+
+.panelTabs {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tabBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--color-brown-light);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.tabBtn:hover {
+  background: rgba(255, 255, 255, 0.40);
+  color: var(--color-brown-medium);
+}
+
+.tabActive {
+  background: rgba(192, 98, 42, 0.10);
+  border-color: rgba(192, 98, 42, 0.25);
+  color: var(--color-terracotta);
+}
+
+.tabActive:hover {
+  background: rgba(192, 98, 42, 0.15);
+  color: var(--color-terracotta);
+}
+
+.panelContent {
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  max-height: 60vh;
+  overflow-y: auto;
+}

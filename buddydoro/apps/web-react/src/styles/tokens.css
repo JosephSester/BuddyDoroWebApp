@@ -1,0 +1,98 @@
+:root {
+  /* ── Warm Earthy Core ───────────────────────────────── */
+  --color-terracotta:        #c0622a;
+  --color-terracotta-light:  #d97d4b;
+  --color-terracotta-muted:  #e8a882;
+  --color-burnt-orange:      #b84f1e;
+  --color-ochre:             #c98a2e;
+  --color-ochre-light:       #e8b557;
+
+  /* ── Backgrounds ────────────────────────────────────── */
+  --color-cream:             #faf4e8;
+  --color-cream-warm:        #f5ead4;
+  --color-parchment:         #ede0c8;
+
+  /* ── Text ───────────────────────────────────────────── */
+  --color-brown-dark:        #2b2213;
+  --color-brown-medium:      #5c4033;
+  --color-brown-light:       #8c6b55;
+
+  /* ── Semantic ───────────────────────────────────────── */
+  --color-sage:              #7a9e7e;
+  --color-sage-light:        #a8c5aa;
+  --color-dusty-rose:        #c97b7b;
+  --color-sky-soft:          #a8c5d8;
+  --color-sky-muted:         #c5dce8;
+
+  /* ── Neutral / Surface ──────────────────────────────── */
+  --color-surface:           rgba(250, 244, 232, 0.85);
+  --color-surface-solid:     #faf4e8;
+  --color-overlay:           rgba(43, 34, 19, 0.55);
+  --color-border:            rgba(192, 98, 42, 0.25);
+  --color-border-strong:     rgba(192, 98, 42, 0.55);
+
+  /* ── Glass Morphism ─────────────────────────────────── */
+  --glass-bg:                rgba(250, 244, 232, 0.55);
+  --glass-border:            rgba(232, 180, 120, 0.40);
+  --glass-blur:              blur(14px) saturate(160%);
+  --glass-inner-ring:        inset 0 0 0 1px rgba(255, 248, 235, 0.30);
+
+  /* ── Typography ─────────────────────────────────────── */
+  --font-primary:            'Nunito', ui-rounded, system-ui, sans-serif;
+  --font-body:               'Lato', 'Nunito', system-ui, sans-serif;
+
+  --text-xs:    11px;
+  --text-sm:    13px;
+  --text-base:  15px;
+  --text-md:    17px;
+  --text-lg:    20px;
+  --text-xl:    24px;
+  --text-2xl:   30px;
+  --text-3xl:   38px;
+
+  --fw-normal:     400;
+  --fw-semibold:   600;
+  --fw-bold:       700;
+  --fw-extrabold:  800;
+
+  /* ── Spacing ────────────────────────────────────────── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+
+  /* ── Border Radius ──────────────────────────────────── */
+  --radius-sm:   8px;
+  --radius-md:   14px;
+  --radius-lg:   20px;
+  --radius-xl:   28px;
+  --radius-pill: 999px;
+  --radius-full: 50%;
+
+  /* ── Shadows ────────────────────────────────────────── */
+  --shadow-sm:   0 2px 8px rgba(43, 34, 19, 0.10);
+  --shadow-md:   0 6px 18px rgba(43, 34, 19, 0.16);
+  --shadow-lg:   0 12px 32px rgba(43, 34, 19, 0.22);
+  --shadow-warm: 0 8px 24px rgba(192, 98, 42, 0.20);
+
+  /* ── Timer ──────────────────────────────────────────── */
+  --timer-focus-bg:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,.40), rgba(255,255,255,.08) 70%),
+    linear-gradient(135deg, rgba(232,165,80,.45) 0%, rgba(192,98,42,.30) 100%);
+  --timer-break-bg:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,.40), rgba(255,255,255,.08) 70%),
+    linear-gradient(135deg, rgba(168,197,216,.55) 0%, rgba(100,150,185,.35) 100%);
+
+  /* ── Z-Index ────────────────────────────────────────── */
+  --z-scene:     0;
+  --z-companion: 1;
+  --z-ui:        10;
+  --z-topbar:    12;
+  --z-modal:     40;
+  --z-toast:     60;
+}

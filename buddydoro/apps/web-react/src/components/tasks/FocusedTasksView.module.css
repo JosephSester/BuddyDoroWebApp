@@ -1,0 +1,102 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pickerHint {
+  font-family: var(--font-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-brown-light);
+  margin: 0 0 var(--space-1);
+}
+
+.pickRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--glass-bg);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  text-align: left;
+}
+
+.pickRow:hover {
+  background: rgba(255, 255, 255, 0.50);
+  border-color: var(--color-terracotta-muted);
+}
+
+.pickName {
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-bold);
+  color: var(--color-brown-dark);
+}
+
+.pickAction {
+  font-family: var(--font-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-terracotta);
+}
+
+.empty {
+  text-align: center;
+  padding: var(--space-6) var(--space-2);
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  color: var(--color-brown-light);
+  line-height: 1.5;
+}
+
+/* ── Focused goal view ───────────────────────────────── */
+.focused {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.focusedHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-brown-medium);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.50);
+  color: var(--color-brown-dark);
+}
+
+.focusedTitle {
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-brown-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

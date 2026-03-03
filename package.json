@@ -1,0 +1,13 @@
+{
+  "name": "buddydoro-tools",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "screenshot": "node screenshot.mjs",
+    "serve": "node serve.mjs"
+  },
+  "dependencies": {
+    "puppeteer": "^22.0.0"
+  }
+}

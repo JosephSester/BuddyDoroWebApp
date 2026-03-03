@@ -1,0 +1,201 @@
+/* ── Column wrapper ───────────────────────────────────── */
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.columnHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.columnTitle {
+  font-family: var(--font-primary);
+  font-size: var(--text-md);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-brown-dark);
+}
+
+.addPanelBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: rgba(255, 255, 255, 0.40);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  color: var(--color-brown-medium);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addPanelBtn:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+/* ── Goal list ────────────────────────────────────────── */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: calc(100dvh - 220px);
+  overflow-y: auto;
+  padding-bottom: var(--space-4);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-brown-light);
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+/* ── Goal row (accordion item) ────────────────────────── */
+.goalRow {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* ── Goal header (always visible) ─────────────────────── */
+.goalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.goalHeader:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.goalHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.goalTitleInput {
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-brown-dark);
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid transparent;
+  padding: var(--space-1) 0;
+  min-width: 0;
+  flex: 1;
+  cursor: text;
+  transition: border-color 0.15s;
+}
+
+.goalTitleInput:focus {
+  outline: none;
+  border-bottom-color: var(--color-terracotta);
+}
+
+/* Due date pill badge */
+.dueChip {
+  font-family: var(--font-primary);
+  font-size: 10px;
+  font-weight: var(--fw-bold);
+  color: var(--color-brown-light);
+  background: var(--color-parchment);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 1px var(--space-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.goalHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.taskCount {
+  font-family: var(--font-primary);
+  font-size: var(--text-xs);
+  color: var(--color-brown-light);
+  font-weight: var(--fw-semibold);
+}
+
+/* Chevron rotates when open */
+.chevron {
+  color: var(--color-brown-light);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.chevronOpen {
+  transform: rotate(-180deg);
+}
+
+.goalActionBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--color-brown-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.goalActionBtn:hover {
+  background: rgba(255, 255, 255, 0.60);
+  color: var(--color-brown-dark);
+}
+
+.goalActionBtn.danger:hover {
+  color: var(--color-dusty-rose);
+}
+
+/* ── Goal body (accordion expand/collapse) ────────────── */
+/*
+   CSS grid trick: grid-template-rows 0fr → 1fr
+   The direct child (.goalBodyInner) must have overflow:hidden
+   for 0fr to actually collapse the content.
+*/
+.goalBody {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.goalRowOpen .goalBody {
+  grid-template-rows: 1fr;
+}
+
+.goalBodyInner {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-4);
+}

@@ -1,0 +1,150 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--color-cream) 0%, var(--color-cream-warm) 60%, #e8d5bc 100%);
+  padding: var(--space-4);
+  position: relative;
+  overflow: hidden;
+}
+
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-warm), var(--glass-inner-ring);
+  padding: var(--space-10) var(--space-8);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: 420px;
+}
+
+/* Slide area */
+.slideArea {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+  text-align: center;
+  animation: fadeIn 0.35s ease;
+}
+
+.slideIcon {
+  font-size: 64px;
+  line-height: 1;
+}
+
+.slideTitle {
+  font-family: var(--font-primary);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-extrabold);
+  color: var(--color-brown-dark);
+}
+
+.slideBody {
+  font-family: var(--font-primary);
+  font-size: var(--text-base);
+  color: var(--color-brown-medium);
+  line-height: 1.7;
+  max-width: 360px;
+}
+
+.slideHighlight {
+  color: var(--color-terracotta);
+  font-weight: var(--fw-bold);
+}
+
+/* Progress dots */
+.dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-terracotta-muted);
+  transition: all 0.25s;
+}
+
+.dot.active {
+  width: 24px;
+  background: var(--color-terracotta);
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.btnSecondary {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  background: rgba(255, 255, 255, 0.45);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-primary);
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  color: var(--color-brown-medium);
+  transition: background 0.2s;
+}
+
+.btnSecondary:hover {
+  background: rgba(255, 255, 255, 0.70);
+}
+
+.btnPrimary {
+  flex: 2;
+  padding: var(--space-3) var(--space-5);
+  background: linear-gradient(135deg, var(--color-terracotta-light), var(--color-terracotta));
+  color: var(--color-cream);
+  border: 2px solid var(--color-burnt-orange);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-primary);
+  font-size: var(--text-base);
+  font-weight: var(--fw-bold);
+  box-shadow: var(--shadow-warm);
+  transition: transform 0.15s, background 0.2s;
+}
+
+.btnPrimary:hover {
+  background: linear-gradient(135deg, var(--color-ochre-light), var(--color-ochre));
+  transform: translateY(-1px);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.skipBtn {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  color: var(--color-brown-light);
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color 0.15s;
+}
+
+.skipBtn:hover {
+  color: var(--color-brown-medium);
+}

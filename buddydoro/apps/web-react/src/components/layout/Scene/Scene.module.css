@@ -1,0 +1,330 @@
+/* ── Scene root ──────────────────────────────────────── */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-scene);
+  overflow: hidden;
+}
+
+/* ── Background layer ────────────────────────────────── */
+.bg {
+  position: absolute;
+  inset: 0;
+  transition: background 2s ease;
+}
+
+/* AUTUMN — hedgehog */
+.bg.autumn-day {
+  background: linear-gradient(180deg,
+    #e8955a 0%, #d4703a 25%, #c05a28 55%, #7a4520 80%, #5a3010 100%);
+}
+.bg.autumn-night {
+  background: linear-gradient(180deg,
+    #1a0e08 0%, #2d1a0a 30%, #3d2510 55%, #4a3018 80%, #5a3820 100%);
+}
+
+/* WOODLAND — fox */
+.bg.woodland-day {
+  background: linear-gradient(180deg,
+    #b8d4a8 0%, #8cb87a 25%, #6a9e58 50%, #4a7a38 75%, #2e5c20 100%);
+}
+.bg.woodland-night {
+  background: linear-gradient(180deg,
+    #050f08 0%, #0d1f0f 30%, #142e17 55%, #1a3d1e 80%, #203825 100%);
+}
+
+/* WINTER — bear */
+.bg.winter-day {
+  background: linear-gradient(180deg,
+    #d8eaf8 0%, #b8d0e8 25%, #94b4d0 50%, #6890b0 75%, #4a7090 100%);
+}
+.bg.winter-night {
+  background: linear-gradient(180deg,
+    #040810 0%, #0a1020 30%, #10182e 55%, #162038 80%, #1c2a42 100%);
+}
+
+/* ── Ambient overlay (misty fog for woodland) ────────── */
+.fog {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  background: radial-gradient(ellipse at 50% 80%,
+    rgba(200, 220, 180, 0.25) 0%, transparent 70%);
+}
+.fog.visible { opacity: 1; }
+
+/* ── Stars ───────────────────────────────────────────── */
+.stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+.stars.visible { opacity: 1; }
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+/* ── Moon ────────────────────────────────────────────── */
+.moon {
+  position: absolute;
+  top: 8%;
+  right: 12%;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff9e0, #f0d880);
+  box-shadow: 0 0 28px rgba(240, 216, 128, 0.55), 0 0 60px rgba(240, 216, 128, 0.22);
+  opacity: 0;
+  transition: opacity 2s ease;
+  pointer-events: none;
+}
+.moon.visible { opacity: 1; }
+
+/* ── Sun ─────────────────────────────────────────────── */
+.sun {
+  position: absolute;
+  top: 10%;
+  right: 14%;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 2s ease;
+  pointer-events: none;
+}
+.sun.visible { opacity: 1; }
+.sun.autumn-sun {
+  background: radial-gradient(circle at 40% 40%, #ffe080, #f5a030);
+  box-shadow: 0 0 32px rgba(245,160,48,0.55), 0 0 70px rgba(245,160,48,0.20);
+}
+.sun.woodland-sun {
+  background: radial-gradient(circle at 40% 40%, #e8f8d0, #b0d870);
+  box-shadow: 0 0 32px rgba(176,216,112,0.45), 0 0 70px rgba(176,216,112,0.15);
+}
+.sun.winter-sun {
+  background: radial-gradient(circle at 40% 40%, #f0f8ff, #c8dff0);
+  box-shadow: 0 0 32px rgba(200,223,240,0.50), 0 0 70px rgba(200,223,240,0.20);
+}
+
+/* ── Clouds ──────────────────────────────────────────── */
+.clouds {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+.clouds.visible { opacity: 1; }
+
+.cloud {
+  position: absolute;
+  border-radius: 50px;
+}
+.cloud::before,
+.cloud::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* Autumn cloud — warm cream */
+.cloud.autumn {
+  background: rgba(255, 240, 210, 0.75);
+  box-shadow: inset 0 -4px 8px rgba(200,150,80,0.15);
+}
+.cloud.autumn::before { background: rgba(255, 240, 210, 0.75); }
+.cloud.autumn::after  { background: rgba(255, 240, 210, 0.75); }
+
+/* Woodland cloud — soft green-white */
+.cloud.woodland {
+  background: rgba(220, 240, 215, 0.70);
+  box-shadow: inset 0 -4px 8px rgba(120,180,100,0.15);
+}
+.cloud.woodland::before { background: rgba(220, 240, 215, 0.70); }
+.cloud.woodland::after  { background: rgba(220, 240, 215, 0.70); }
+
+/* Winter cloud — pale blue-white */
+.cloud.winter {
+  background: rgba(220, 235, 250, 0.75);
+  box-shadow: inset 0 -4px 8px rgba(130,170,210,0.18);
+}
+.cloud.winter::before { background: rgba(220, 235, 250, 0.75); }
+.cloud.winter::after  { background: rgba(220, 235, 250, 0.75); }
+
+@keyframes driftCloud1 {
+  0%   { transform: translateX(-120px); }
+  100% { transform: translateX(calc(100vw + 200px)); }
+}
+@keyframes driftCloud2 {
+  0%   { transform: translateX(-200px); }
+  100% { transform: translateX(calc(100vw + 260px)); }
+}
+@keyframes driftCloud3 {
+  0%   { transform: translateX(-160px); }
+  100% { transform: translateX(calc(100vw + 220px)); }
+}
+
+/* ── Particle canvas ─────────────────────────────────── */
+.particleCanvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── Fireflies ───────────────────────────────────────── */
+.fireflies {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 2.5s ease;
+}
+.fireflies.visible { opacity: 1; }
+
+.firefly {
+  position: absolute;
+  border-radius: 50%;
+  background: #c8f060;
+  box-shadow: 0 0 6px 3px rgba(200, 240, 96, 0.6);
+  animation: fireflyFloat linear infinite, fireflyGlow ease-in-out infinite alternate;
+}
+
+@keyframes fireflyFloat {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(20px, -30px); }
+  50%  { transform: translate(-15px, -50px); }
+  75%  { transform: translate(30px, -20px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes fireflyGlow {
+  0%   { opacity: 0.1; box-shadow: 0 0 4px 2px rgba(200, 240, 96, 0.3); }
+  100% { opacity: 0.85; box-shadow: 0 0 10px 5px rgba(200, 240, 96, 0.65); }
+}
+
+/* Woodland fireflies — warm yellow-green */
+.firefly.woodland { background: #c8f060; box-shadow: 0 0 6px 3px rgba(200,240,96,0.6); }
+/* Autumn fireflies — warm amber */
+.firefly.autumn   { background: #ffd060; box-shadow: 0 0 6px 3px rgba(255,208,96,0.6); }
+/* Winter fireflies — icy blue */
+.firefly.winter   { background: #a0d8ff; box-shadow: 0 0 6px 3px rgba(160,216,255,0.6); }
+
+/* ── Ground / Horizon ────────────────────────────────── */
+.ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 22%;
+  pointer-events: none;
+  transition: background 2s ease;
+}
+.ground.autumn-day   { background: linear-gradient(180deg, #7a4520 0%, #5a3010 100%); }
+.ground.autumn-night { background: linear-gradient(180deg, #3a2010 0%, #25140a 100%); }
+.ground.woodland-day   { background: linear-gradient(180deg, #2e5c20 0%, #1e3c14 100%); }
+.ground.woodland-night { background: linear-gradient(180deg, #0e2010 0%, #08140a 100%); }
+.ground.winter-day   { background: linear-gradient(180deg, #8ab0c8 0%, #6890a8 100%); }
+.ground.winter-night { background: linear-gradient(180deg, #1c2a42 0%, #101828 100%); }
+
+/* Snow on ground */
+.snowGround {
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: rgba(240, 248, 255, 0.85);
+  border-radius: 50% 50% 0 0 / 80% 80% 0 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+.snowGround.visible { opacity: 1; }
+
+/* ── Tree silhouettes ────────────────────────────────── */
+.trees {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+}
+
+.treeWrap {
+  position: absolute;
+  bottom: 18%;
+  transform-origin: bottom center;
+  animation: sway ease-in-out infinite alternate;
+}
+
+@keyframes sway {
+  from { transform: rotate(-1.5deg); }
+  to   { transform: rotate(1.5deg); }
+}
+
+/* ── Autumn oaks ─────────────────────────────────────── */
+.oakTrunk {
+  width: 14px;
+  margin: 0 auto;
+  border-radius: 4px 4px 0 0;
+  background: #5a3010;
+}
+.oakCanopy {
+  border-radius: 50% 55% 48% 52%;
+  margin-bottom: -6px;
+}
+
+/* ── Pine trees (woodland) ───────────────────────────── */
+.pine {
+  position: relative;
+}
+.pineTrunk {
+  width: 10px;
+  margin: 0 auto;
+  background: #3a2810;
+}
+.pineLayer {
+  border-left: solid transparent;
+  border-right: solid transparent;
+  border-bottom: solid;
+  margin: 0 auto;
+  margin-top: -8px;
+}
+
+/* ── Bare winter trees ───────────────────────────────── */
+.bareTrunk {
+  width: 8px;
+  margin: 0 auto;
+  border-radius: 4px 4px 0 0;
+}
+.bareBranches {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ── Grass tufts ─────────────────────────────────────── */
+.grass {
+  position: absolute;
+  bottom: 18%;
+  display: flex;
+  gap: 3px;
+  transform-origin: bottom center;
+  animation: sway 2.5s ease-in-out infinite alternate;
+}
+.grassBlade {
+  border-radius: 50% 50% 0 0;
+}

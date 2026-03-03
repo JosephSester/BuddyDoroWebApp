@@ -1,8 +1,0 @@
-/* apps/web/styles/backgroundnight.css
-   Optional: a subtle fade when we swap backgrounds. 
-   Note: background-image itself isn't animatable across browsers, 
-   so we animate the 'background' shorthand which gives a soft fade in many engines. */
-
-.scene {
-  transition: background 350ms ease-in-out;
-}

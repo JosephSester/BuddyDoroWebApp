@@ -17,6 +17,10 @@ const panelSchema = new mongoose.Schema({
         default: 0,
         index: true
     },
+    dueDate: {
+        type: Date,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now

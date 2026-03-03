@@ -13,6 +13,7 @@ router.get('/', authMiddleware, async (req, res) => {
             id: p._id.toString(),
             title: p.title,
             order: p.order,
+            dueDate: p.dueDate ? p.dueDate.toISOString() : null,
             createdAt: p.createdAt,
             updatedAt: p.updatedAt
         }));
@@ -28,6 +29,7 @@ router.post('/', authMiddleware, async (req, res) => {
     try {
         const title = (req.body.title || 'Goal').toString().trim().slice(0, 100);
         const order = Number.isFinite(req.body.order) ? Number(req.body.order) : 0;
+        const dueDate = req.body.dueDate ? new Date(req.body.dueDate) : null;
 
         // Compute default order to append to end
         const max = await Panel.find({ userId: req.user.userId }).sort({ order: -1 }).limit(1);
@@ -36,13 +38,15 @@ router.post('/', authMiddleware, async (req, res) => {
         const panel = new Panel({
             userId: req.user.userId,
             title: title || 'Goal',
-            order: Number.isFinite(order) ? order : nextOrder
+            order: Number.isFinite(order) ? order : nextOrder,
+            dueDate
         });
         await panel.save();
         res.status(201).json({
             id: panel._id.toString(),
             title: panel.title,
             order: panel.order,
+            dueDate: panel.dueDate ? panel.dueDate.toISOString() : null,
             createdAt: panel.createdAt,
             updatedAt: panel.updatedAt
         });
@@ -68,6 +72,9 @@ router.put('/:id', authMiddleware, async (req, res) => {
         if (req.body.order !== undefined && Number.isFinite(req.body.order)) {
             panel.order = Number(req.body.order);
         }
+        if (req.body.dueDate !== undefined) {
+            panel.dueDate = req.body.dueDate ? new Date(req.body.dueDate) : null;
+        }
 
         panel.updatedAt = new Date();
         await panel.save();
@@ -76,6 +83,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
             id: panel._id.toString(),
             title: panel.title,
             order: panel.order,
+            dueDate: panel.dueDate ? panel.dueDate.toISOString() : null,
             createdAt: panel.createdAt,
             updatedAt: panel.updatedAt
         });

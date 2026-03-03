@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OWE2NDA3OGM4YWJlYmZmNDRhYjQ4ZTQiLCJpYXQiOjE3NzI1MDMxNzEsImV4cCI6MTc3MjUwNjc3MX0.vQ_r-whZ48kcT7t_CPqPS75-S5lbWV-cPvf_wA8qsWo\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/user/onboarding -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(curl -s -X PATCH http://localhost:3000/api/user/onboarding -H \"Authorization: Bearer $TOKEN\")",
+      "Bash(node screenshot-auth.mjs)"
+    ]
+  }
+}

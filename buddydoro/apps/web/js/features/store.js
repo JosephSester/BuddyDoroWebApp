@@ -43,6 +43,119 @@ export function initStore({ getDoros, spendDoros }) {
   'Werewolf.png'
 ];
 
+  // ----------------------------
+  // NEW: Backgrounds (day shown in store, night auto-applied at night)
+  // ----------------------------
+  const BACKGROUNDS = [
+    { key: 'African', day: 'AfricanBackgroundDay.png', night: 'AfricanBackgroundNight.png' },
+    { key: 'Arctic', day: 'ArcticBackgroundDay.png', night: 'ArcticBackgroundNight.png' },
+    { key: 'Beach', day: 'BeachBackgroundDay.png', night: 'BeachBackgroundNight.png' },
+    { key: 'Cemetery', day: 'CemeteryBackgroundDay.png', night: 'CemeteryBackgroundNight.png' },
+    { key: 'Desert', day: 'DesertBackgroundDay.png', night: 'DesertBackgroundNight.png' },
+    { key: 'Everglades', day: 'EvergladesBackgroundDay.png', night: 'EvergladesBackgroundNight.png' },
+    { key: 'Floating Island', day: 'FloatingIslandBackgroundDay.png', night: 'FloatingIslandBackgroundNight.png' },
+    { key: 'Inca', day: 'IncaBackgroundDay.png', night: 'IncaBackgroundNight.png' },
+    { key: 'Japanese', day: 'JapaneseBackgroundDay.png', night: 'JapaneseBackgroundNight.png' },
+    { key: 'Jungle', day: 'JungleBackgroundDay.png', night: 'JungleBackgroundNight.png' },
+    { key: 'Mayan', day: 'MayanBackgroundDay.png', night: 'MayanBackgroundNight.png' },
+    { key: 'Mountain', day: 'MountainBackgroundDay.png', night: 'MountainBackgroundNight.png' },
+    { key: 'Rainforest', day: 'RainforestBackgroundDay.png', night: 'RainforestBackgroundNight.png' },
+
+    // These appear to be single-file backgrounds (use same image day+night)
+    { key: 'Inner Earth', day: 'InnerEarthBackground.png', night: 'InnerEarthBackground.png' },
+    { key: 'Moon', day: 'MoonBackground.png', night: 'MoonBackground.png' },
+
+    // If Mars only has a day file in your folder, we just reuse day at night
+    { key: 'Mars', day: 'MarsBackgroundDay.png', night: 'MarsBackgroundDay.png' },
+  ];
+
+  const BG_STORAGE_KEY = 'buddydoro:selectedBackground';
+
+  function getSceneEl() {
+    return document.getElementById('scene');
+  }
+
+  // We try to detect "night" in a way that won't fight your existing backgroundnight.js.
+  // If your app adds a class like "is-night" to body/scene, we use that.
+  // Otherwise we fallback to a simple hour rule.
+  function isNightNow() {
+    const scene = getSceneEl();
+    const body = document.body;
+
+    const hasNightClass =
+      body.classList.contains('is-night') ||
+      body.classList.contains('night') ||
+      (scene && (scene.classList.contains('is-night') || scene.classList.contains('night')));
+
+    if (hasNightClass) return true;
+
+    // Fallback hour rule (adjust if your app uses different hours)
+    const h = new Date().getHours();
+    return (h >= 19 || h < 6);
+  }
+
+  function buildBgPath(file) {
+    // Your images live in: apps/web/public/assets/artwork/Backgrounds/
+    return `./assets/artwork/Backgrounds/${file}`;
+  }
+
+  function applyBackground(bg) {
+    const scene = getSceneEl();
+    if (!scene) return;
+
+    const night = isNightNow();
+    const fileToUse = night ? (bg.night || bg.day) : bg.day;
+    const url = buildBgPath(fileToUse);
+
+    // Apply inline background image (works even if backgroundnight.js exists)
+    scene.style.backgroundImage = `url("${url}")`;
+    scene.style.backgroundRepeat = 'no-repeat';
+    scene.style.backgroundPosition = 'center center';
+    scene.style.backgroundSize = 'cover';
+  }
+
+  function saveSelectedBackground(bgKey) {
+    localStorage.setItem(BG_STORAGE_KEY, bgKey);
+  }
+
+  function loadSelectedBackgroundKey() {
+    return localStorage.getItem(BG_STORAGE_KEY);
+  }
+
+  function getSelectedBackground() {
+    const key = loadSelectedBackgroundKey();
+    if (!key) return null;
+    return BACKGROUNDS.find(b => b.key === key) || null;
+  }
+
+  // Keep background synced if your day/night logic flips classes on <body> or #scene.
+  function startBackgroundNightWatcher() {
+    const scene = getSceneEl();
+    const body = document.body;
+
+    const reapply = () => {
+      const selected = getSelectedBackground();
+      if (selected) applyBackground(selected);
+    };
+
+    // Watch for class changes (common pattern for day/night toggles)
+    const obs = new MutationObserver(() => reapply());
+    obs.observe(body, { attributes: true, attributeFilter: ['class'] });
+    if (scene) obs.observe(scene, { attributes: true, attributeFilter: ['class'] });
+
+    // Also re-check periodically as a safe fallback
+    setInterval(reapply, 60 * 1000);
+  }
+
+    // Start background watcher once (keeps equipped background synced with day/night)
+  startBackgroundNightWatcher();
+
+  // If user already equipped a background previously, apply it on load
+  const previouslySelected = getSelectedBackground();
+  if (previouslySelected) {
+    applyBackground(previouslySelected);
+  }
+
 function niceNameFromFile(filename) {
   return filename
     .replace('.png', '')
@@ -142,6 +255,14 @@ function niceNameFromFile(filename) {
       return;
     }
 
+    // Backgrounds tab  ✅ goes right here
+    if (cat === 'backgrounds') {
+      currentCat = 'backgrounds';
+      selectedSku = null;
+      renderBackgroundsCatalog();
+      return;
+    }
+
     // Normal store category behavior
     currentCat = cat;
     selectedSku = null;
@@ -187,6 +308,53 @@ function niceNameFromFile(filename) {
 
       grid.appendChild(card);
     });
+
+    highlightSelection();
+  }
+
+    function renderBackgroundsCatalog() {
+    grid.innerHTML = '';
+
+    BACKGROUNDS.forEach(bg => {
+      const name = bg.key; // already nice
+      const card = document.createElement('div');
+      card.className = 'card background-card';
+      card.dataset.sku = bg.key;
+
+      // IMPORTANT: show ONLY the DAY image in the store UI
+      const thumbSrc = buildBgPath(bg.day);
+
+      card.innerHTML = `
+        <div class="skin-thumb">
+          <img src="${thumbSrc}" alt="${name} background" />
+        </div>
+        <div class="item-name">${name}</div>
+        <div class="item-price">Background</div>
+        <div class="item-actions">
+          <button class="use-btn" type="button">Equip</button>
+        </div>
+      `;
+
+      // Equip button applies immediately AND saves choice
+      card.querySelector('.use-btn').addEventListener('click', () => {
+        saveSelectedBackground(bg.key);
+        applyBackground(bg);
+        showNotification(`${name} background equipped! 🌄✨`, 'success');
+      });
+
+      // Optional: click card to select outline highlight
+      card.addEventListener('click', (e) => {
+        if (e.target.tagName.toLowerCase() === 'button') return;
+        selectedSku = (selectedSku === bg.key) ? null : bg.key;
+        highlightSelection();
+      });
+
+      grid.appendChild(card);
+    });
+
+    // Highlight current selection from storage (if any)
+    const selected = getSelectedBackground();
+    if (selected) selectedSku = selected.key;
 
     highlightSelection();
   }

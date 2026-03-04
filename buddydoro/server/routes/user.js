@@ -71,4 +71,56 @@ router.patch('/onboarding', authMiddleware, async (req, res) => {
   }
 });
 
+router.patch('/life', authMiddleware, async (req, res) => {
+  try {
+    const { current, max, resetDecay, lastSessionEnd } = req.body;
+
+    // Validation
+    if (current !== undefined && (typeof current !== 'number' || current < 0 || current > 14)) {
+      return res.status(400).json({ error: 'current must be a number between 0 and 14' });
+    }
+    if (max !== undefined && (typeof max !== 'number' || max < 1 || max > 14)) {
+      return res.status(400).json({ error: 'max must be a number between 1 and 14' });
+    }
+    if (resetDecay !== undefined && typeof resetDecay !== 'boolean') {
+      return res.status(400).json({ error: 'resetDecay must be boolean' });
+    }
+    if (lastSessionEnd && isNaN(Date.parse(lastSessionEnd))) {
+      return res.status(400).json({ error: 'lastSessionEnd must be a valid ISO date string' });
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Update fields only if provided
+    if (current !== undefined) user.life.current = current;
+    if (max !== undefined) user.life.max = max;
+
+    // Reset decay timer if requested (e.g. after care action)
+    if (resetDecay) {
+      user.lastCareAt = new Date();
+    }
+
+    // Update last session end time (for offline decay calculation)
+    if (lastSessionEnd) {
+      user.lastSessionEnd = new Date(lastSessionEnd);
+    }
+
+    await user.save();
+
+    // Return updated values
+    res.json({
+      life: {
+        current: user.life.current,
+        max: user.life.max
+      },
+      lastCareAt: user.lastCareAt,
+      lastSessionEnd: user.lastSessionEnd
+    });
+  } catch (err) {
+    console.error('PATCH /user/life error:', err);
+    res.status(500).json({ error: 'Failed to update life' });
+  }
+});
+
 module.exports = router;

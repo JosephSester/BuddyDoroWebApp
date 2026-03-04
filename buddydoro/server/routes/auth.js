@@ -107,9 +107,10 @@ router.get('/me', async (req, res) => {
     return res.json({
       userId: user._id,
       name: user.name,
-      email: user.email,
+      email: user.email,  
       doros: user.doros,
       diamonds: user.diamonds,
+      lastSessionEnd: user.lastSessionEnd
       hasSeenOnboarding: user.hasSeenOnboarding,
     });
 

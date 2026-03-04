@@ -20,6 +20,12 @@ if (!authToken) {
   throw new Error('Not authenticated');
 }
 
+// ---- Onboarding guard -------------------------------------------
+if (localStorage.getItem('hasSeenOnboarding') !== 'true') {
+  window.location.href = 'onboarding.html';
+  throw new Error('Onboarding not complete');
+}
+
 // UI features
 
 // ----- 1) Background & dragon -------------------------------------------------

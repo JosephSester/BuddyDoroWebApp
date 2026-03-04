@@ -58,6 +58,45 @@ router.patch('/diamonds', authMiddleware, async (req, res) => {
 //   res.json({ doros: user.doros });
 // });
 
+router.patch('/settings', authMiddleware, async (req, res) => {
+  try {
+    const { focusMinutes, breakMinutes } = req.body;
+    const update = {};
+
+    if (focusMinutes !== undefined) {
+      const val = Number(focusMinutes);
+      if (isNaN(val) || val < 1 || val > 120) {
+        return res.status(400).json({ error: 'focusMinutes must be between 1 and 120' });
+      }
+      update['settings.focusMinutes'] = val;
+    }
+
+    if (breakMinutes !== undefined) {
+      const val = Number(breakMinutes);
+      if (isNaN(val) || val < 1 || val > 60) {
+        return res.status(400).json({ error: 'breakMinutes must be between 1 and 60' });
+      }
+      update['settings.breakMinutes'] = val;
+    }
+
+    if (Object.keys(update).length === 0) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.userId,
+      { $set: update },
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    res.json({ settings: user.settings });
+  } catch (err) {
+    console.error('PATCH /user/settings error:', err);
+    res.status(500).json({ error: 'Failed to update settings' });
+  }
+});
+
 router.patch('/onboarding', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);

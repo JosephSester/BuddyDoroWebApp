@@ -111,6 +111,7 @@ router.get('/me', async (req, res) => {
       doros: user.doros,
       diamonds: user.diamonds,
       lastSessionEnd: user.lastSessionEnd
+      hasSeenOnboarding: user.hasSeenOnboarding,
     });
 
   } catch (err) {

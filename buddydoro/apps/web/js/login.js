@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('userId', data.userId);
       if (data.name) localStorage.setItem('userName', data.name);
+      localStorage.setItem('hasSeenOnboarding', data.hasSeenOnboarding ? 'true' : 'false');
 
       console.log('Login successful!');
       window.location.href = data.hasSeenOnboarding ? 'index.html' : 'onboarding.html';
@@ -110,24 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
       showLoginError('Server unreachable');
       console.error(err);
     }
-
-
-
-    // Validation checks
-    if (email === '' || password === '') {
-      showLoginError('Please enter both your email and password.');
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      showLoginError('Please enter a valid email address.');
-      return;
-    }
-
-    // If all validation passes
-    loginError.hidden = true;
-    console.log('Login successful! Redirecting to main app...');
-    window.location.href = 'index.html';
 
   });
 

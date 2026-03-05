@@ -294,3 +294,4 @@ export function initStore({ getDoros, spendDoros }) {
 
   return { openStore };
 }
+

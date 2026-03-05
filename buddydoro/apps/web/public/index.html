@@ -37,6 +37,7 @@
   <link rel="stylesheet" href="../styles/tasks.css" />
   <link rel="stylesheet" href="../styles/ai-plan.css" />
   <link rel="stylesheet" href="../styles/store.css" />
+  <link rel="stylesheet" href="../styles/inventory.css" />
   <link rel="stylesheet" href="../styles/animations.css" />
 
   <!-- Life Circle CSS -->
@@ -53,6 +54,7 @@
 
   <!-- Logout Modal -->
   <link rel="stylesheet" href="../styles/logoutModal.css"
+
   <!-- Theme last so it can override colors if needed -->
   <link rel="stylesheet" href="../styles/themes.css" />
 </head>
@@ -99,6 +101,29 @@
               fill="#2b2213" />
           </svg>
           <span class="store-label">Store</span>
+        </button>
+
+        <!-- Inventory chip (opens inventory window) -->
+        <button class="chip glass-chip inventory-chip" id="inventoryChip" type="button" aria-haspopup="dialog"
+          aria-expanded="false" aria-controls="inventoryDialog">
+          <svg class="inventory-icon" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="inventoryRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f7d073" />
+                <stop offset="100%" stop-color="#d39b2d" />
+              </linearGradient>
+              <radialGradient id="inventoryFill" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#fff6c3" />
+                <stop offset="55%" stop-color="#ffd36b" />
+                <stop offset="100%" stop-color="#f0b13a" />
+              </radialGradient>
+            </defs>
+            <circle cx="32" cy="32" r="29" fill="url(#inventoryRing)" />
+            <circle cx="32" cy="32" r="25" fill="url(#inventoryFill)" stroke="#b98627" stroke-width="2" />
+            <path d="M18 24h28v24a3 3 0 0 1-3 3H21a3 3 0 0 1-3-3V24z" fill="#2b2213" />
+            <path d="M23 24v-2a9 9 0 0 1 18 0v2h-4v-2a5 5 0 0 0-10 0v2h-4z" fill="#2b2213" />
+          </svg>
+          <span class="inventory-label">Inventory</span>
         </button>
 
         <!-- Diamond chip -->
@@ -435,6 +460,26 @@
     </div>
   </section>
 
+  <!-- Inventory dialog (window) -->
+  <div id="inventoryBackdrop" class="backdrop" hidden></div>
+
+  <section id="inventoryDialog" class="inventory-panel" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle"
+    hidden>
+    <div class="inventory-header">
+      <h2 id="inventoryTitle">Your Inventory</h2>
+      <button id="inventoryClose" class="icon-btn" aria-label="Close inventory">&times;</button>
+    </div>
+
+    <div class="inventory-content">
+      <div id="inventoryCategoryTabs" class="category-tabs" role="tablist" aria-label="Inventory categories"></div>
+      <div id="inventoryGrid" class="inventory-grid" aria-live="polite"></div>
+    </div>
+
+    <div class="inventory-footer">
+      <button id="inventoryCloseBottom" class="btn-secondary" type="button">Close</button>
+    </div>
+  </section>
+
   <!-- Diamond Store dialog (Buy Diamonds) -->
   <div id="diamondStoreBackdrop" class="backdrop" hidden></div>
 
@@ -455,6 +500,13 @@
       <!-- Diamond packs dynamically rendered here -->
     </div>
   </section>
+
+  <div class="music-fab-wrap">
+    <button id="musicChip" class="music-fab" aria-label="Open music" aria-expanded="false">♫</button>
+    <section id="musicMiniPanel" class="music-mini-panel" hidden>
+      <!-- now playing + controls / track list -->
+    </section>
+  </div>
 
   <!-- Life Circle logic (auto-mounts into #scene and positions under the dragon) -->
   <script src="../js/features/lifecircle.js"></script>

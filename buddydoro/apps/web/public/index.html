@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="../styles/diamondStore.css" />
 
   <link rel="stylesheet" href="../styles/dragon.css" />
+  <link rel="stylesheet" href="../styles/companionStatus.css" />
   <link rel="stylesheet" href="../styles/topbar.css" />
   <link rel="stylesheet" href="../styles/diamond.css" />
   <link rel="stylesheet" href="../styles/timer.css" />
@@ -39,11 +40,11 @@
   <link rel="stylesheet" href="../styles/store.css" />
   <link rel="stylesheet" href="../styles/animations.css" />
 
-  <!-- Life Circle CSS -->
-  <link rel="stylesheet" href="../styles/lifecircle.css" />
+  <!-- Life Circle CSS (disabled; using companionStatus instead) -->
+  <!-- <link rel="stylesheet" href="../styles/lifecircle.css" /> -->
 
-  <!-- Restore Life Segment CSS -->
-  <link rel="stylesheet" href="../styles/restorelifesegment.css" />
+  <!-- Restore Life Segment CSS (disabled; tied to LifeCircle) -->
+  <!-- <link rel="stylesheet" href="../styles/restorelifesegment.css" /> -->
 
   <!-- Rain overlay CSS -->
   <link rel="stylesheet" href="../styles/rain.css" />
@@ -456,20 +457,22 @@
     </div>
   </section>
 
-  <!-- Life Circle logic (auto-mounts into #scene and positions under the dragon) -->
+  <!-- Life Circle logic disabled; companionStatus.js is now used -->
+  <!--
   <script src="../js/features/lifecircle.js"></script>
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       window.LifeCircle.init({
-        initial: 14,   // 0..14  (14 = full)
-        size: 120,     // px
+        initial: 14,
+        size: 120,
         altPrefix: 'Life'
       });
     });
   </script>
+  -->
 
-  <!-- Restore Life Segment behavior (listens for store item usage) -->
-  <script src="../js/features/restorelifesegment.js"></script>
+  <!-- Restore Life Segment behavior disabled; tied to LifeCircle -->
+  <!-- <script src="../js/features/restorelifesegment.js"></script> -->
 
   <!-- Rain overlay -->
   <script src="../js/features/rain.js"></script>
@@ -498,6 +501,9 @@
 
   <!-- Diamond balance logic -->
   <script src="../js/features/diamond.js"></script>
+
+  <!-- Companion status bars (health, happiness, thirst) -->
+  <script src="../js/features/companionStatus.js"></script>
 
   <!-- Entry script: lives in apps/web/js/main.js -->
   <script type="module" src="../js/main.js"></script>

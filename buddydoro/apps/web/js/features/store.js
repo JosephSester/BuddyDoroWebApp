@@ -174,38 +174,39 @@ function niceNameFromFile(filename) {
     storeChip.setAttribute('aria-expanded', 'true');
     (storeDialog.querySelector('.tab') || storeClose).focus();
 
+    setBusy(true, 'Loading store...');
+
+    // Load catalog from backend (independent of inventory)
     try {
-      setBusy(true, 'Loading store...');
-
-      // Load catalog from backend
       const apiItems = await fetchCatalog();
-      allItems = apiItems; // keep flat list for lookups
-
-      // Group by category for tabs
+      allItems = apiItems;
       itemsByCategory = apiItems.reduce((acc, item) => {
         const cat = item.category || 'other';
         if (!acc[cat]) acc[cat] = [];
         acc[cat].push(item);
         return acc;
       }, {});
+    } catch (error) {
+      console.error('Failed to load catalog:', error);
+      showNotification('Failed to load store items', 'error');
+      allItems = [];
+      itemsByCategory = {};
+    }
 
-      // Load inventory
+    // Load inventory (failure here won't blank the catalog)
+    try {
       const apiInventory = await fetchInventory();
       inventory.clear();
       const loaded = inventoryToMap(apiInventory);
       for (const [sku, count] of loaded.entries()) {
         inventory.set(sku, count);
       }
-
-      setBusy(false);
     } catch (error) {
-      console.error('Failed to load store data:', error);
-      showNotification('Failed to load store', 'error');
-      setBusy(false);
-      allItems = [];
-      itemsByCategory = {};
+      console.warn('Failed to load inventory:', error);
       inventory.clear();
     }
+
+    setBusy(false);
 
     // Activate default tab or first available
     const defaultTab = tabs.find(t => t.dataset.cat === currentCat) || tabs[0];

@@ -29,8 +29,9 @@
     return isNight ? NIGHT_BG : DAY_BG;
   }
 
-  // Apply immediately
+  // Apply immediately — but skip if the user has a custom background selected from the store
   function apply() {
+    if (localStorage.getItem('buddydoro:selectedBackground')) return;
     setBackground(pickBackgroundFor());
   }
 

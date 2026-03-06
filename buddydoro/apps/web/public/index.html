@@ -290,8 +290,19 @@
 
     <!-- Timer & controls (right) -->
     <div class="right-ui">
-      <div id="focusTaskName" class="focus-task-name" hidden></div>
-      <div id="modeLabel" class="timer-label">Idle</div>
+      <div class="timer-info-panel">
+        <div id="focusTaskName" class="focus-task-name" hidden></div>
+        <div id="modeLabel" class="timer-label">Idle</div>
+
+        <!-- Subtask selector — shown when a task is active -->
+        <div id="subtaskSelector" class="subtask-selector" hidden>
+          <label class="subtask-selector-label" for="subtaskSelect">Timing:</label>
+          <select id="subtaskSelect" class="subtask-select">
+            <option value="">— select subtask —</option>
+          </select>
+        </div>
+      </div>
+
       <div class="timer-card" aria-live="polite">
         <div id="timerDisplay" class="timer-value">25:00</div>
         <div id="timerSessionCount" class="timer-session-count">0 sessions done</div>
@@ -552,7 +563,7 @@
   <script type="module" src="../js/main.js"></script>
 
   <script type="module" src="../js/features/store.js"></script>
-  <script src="../js/features/history.js"></script>
+  <script type="module" src="../js/features/history.js"></script>
 </body>
 
 </html>

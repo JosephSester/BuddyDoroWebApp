@@ -12,6 +12,8 @@ import { initDiamondStore } from './features/diamondStore.js';
 import { initTasks, getActiveTask } from './features/taskfeature/index.js';
 import { initAiPlan } from './features/aiPlan.js';
 import { API_BASE } from './api/apiClient.js';
+import { saveSession } from './features/historyStorage.js';
+import { getSubtasks } from './features/subtasks.js';
 
 // ---- Auth guard -------------------------------------------------
 const authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
@@ -107,14 +109,42 @@ const updateSessionCount = () => {
   sessionCountEl.hidden = false;
 };
 
+// ---- Subtask selector -------------------------------------------------------
+const subtaskSelectorEl = document.getElementById('subtaskSelector');
+const subtaskSelectEl   = document.getElementById('subtaskSelect');
+
+function populateSubtaskSelector(task) {
+  if (!subtaskSelectorEl || !subtaskSelectEl || !task) return;
+  const subtasks = getSubtasks(task.id);
+  subtaskSelectEl.innerHTML = '<option value="">— select subtask —</option>';
+  subtasks.forEach(sub => {
+    const opt = document.createElement('option');
+    opt.value = sub.title;
+    opt.textContent = sub.title;
+    subtaskSelectEl.appendChild(opt);
+  });
+  subtaskSelectorEl.hidden = subtasks.length === 0;
+}
+
+function clearSubtaskSelector() {
+  if (!subtaskSelectorEl || !subtaskSelectEl) return;
+  subtaskSelectEl.innerHTML = '<option value="">— select subtask —</option>';
+  subtaskSelectorEl.hidden = true;
+}
+// -----------------------------------------------------------------------------
+
 const taskPomodoro = initTaskPomodoroLogic({
   timer,
   onFocusStart: ({ task }) => {
     completedFocusSessions = 0;
     updateSessionCount();
     showFocusPanel(task);
+    populateSubtaskSelector(task);
   },
-  onFocusStop: () => clearFocusPanel({ clearTask: true }),
+  onFocusStop: () => {
+    clearFocusPanel({ clearTask: true });
+    clearSubtaskSelector();
+  },
 });
 
 timer.onComplete(({ mode }) => {
@@ -122,6 +152,14 @@ timer.onComplete(({ mode }) => {
     completedFocusSessions++;
     updateSessionCount();
   }
+});
+
+// Save a history record whenever a focus session summary fires
+timer.onSummary(({ minutes }) => {
+  if (minutes <= 0) return;
+  const subtaskName = subtaskSelectEl?.value || null;
+  const taskName    = currentFocusTask?.name  || null;
+  saveSession({ subtaskName, taskName, seconds: minutes * 60 });
 });
 
 const manualPomodoro = initManualPomodoroLogic({

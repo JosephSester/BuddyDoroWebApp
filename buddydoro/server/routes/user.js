@@ -4,6 +4,9 @@ const router = express.Router();
 const authMiddleware = require('../authMiddleware'); // your JWT middleware file
 const User = require('../models/User');
 
+const STATUS_KEYS = ['health', 'happiness', 'thirst', 'hunger'];
+const clampStatus = (n) => Math.max(0, Math.min(14, Number(n) || 0));
+
 router.patch('/doros', authMiddleware, async (req, res) => {
   try {
     const { delta } = req.body;
@@ -159,6 +162,65 @@ router.patch('/life', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('PATCH /user/life error:', err);
     res.status(500).json({ error: 'Failed to update life' });
+  }
+});
+
+router.patch('/statuses', authMiddleware, async (req, res) => {
+  try {
+    const { health, happiness, thirst, hunger } = req.body || {};
+
+    if (health !== undefined) {
+      return res.status(400).json({ error: 'health is derived and cannot be set directly' });
+    }
+
+    const hasAny =
+      happiness !== undefined ||
+      thirst !== undefined ||
+      hunger !== undefined;
+
+    if (!hasAny) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
+
+    for (const [key, value] of Object.entries({ happiness, thirst, hunger })) {
+      if (value === undefined) continue;
+      if (typeof value !== 'number' || Number.isNaN(value) || value < 0 || value > 14) {
+        return res.status(400).json({ error: `${key} must be a number between 0 and 14` });
+      }
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (!user.companionStatuses) {
+      user.companionStatuses = {
+        health: 14,
+        happiness: 14,
+        thirst: 14,
+        hunger: 14
+      };
+    }
+
+    if (happiness !== undefined) user.companionStatuses.happiness = clampStatus(happiness);
+    if (thirst !== undefined) user.companionStatuses.thirst = clampStatus(thirst);
+    if (hunger !== undefined) user.companionStatuses.hunger = clampStatus(hunger);
+
+    // Health is derived from the 3 primary statuses; keep stored value aligned.
+    const derivedHealth = Math.floor(
+      (user.companionStatuses.happiness + user.companionStatuses.thirst + user.companionStatuses.hunger) / 3
+    );
+    user.companionStatuses.health = clampStatus(derivedHealth);
+
+    // Ensure all status fields are clamped before saving.
+    for (const key of STATUS_KEYS) {
+      user.companionStatuses[key] = clampStatus(user.companionStatuses[key]);
+    }
+
+    await user.save();
+    res.json({ companionStatuses: user.companionStatuses });
+  } catch (err) {
+    console.error('PATCH /user/statuses error:', err);
+    res.status(500).json({ error: 'Failed to update statuses' });
   }
 });
 

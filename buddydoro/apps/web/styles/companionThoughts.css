@@ -1,0 +1,46 @@
+.companion-thought {
+  position: absolute;
+  z-index: 14;
+  max-width: min(340px, calc(100vw - 30px));
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.companion-thought.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.companion-thought-text {
+  border-radius: 18px;
+  padding: 10px 12px;
+  color: #2b2213;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+  background:
+    radial-gradient(150px circle at 38% 10%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.15) 72%),
+    rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(224, 162, 51, 0.9);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22), inset 0 0 0 4px rgba(255, 210, 100, 0.16);
+}
+
+.companion-thought-tail {
+  width: 16px;
+  height: 16px;
+  margin-left: 22px;
+  margin-top: -2px;
+  transform: rotate(45deg);
+  background: rgba(255, 246, 230, 0.94);
+  border-right: 2px solid rgba(224, 162, 51, 0.9);
+  border-bottom: 2px solid rgba(224, 162, 51, 0.9);
+}
+
+@media (max-width: 720px) {
+  .companion-thought-text {
+    font-size: 13px;
+    padding: 9px 10px;
+  }
+}

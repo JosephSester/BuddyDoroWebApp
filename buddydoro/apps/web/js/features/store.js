@@ -47,6 +47,7 @@ export function initStore({ getDoros, spendDoros }) {
   // NEW: Backgrounds (day shown in store, night auto-applied at night)
   // ----------------------------
   const BACKGROUNDS = [
+    { key: 'Forest', day: '../BackgroundDay.jpg', night: '../BackgroundNight.png', isDefault: true },
     { key: 'African', day: 'AfricanBackgroundDay.png', night: 'AfricanBackgroundNight.png' },
     { key: 'Arctic', day: 'ArcticBackgroundDay.png', night: 'ArcticBackgroundNight.png' },
     { key: 'Beach', day: 'BeachBackgroundDay.png', night: 'BeachBackgroundNight.png' },
@@ -112,6 +113,10 @@ export function initStore({ getDoros, spendDoros }) {
     scene.style.backgroundRepeat = 'no-repeat';
     scene.style.backgroundPosition = 'center center';
     scene.style.backgroundSize = 'cover';
+
+    // Tag the scene with the background key so dragon.css can adjust
+    // the character's vertical position per-background
+    scene.dataset.bg = bg.key;
   }
 
   function saveSelectedBackground(bgKey) {
@@ -157,6 +162,7 @@ export function initStore({ getDoros, spendDoros }) {
   }
 
 function niceNameFromFile(filename) {
+  if (filename === 'DragonSkin.png') return 'Dragon';
   return filename
     .replace('.png', '')
     .replace(/([a-z])([A-Z])/g, '$1 $2');
@@ -338,6 +344,21 @@ function niceNameFromFile(filename) {
 
       // Equip button applies immediately AND saves choice
       card.querySelector('.use-btn').addEventListener('click', () => {
+        if (bg.isDefault) {
+          // Clear custom selection so backgroundnight.js resumes day/night switching
+          localStorage.removeItem(BG_STORAGE_KEY);
+          window.BackgroundNight?.apply();
+          // Remove bg tag so dragon uses the default Forest bottom position
+          const scene = getSceneEl();
+          if (scene) {
+            scene.removeAttribute('data-bg');
+            scene.style.backgroundPosition = 'center bottom';
+          }
+          selectedSku = null;
+          highlightSelection();
+          showNotification(`Default Forest background equipped! 🌲✨`, 'success');
+          return;
+        }
         saveSelectedBackground(bg.key);
         applyBackground(bg);
         showNotification(`${name} background equipped! 🌄✨`, 'success');

@@ -11,6 +11,7 @@ import { initStore } from './features/store.js';
 import { initDiamondStore } from './features/diamondStore.js';
 import { initTasks, getActiveTask } from './features/taskfeature/index.js';
 import { initAiPlan } from './features/aiPlan.js';
+import { initCompanionThoughts } from './features/companionThoughts.js';
 import { API_BASE } from './api/apiClient.js';
 import { saveSession } from './features/historyStorage.js';
 import { getSubtasks } from './features/subtasks.js';
@@ -270,6 +271,10 @@ await initTasks({
     minutes > 0 && timer.setPlannedFocusDuration(minutes * 60),
   onSubtaskEstimate: minutes =>
     minutes > 0 && timer.setPlannedFocusDuration(minutes * 60),
+});
+
+initCompanionThoughts({
+  getActiveTask: () => getActiveTask()
 });
 
 // ---- AI Plan ----------------------------------------------------

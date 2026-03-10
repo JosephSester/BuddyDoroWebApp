@@ -2,6 +2,8 @@
 import { fetchInventory, purchaseItem, useItem, inventoryToMap} from '../api/inventoryService.js';
 import { showNotification, setBusy } from '../utils/notifications.js';
 import { fetchCatalog } from '../api/storeService.js';
+import { setDragonSkin } from './dragon.js';
+
 
 console.log('[Store Init] storeChip:', !!document.getElementById('storeChip'));
 console.log('[Store Init] storeDialog:', !!document.getElementById('storeDialog'));
@@ -24,8 +26,147 @@ export function initStore({ getDoros, spendDoros }) {
   let selectedSku = null;
   let allItems = [];           // ← Loaded from API
   let itemsByCategory = {};    // ← Grouped for tabs
-
   const inventory = new Map();
+
+  const SKINS = [
+  'Alien.png',
+  'Axolotyl.png',
+  'Bigfoot.png',
+  'Butterfly.png',
+  'Capybara.png',
+  'DragonSkin.png',
+  'Frog.png',
+  'PrayingMantis.png',
+  'Robot.png',
+  'RockCreature.png',
+  'Vampire.png',
+  'Werewolf.png'
+];
+
+  // ----------------------------
+  // NEW: Backgrounds (day shown in store, night auto-applied at night)
+  // ----------------------------
+  const BACKGROUNDS = [
+    { key: 'Forest', day: '../BackgroundDay.jpg', night: '../BackgroundNight.png', isDefault: true },
+    { key: 'African', day: 'AfricanBackgroundDay.png', night: 'AfricanBackgroundNight.png' },
+    { key: 'Arctic', day: 'ArcticBackgroundDay.png', night: 'ArcticBackgroundNight.png' },
+    { key: 'Beach', day: 'BeachBackgroundDay.png', night: 'BeachBackgroundNight.png' },
+    { key: 'Cemetery', day: 'CemeteryBackgroundDay.png', night: 'CemeteryBackgroundNight.png' },
+    { key: 'Desert', day: 'DesertBackgroundDay.png', night: 'DesertBackgroundNight.png' },
+    { key: 'Everglades', day: 'EvergladesBackgroundDay.png', night: 'EvergladesBackgroundNight.png' },
+    { key: 'Floating Island', day: 'FloatingIslandBackgroundDay.png', night: 'FloatingIslandBackgroundNight.png' },
+    { key: 'Inca', day: 'IncaBackgroundDay.png', night: 'IncaBackgroundNight.png' },
+    { key: 'Japanese', day: 'JapaneseBackgroundDay.png', night: 'JapaneseBackgroundNight.png' },
+    { key: 'Jungle', day: 'JungleBackgroundDay.png', night: 'JungleBackgroundNight.png' },
+    { key: 'Mayan', day: 'MayanBackgroundDay.png', night: 'MayanBackgroundNight.png' },
+    { key: 'Mountain', day: 'MountainBackgroundDay.png', night: 'MountainBackgroundNight.png' },
+    { key: 'Rainforest', day: 'RainforestBackgroundDay.png', night: 'RainforestBackgroundNight.png' },
+
+    // These appear to be single-file backgrounds (use same image day+night)
+    { key: 'Inner Earth', day: 'InnerEarthBackground.png', night: 'InnerEarthBackground.png' },
+    { key: 'Moon', day: 'MoonBackground.png', night: 'MoonBackground.png' },
+
+    // If Mars only has a day file in your folder, we just reuse day at night
+    { key: 'Mars', day: 'MarsBackgroundDay.png', night: 'MarsBackgroundDay.png' },
+  ];
+
+  const BG_STORAGE_KEY = 'buddydoro:selectedBackground';
+
+  function getSceneEl() {
+    return document.getElementById('scene');
+  }
+
+  // We try to detect "night" in a way that won't fight your existing backgroundnight.js.
+  // If your app adds a class like "is-night" to body/scene, we use that.
+  // Otherwise we fallback to a simple hour rule.
+  function isNightNow() {
+    const scene = getSceneEl();
+    const body = document.body;
+
+    const hasNightClass =
+      body.classList.contains('is-night') ||
+      body.classList.contains('night') ||
+      (scene && (scene.classList.contains('is-night') || scene.classList.contains('night')));
+
+    if (hasNightClass) return true;
+
+    // Fallback hour rule (adjust if your app uses different hours)
+    const h = new Date().getHours();
+    return (h >= 19 || h < 6);
+  }
+
+  function buildBgPath(file) {
+    // Your images live in: apps/web/public/assets/artwork/Backgrounds/
+    return `./assets/artwork/Backgrounds/${file}`;
+  }
+
+  function applyBackground(bg) {
+    const scene = getSceneEl();
+    if (!scene) return;
+
+    const night = isNightNow();
+    const fileToUse = night ? (bg.night || bg.day) : bg.day;
+    const url = buildBgPath(fileToUse);
+
+    // Apply inline background image (works even if backgroundnight.js exists)
+    scene.style.backgroundImage = `url("${url}")`;
+    scene.style.backgroundRepeat = 'no-repeat';
+    scene.style.backgroundPosition = 'center center';
+    scene.style.backgroundSize = 'cover';
+
+    // Tag the scene with the background key so dragon.css can adjust
+    // the character's vertical position per-background
+    scene.dataset.bg = bg.key;
+  }
+
+  function saveSelectedBackground(bgKey) {
+    localStorage.setItem(BG_STORAGE_KEY, bgKey);
+  }
+
+  function loadSelectedBackgroundKey() {
+    return localStorage.getItem(BG_STORAGE_KEY);
+  }
+
+  function getSelectedBackground() {
+    const key = loadSelectedBackgroundKey();
+    if (!key) return null;
+    return BACKGROUNDS.find(b => b.key === key) || null;
+  }
+
+  // Keep background synced if your day/night logic flips classes on <body> or #scene.
+  function startBackgroundNightWatcher() {
+    const scene = getSceneEl();
+    const body = document.body;
+
+    const reapply = () => {
+      const selected = getSelectedBackground();
+      if (selected) applyBackground(selected);
+    };
+
+    // Watch for class changes (common pattern for day/night toggles)
+    const obs = new MutationObserver(() => reapply());
+    obs.observe(body, { attributes: true, attributeFilter: ['class'] });
+    if (scene) obs.observe(scene, { attributes: true, attributeFilter: ['class'] });
+
+    // Also re-check periodically as a safe fallback
+    setInterval(reapply, 60 * 1000);
+  }
+
+    // Start background watcher once (keeps equipped background synced with day/night)
+  startBackgroundNightWatcher();
+
+  // If user already equipped a background previously, apply it on load
+  const previouslySelected = getSelectedBackground();
+  if (previouslySelected) {
+    applyBackground(previouslySelected);
+  }
+
+function niceNameFromFile(filename) {
+  if (filename === 'DragonSkin.png') return 'Dragon';
+  return filename
+    .replace('.png', '')
+    .replace(/([a-z])([A-Z])/g, '$1 $2');
+}
 
   if (!storeChip) {
     console.error('[Store] storeChip not found');
@@ -39,38 +180,39 @@ export function initStore({ getDoros, spendDoros }) {
     storeChip.setAttribute('aria-expanded', 'true');
     (storeDialog.querySelector('.tab') || storeClose).focus();
 
+    setBusy(true, 'Loading store...');
+
+    // Load catalog from backend (independent of inventory)
     try {
-      setBusy(true, 'Loading store...');
-
-      // Load catalog from backend
       const apiItems = await fetchCatalog();
-      allItems = apiItems; // keep flat list for lookups
-
-      // Group by category for tabs
+      allItems = apiItems;
       itemsByCategory = apiItems.reduce((acc, item) => {
         const cat = item.category || 'other';
         if (!acc[cat]) acc[cat] = [];
         acc[cat].push(item);
         return acc;
       }, {});
+    } catch (error) {
+      console.error('Failed to load catalog:', error);
+      showNotification('Failed to load store items', 'error');
+      allItems = [];
+      itemsByCategory = {};
+    }
 
-      // Load inventory
+    // Load inventory (failure here won't blank the catalog)
+    try {
       const apiInventory = await fetchInventory();
       inventory.clear();
       const loaded = inventoryToMap(apiInventory);
       for (const [sku, count] of loaded.entries()) {
         inventory.set(sku, count);
       }
-
-      setBusy(false);
     } catch (error) {
-      console.error('Failed to load store data:', error);
-      showNotification('Failed to load store', 'error');
-      setBusy(false);
-      allItems = [];
-      itemsByCategory = {};
+      console.warn('Failed to load inventory:', error);
       inventory.clear();
     }
+
+    setBusy(false);
 
     // Activate default tab or first available
     const defaultTab = tabs.find(t => t.dataset.cat === currentCat) || tabs[0];
@@ -104,16 +246,141 @@ export function initStore({ getDoros, spendDoros }) {
   storeCloseBottom?.addEventListener('click', closeStore);
 
   tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => {
-        t.classList.toggle('is-active', t === tab);
-        t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
-      });
-      currentCat = tab.dataset.cat;
-      selectedSku = null;
-      renderCatalog(itemsByCategory[currentCat] || []);
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => {
+      t.classList.toggle('is-active', t === tab);
+      t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
     });
+
+    const cat = tab.dataset.cat;
+
+    // NEW: Skins tab renders the skins catalog inside the store window.
+    if (cat === 'skins') {
+      currentCat = 'skins';
+      selectedSku = null;
+      renderSkinsCatalog();   // <-- you will add this function in store.js
+      return;
+    }
+
+    // Backgrounds tab  ✅ goes right here
+    if (cat === 'backgrounds') {
+      currentCat = 'backgrounds';
+      selectedSku = null;
+      renderBackgroundsCatalog();
+      return;
+    }
+
+    // Normal store category behavior
+    currentCat = cat;
+    selectedSku = null;
+    renderCatalog(itemsByCategory[currentCat] || []);
   });
+});
+
+    function renderSkinsCatalog() {
+    grid.innerHTML = '';
+
+    // If you later want “selected skin” highlighting, use selectedSku
+    SKINS.forEach(file => {
+      const name = niceNameFromFile(file);
+      const card = document.createElement('div');
+      card.className = 'card skin-card';
+      card.dataset.sku = file;
+
+      card.innerHTML = `
+        <div class="skin-thumb">
+          <img src="./assets/artwork/Skins/${file}" alt="${name}" />
+
+        </div>
+        <div class="item-name">${name}</div>
+        <div class="item-price">Skin</div>
+        <div class="item-actions">
+          <button class="use-btn" type="button">Equip</button>
+        </div>
+      `;
+
+      // Equip button
+      card.querySelector('.use-btn').addEventListener('click', () => {
+        // For now: open = closed = same image until you add closed-eye versions
+        setDragonSkin({ open: `Skins/${file}`, closed: `Skins/${file}` });
+        showNotification(`${name} equipped! 🐉✨`, 'success');
+      });
+
+      // Optional: click card (select highlight)
+      card.addEventListener('click', (e) => {
+        if (e.target.tagName.toLowerCase() === 'button') return;
+        selectedSku = (selectedSku === file) ? null : file;
+        highlightSelection();
+      });
+
+      grid.appendChild(card);
+    });
+
+    highlightSelection();
+  }
+
+    function renderBackgroundsCatalog() {
+    grid.innerHTML = '';
+
+    BACKGROUNDS.forEach(bg => {
+      const name = bg.key; // already nice
+      const card = document.createElement('div');
+      card.className = 'card background-card';
+      card.dataset.sku = bg.key;
+
+      // IMPORTANT: show ONLY the DAY image in the store UI
+      const thumbSrc = buildBgPath(bg.day);
+
+      card.innerHTML = `
+        <div class="skin-thumb">
+          <img src="${thumbSrc}" alt="${name} background" />
+        </div>
+        <div class="item-name">${name}</div>
+        <div class="item-price">Background</div>
+        <div class="item-actions">
+          <button class="use-btn" type="button">Equip</button>
+        </div>
+      `;
+
+      // Equip button applies immediately AND saves choice
+      card.querySelector('.use-btn').addEventListener('click', () => {
+        if (bg.isDefault) {
+          // Clear custom selection so backgroundnight.js resumes day/night switching
+          localStorage.removeItem(BG_STORAGE_KEY);
+          window.BackgroundNight?.apply();
+          // Remove bg tag so dragon uses the default Forest bottom position
+          const scene = getSceneEl();
+          if (scene) {
+            scene.removeAttribute('data-bg');
+            scene.style.backgroundPosition = 'center bottom';
+          }
+          selectedSku = null;
+          highlightSelection();
+          showNotification(`Default Forest background equipped! 🌲✨`, 'success');
+          return;
+        }
+        saveSelectedBackground(bg.key);
+        applyBackground(bg);
+        showNotification(`${name} background equipped! 🌄✨`, 'success');
+      });
+
+      // Optional: click card to select outline highlight
+      card.addEventListener('click', (e) => {
+        if (e.target.tagName.toLowerCase() === 'button') return;
+        selectedSku = (selectedSku === bg.key) ? null : bg.key;
+        highlightSelection();
+      });
+
+      grid.appendChild(card);
+    });
+
+    // Highlight current selection from storage (if any)
+    const selected = getSelectedBackground();
+    if (selected) selectedSku = selected.key;
+
+    highlightSelection();
+  }
+
 
   function renderCatalog(categoryItems = []) {
     grid.innerHTML = '';
@@ -262,6 +529,12 @@ export function initStore({ getDoros, spendDoros }) {
     const evt = new CustomEvent('store:itemUsed', { detail });
     window.dispatchEvent(evt);
   }
+
+  function emitOpenSkins() {
+    const evt = new CustomEvent('store:openSkins');
+    window.dispatchEvent(evt);
+  }
+
 
   // Optional: keep this for manual use button if you want to keep it
   useBtn?.addEventListener('click', () => {

@@ -166,7 +166,7 @@ export function initEditors({ addTask } = {}) {
 
         const stopPropagation = evt => evt.stopPropagation();
         [container, nameInput, saveBtn, cancelBtn].forEach(el => {
-            ['click', 'mousedown', 'mouseup', 'dblclick'].forEach(evtName => el.addEventListener(evtName, stopPropagation));
+            ['click', 'mousedown', 'mouseup', 'dblclick', 'keydown'].forEach(evtName => el.addEventListener(evtName, stopPropagation));
         });
 
         const ctx = {

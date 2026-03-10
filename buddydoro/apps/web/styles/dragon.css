@@ -12,7 +12,7 @@
 .dragon {
   left: 50%;
   transform: translateX(-50%);
-  bottom: 16vh;
+  bottom: 16vh; /* default: Forest (background-position: center bottom) */
 
   /* Scale with viewport, but cap min/max so it looks good on all screens */
   width: clamp(320px, 32vw, 820px);
@@ -21,11 +21,50 @@
   z-index: 1;
 }
 
+/* ---- Per-background vertical position ----
+   Store backgrounds use background-position: center center, which places
+   platforms higher in the viewport than the default Forest (center bottom).
+   [data-bg] is set on #scene by store.js whenever a store background is active. */
+
+#scene[data-bg] .dragon {
+  bottom: 13vh; /* sits character ~25px into the platform surface (centered) */
+}
+
+/* Floating Island has a much higher platform — needs extra lift */
+#scene[data-bg="Floating Island"] .dragon {
+  bottom: 27vh;
+}
+
 .dragon-img {
   display: block;
   width: 100%;
   height: auto;
 }
+
+/* ✅ Only nudge SKIN images upward (default dragon stays the same) */
+/*#dragon img[src*="/Skins/"],
+#dragon img[src*="\\Skins\\"] {
+  transform: translateY(-100px); /* tweak this value */
+/* } */
+
+/* ---- Per-skin vertical alignment ---- */
+/* translateY % is relative to the img's own height, so it scales with viewport size.
+   Negative = move UP. Reference: Dragon.png at translateY(0) sits correctly on the stump.
+   Each skin's value compensates for the transparent space at the bottom of its image
+   so all feet/bodies land at the same stump level as the default dragon. */
+
+#dragon img[src$="/Skins/Alien.png"]          { transform: translateY(-17%); }
+#dragon img[src$="/Skins/Axolotyl.png"]       { transform: translateY(-10%); }
+#dragon img[src$="/Skins/Bigfoot.png"]        { transform: translateY(-16%); }
+#dragon img[src$="/Skins/Butterfly.png"]      { transform: translateY(-10%); }
+#dragon img[src$="/Skins/Capybara.png"]       { transform: translateY(-13%); }
+#dragon img[src$="/Skins/DragonSkin.png"]     { transform: translateY(0%); }
+#dragon img[src$="/Skins/Frog.png"]           { transform: translateY(0%); }
+#dragon img[src$="/Skins/PrayingMantis.png"]  { transform: translateY(-16%); }
+#dragon img[src$="/Skins/Robot.png"]          { transform: translateY(-13%); }
+#dragon img[src$="/Skins/RockCreature.png"]   { transform: translateY(-13%); }
+#dragon img[src$="/Skins/Vampire.png"]        { transform: translateY(-17%); }
+#dragon img[src$="/Skins/Werewolf.png"]       { transform: translateY(-11%); }
 
 /* Optional: a utility to hide the dragon (e.g., during transitions) */
 .dragon.is-hidden {

@@ -270,6 +270,19 @@
 
 .payment-container {
   display: flex;
+  gap: 20px;
+  padding: 6px 12px 16px;
+  min-height: 400px;
+}
+
+.payment-left {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.payment-right {
+  flex: 1;
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;

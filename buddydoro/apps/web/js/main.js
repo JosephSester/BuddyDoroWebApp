@@ -1,5 +1,6 @@
 // apps/web/js/main.js
 
+// Scene / sprite
 import { initScene } from './features/scene.js';
 import { initDragon } from './features/dragon.js';
 import { initTopbar } from './features/topbar.js';
@@ -15,11 +16,17 @@ import { initAiPlan } from './features/aiPlan.js';
 // ---- Auth guard -------------------------------------------------
 const authToken = localStorage.getItem('authToken');
 if (!authToken) {
+  console.log('No auth token found. Redirecting to login...');
   window.location.href = 'login.html';
   throw new Error('Not authenticated');
 }
 
-// UI features
+// document.addEventListener('DOMContentLoaded', () => {
+//   initStore({
+//     getDoros,
+//     spendDoros
+//   });
+// });
 
 // ----- 1) Background & dragon -------------------------------------------------
 // ---- Scene ------------------------------------------------------

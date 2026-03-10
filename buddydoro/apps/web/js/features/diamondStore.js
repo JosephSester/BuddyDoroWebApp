@@ -79,6 +79,7 @@ export function initDiamondStore() {
     const diamondLabel = selectedPack.amount === 1 ? 'Diamond' : 'Diamonds';
 
     dialog.classList.add('payment-view');
+    const currentBalance = Number(balance.textContent || "0");
 
     list.innerHTML = `
       <div class="payment-header">
@@ -86,41 +87,44 @@ export function initDiamondStore() {
       </div>
 
       <div class="payment-container">
-        <div class="payment-summary">
+        <div class="payment-left">
+          <div class="payment-summary">
           <img src="${selectedPack.image}" class="payment-diamond-icon" />
           <h3>+${selectedPack.amount} ${diamondLabel}</h3>
-          <p class="payment-balance">Balance Due: $${selectedPack.totalPrice}</p>
+            <p class="payment-balance">Balance Due: $${selectedPack.totalPrice}</p>
+          </div>
         </div>
 
-        <div class="payment-methods-label">Select payment method:</div>
-        <div class="payment-methods">
-          <button class="payment-method-btn" data-method="card">
-            <div class="payment-method-content">
-              <div class="payment-logos">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" class="payment-logo" alt="Visa" />
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="payment-logo" alt="Mastercard" />
-                <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg" class="payment-logo" alt="Amex" />
+        <div class="payment-right">
+          <div class="payment-methods-label">Select payment method:</div>
+          <div class="payment-methods">
+            <button class="payment-method-btn" data-method="card">
+              <div class="payment-method-content">
+                <div class="payment-logos">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" class="payment-logo" alt="Visa" />
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" class="payment-logo" alt="Mastercard" />
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg" class="payment-logo" alt="Amex" />
+                </div>
+                <div class="payment-method-name">Credit / Debit Card</div>
               </div>
-              <div class="payment-method-name">Credit / Debit Card</div>
-            </div>
-          </button>
+            </button>
 
-          <button class="payment-method-btn" data-method="paypal">
-            <div class="payment-method-content">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" class="payment-logo-single" alt="PayPal" />
-              <div class="payment-method-name">PayPal</div>
-            </div>
-          </button>
+            <button class="payment-method-btn" data-method="paypal">
+              <div class="payment-method-content">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" class="payment-logo-single" alt="PayPal" />
+                <div class="payment-method-name">PayPal</div>
+              </div>
+            </button>
 
-          <button class="payment-method-btn" data-method="venmo">
-            <div class="payment-method-content">
-              <img src="./assets/artwork/Venmo_logo.png" class="payment-logo-single" alt="Venmo" />
-              <div class="payment-method-name">Venmo</div>
-            </div>
-          </button>
+            <button class="payment-method-btn" data-method="venmo">
+              <div class="payment-method-content">
+                <img src="./assets/artwork/Venmo_logo.png" class="payment-logo-single" alt="Venmo" />
+                <div class="payment-method-name">Venmo</div>
+              </div>
+            </button>
 
-          <button class="payment-method-btn" data-method="other">
-            <div class="payment-method-content">
+            <button class="payment-method-btn" data-method="other">
+              <div class="payment-method-content">
               <span class="payment-method-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
                   <rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="2" />
@@ -128,14 +132,41 @@ export function initDiamondStore() {
                   <path d="M7 15h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
               </span>
-              <div class="payment-method-name">Other</div>
-            </div>
-          </button>
-        </div>
+                <div class="payment-method-name">Other</div>
+              </div>
+            </button>
+          </div>
 
         <button class="payment-cancel-btn btn-secondary">Cancel</button>
       </div>
     `;
+
+    const header = dialog.querySelector('.diamond-store-header');
+    const headerLeft = header?.querySelector('.diamond-store-left');
+    const headerTitle = header?.querySelector('#diamondStoreTitle');
+    let headerBackBtn = header?.querySelector('.payment-back-btn');
+
+    if (headerTitle) headerTitle.textContent = '';
+
+    if (!headerBackBtn && headerLeft) {
+      headerBackBtn = document.createElement('button');
+      headerBackBtn.className = 'payment-back-btn';
+      headerBackBtn.setAttribute('aria-label', 'Go back to packages');
+      headerBackBtn.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `;
+      headerLeft.prepend(headerBackBtn);
+    }
+
+    if (headerBackBtn) {
+      headerBackBtn.onclick = () => {
+        currentView = 'packs';
+        selectedPack = null;
+        renderPacks();
+      };
+    }
 
     const paymentBtns = list.querySelectorAll('.payment-method-btn');
     paymentBtns.forEach(btn => {

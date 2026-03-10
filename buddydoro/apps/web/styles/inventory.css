@@ -1,0 +1,115 @@
+/* Inventory modal follows existing store visual language */
+.inventory-panel {
+  position: fixed;
+  inset: auto 50% 30vh auto;
+  transform: translateX(50%);
+  width: min(880px, 92vw);
+  max-height: 78vh;
+  overflow: auto;
+  border-radius: 28px;
+  z-index: 31;
+  border: 2px solid rgba(194, 178, 140, 0.4);
+  background:
+    radial-gradient(120px circle at 50% 42%, rgba(255, 255, 255, 0.4), rgba(245, 240, 230, 0.15) 70%),
+    linear-gradient(135deg, rgba(222, 196, 160, 0.45) 0%, rgba(194, 178, 140, 0.35) 100%);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(245, 240, 230, 0.25),
+    0 0 20px rgba(194, 178, 140, 0.2);
+  color: #2b2213;
+  pointer-events: auto;
+}
+
+.inventory-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 8px;
+}
+
+.inventory-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.inventory-content {
+  padding: 8px 18px 12px;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.inventory-card {
+  border: 2px solid #e0a233;
+  border-radius: 16px;
+  background: rgba(255, 235, 160, 0.45);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.inventory-card-emoji {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.inventory-card-name {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.inventory-card-meta {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.inventory-card-count {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.inventory-empty {
+  border: 2px dashed rgba(224, 162, 51, 0.8);
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  background: rgba(255, 235, 160, 0.35);
+  font-weight: 700;
+}
+
+.inventory-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 10px 18px 16px;
+}
+
+.inventory-chip .inventory-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.inventory-chip .inventory-label {
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  .inventory-panel {
+    inset: auto 50% 4vh auto;
+    width: 94vw;
+  }
+
+  .inventory-grid {
+    grid-template-columns: 1fr;
+  }
+}

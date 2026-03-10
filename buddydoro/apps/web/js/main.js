@@ -8,6 +8,7 @@ import { initManualPomodoroLogic } from './features/timerFeature/manualPomodoroL
 import { initTaskPomodoroLogic } from './features/timerFeature/taskPomodoroLogic.js';
 import { initEarnDoros } from './features/earndoros.js';
 import { initStore } from './features/store.js';
+import { initInventory } from './features/inventory.js';
 import { initDiamondStore } from './features/diamondStore.js';
 import { initTasks, getActiveTask } from './features/taskfeature/index.js';
 import { initAiPlan } from './features/aiPlan.js';
@@ -209,6 +210,9 @@ initStore({
   getDoros: () => earnDoros.getBalance(),
   spendDoros: amount => earnDoros.spend(amount),
 });
+
+// Dedicated inventory modal (separate from store purchase flow).
+initInventory();
 
 // ----- Diamond Store ----------------------------------------------------------
 initDiamondStore();

@@ -77,6 +77,7 @@ router.post('/login', async (req, res) => {
       name: user.name,
       doros: user.doros,
       diamonds: user.diamonds,
+      companionStatuses: user.companionStatuses,
       hasSeenOnboarding: user.hasSeenOnboarding,
     });
   } catch (err) {
@@ -107,9 +108,12 @@ router.get('/me', async (req, res) => {
     return res.json({
       userId: user._id,
       name: user.name,
-      email: user.email,   // ✅ added
+      email: user.email,  
       doros: user.doros,
-      diamonds: user.diamonds
+      diamonds: user.diamonds,
+      companionStatuses: user.companionStatuses,
+      lastSessionEnd: user.lastSessionEnd,
+      hasSeenOnboarding: user.hasSeenOnboarding,
     });
 
   } catch (err) {

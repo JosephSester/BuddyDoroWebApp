@@ -2,7 +2,7 @@ import { API_BASE } from './api/apiClient.js';
 
 console.log('onboarding.js loaded');
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     let currentSlide = 0;
     const slides       = document.querySelectorAll('.slide');
     const dots         = document.querySelectorAll('.dot');
@@ -11,22 +11,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const startBtn     = document.querySelector('.start-btn');
     const skipBtn      = document.querySelector('.skip-btn');
     const footer       = document.querySelector('.onboarding-footer');
+    const scrollHint   = document.getElementById('scrollHint');
     const totalSlides  = slides.length;
 
-    // Personalize with the user's name from login
-    const userName = localStorage.getItem('userName');
-    if (userName) {
-        document.querySelectorAll('.user-name').forEach(el => {
-            el.textContent = userName;
-        });
+    // ── Timer settings state (slide 4) ──────────────────
+    let focusMinutes = 25;
+    let breakMinutes = 5;
+
+    const focusSlider  = document.getElementById('focusSlider');
+    const breakSlider  = document.getElementById('breakSlider');
+    const focusDisplay = document.getElementById('focusDisplay');
+    const breakDisplay = document.getElementById('breakDisplay');
+
+    function updateSliderFill(slider) {
+        const min = Number(slider.min), max = Number(slider.max), val = Number(slider.value);
+        const pct = ((val - min) / (max - min)) * 100;
+        slider.style.setProperty('--fill', `${pct}%`);
     }
 
-    // Toggle dark-mode styling on the footer and skip button.
-    // Slide 0 (welcome) is a dark full-screen scene — everything needs to be white.
-    // Slides 1+ are split-screen with a white right panel — use dark UI.
-    function setDarkMode(isDark) {
-        footer.classList.toggle('is-dark', isDark);
-        skipBtn.classList.toggle('is-dark', isDark);
+    focusSlider.addEventListener('input', () => {
+        focusMinutes = Number(focusSlider.value);
+        focusDisplay.textContent = focusMinutes;
+        updateSliderFill(focusSlider);
+    });
+    breakSlider.addEventListener('input', () => {
+        breakMinutes = Number(breakSlider.value);
+        breakDisplay.textContent = breakMinutes;
+        updateSliderFill(breakSlider);
+    });
+
+    // Init fill on load
+    updateSliderFill(focusSlider);
+    updateSliderFill(breakSlider);
+
+    // ── Fetch real user data from backend ────────────────
+    const token = localStorage.getItem('authToken');
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            const user = await res.json();
+            document.querySelectorAll('.user-name').forEach(el => {
+                el.textContent = user.name;
+            });
+            localStorage.setItem('userName', user.name);
+            // Pre-fill sliders with any saved settings
+            if (user.settings?.focusMinutes) {
+                focusMinutes = user.settings.focusMinutes;
+                focusSlider.value = focusMinutes;
+                focusDisplay.textContent = focusMinutes;
+                updateSliderFill(focusSlider);
+            }
+            if (user.settings?.breakMinutes) {
+                breakMinutes = user.settings.breakMinutes;
+                breakSlider.value = breakMinutes;
+                breakDisplay.textContent = breakMinutes;
+                updateSliderFill(breakSlider);
+            }
+        } else {
+            const cached = localStorage.getItem('userName');
+            if (cached) document.querySelectorAll('.user-name').forEach(el => { el.textContent = cached; });
+        }
+    } catch {
+        const cached = localStorage.getItem('userName');
+        if (cached) document.querySelectorAll('.user-name').forEach(el => { el.textContent = cached; });
     }
 
     function updateSlide(newIndex, direction = 'next') {
@@ -57,20 +106,16 @@ document.addEventListener('DOMContentLoaded', () => {
         dots[newIndex].classList.add('active');
 
         currentSlide = newIndex;
-
-        setDarkMode(currentSlide === 0);
         updateButtons();
     }
 
     function updateButtons() {
-        prevBtn.disabled = currentSlide === 0;
-
         if (currentSlide === totalSlides - 1) {
-            nextBtn.style.display = 'none';
             startBtn.style.display = 'flex';
+            scrollHint.classList.add('hidden');
         } else {
-            nextBtn.style.display = 'flex';
             startBtn.style.display = 'none';
+            scrollHint.classList.remove('hidden');
         }
     }
 
@@ -83,27 +128,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function completeOnboarding() {
-        const container = document.querySelector('.onboarding-container');
-        container.style.transition = 'opacity 0.5s ease';
-        container.style.opacity = '0';
+        const wrap = document.querySelector('.ob-wrap');
+        wrap.style.transition = 'opacity 0.5s ease';
+        wrap.style.opacity = '0';
 
+        // Mark locally immediately so the main page guard passes
+        localStorage.setItem('hasSeenOnboarding', 'true');
+
+        const authToken = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+        };
+
+        // Save timer settings to backend
         try {
-            const token = localStorage.getItem('authToken');
-            await fetch(`${API_BASE}/user/onboarding`, {
+            const res = await fetch(`${API_BASE}/user/settings`, {
                 method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers,
+                body: JSON.stringify({ focusMinutes, breakMinutes })
             });
+            if (!res.ok) console.warn('Settings sync returned', res.status);
+        } catch (e) {
+            console.warn('Failed to sync settings to backend', e);
+        }
+
+        // Mark onboarding complete in backend
+        try {
+            const res = await fetch(`${API_BASE}/user/onboarding`, {
+                method: 'PATCH',
+                headers
+            });
+            if (!res.ok) console.warn('Onboarding sync returned', res.status);
         } catch (e) {
             console.warn('Failed to sync onboarding to backend', e);
         }
 
         setTimeout(() => {
-            localStorage.setItem('hasSeenOnboarding', 'true');
             window.location.href = 'index.html';
         }, 500);
     }
 
-    // Button listeners
+    // Hidden prev/next buttons (kept for fallback — scroll is primary)
     nextBtn.addEventListener('click', nextSlide);
     prevBtn.addEventListener('click', prevSlide);
     startBtn.addEventListener('click', completeOnboarding);
@@ -118,19 +184,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
-        if      (e.key === 'ArrowRight' || e.key === 'ArrowDown')  nextSlide();
-        else if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    prevSlide();
+        if      (e.key === 'ArrowDown')  nextSlide();
+        else if (e.key === 'ArrowUp')    prevSlide();
         else if (e.key === 'Enter' && currentSlide === totalSlides - 1) completeOnboarding();
         else if (e.key === 'Escape') completeOnboarding();
     });
 
-    // Swipe support
+    // ── Scroll wheel navigation (throttled) ──────────────
+    let scrollCooldown = false;
+    document.addEventListener('wheel', (e) => {
+        if (scrollCooldown) return;
+        scrollCooldown = true;
+        setTimeout(() => { scrollCooldown = false; }, 700);
+
+        if (e.deltaY > 0) nextSlide();
+        else if (e.deltaY < 0) prevSlide();
+    }, { passive: true });
+
+    // ── Vertical touch swipe ──────────────────────────────
+    let touchStartY = 0;
     let touchStartX = 0;
-    document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
     document.addEventListener('touchend', (e) => {
-        const diff = touchStartX - e.changedTouches[0].screenX;
-        if (Math.abs(diff) > 50) diff > 0 ? nextSlide() : prevSlide();
-    });
+        const diffX = touchStartX - e.changedTouches[0].screenX;
+        const diffY = touchStartY - e.changedTouches[0].screenY;
+        // Only trigger if vertical swipe dominates
+        if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 50) {
+            diffY > 0 ? nextSlide() : prevSlide();
+        }
+    }, { passive: true });
 
     updateButtons();
     console.log('Onboarding initialized');

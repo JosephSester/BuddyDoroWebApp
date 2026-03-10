@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude plugins install frontend-design)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\(''main'',''index.js''\\), d.get\\(''scripts'',{}\\)\\)\")",
+      "Bash(where npx)",
+      "Bash(npx puppeteer --version)",
+      "Read(//c/Users/jchar/AppData/Local/Temp/**)",
+      "Bash(node screenshot.mjs \"http://localhost:9090/public/onboarding.html\" \"v2-slide0\" 0)",
+      "Bash(node screenshot.mjs \"http://localhost:9090/public/onboarding.html\" \"v2-slide3\" 3)"
+    ]
+  }
+}

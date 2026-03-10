@@ -21,7 +21,18 @@ export function initTaskCrud({ renderAllTasks, onShouldStopTimer } = {}) {
 
             console.log(`[Tasks] Adding task "${name}" to panel: ${panelId}`);
 
-            const apiTask = await createTask(name, panelId);
+            let apiTask;
+            try {
+                apiTask = await createTask(name, panelId);
+            } catch (fetchError) {
+                // Server unreachable — save locally with a generated ID
+                console.warn('[Tasks] Server unavailable, saving task locally:', fetchError.message);
+                apiTask = {
+                    id: `local-${Date.now()}-${Math.floor(Math.random() * 1e6)}`,
+                    text: name,
+                    panelId,
+                };
+            }
 
             const t = {
                 id: apiTask.id,
@@ -35,7 +46,7 @@ export function initTaskCrud({ renderAllTasks, onShouldStopTimer } = {}) {
             setTaskPanel(t.id, panelId);
             renderAllTasks();
             console.log('Task created:', t);
-            showTaskNotification('Task created successfully', 'success');
+            showTaskNotification('Task saved', 'success');
             return t;
         } catch (error) {
             console.error('Failed to create task:', error);
@@ -50,7 +61,11 @@ export function initTaskCrud({ renderAllTasks, onShouldStopTimer } = {}) {
     const deleteTask = async (id) => {
         setTasksBusy(true, 'Deleting task...');
         try {
-            await apiDeleteTask(id);
+            try {
+                await apiDeleteTask(id);
+            } catch (fetchError) {
+                console.warn('[Tasks] Server unavailable, deleting task locally:', fetchError.message);
+            }
 
             const i = state.tasks.findIndex(t => t.id === id);
             if (i === -1) return;

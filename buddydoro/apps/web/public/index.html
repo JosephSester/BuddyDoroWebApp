@@ -31,19 +31,23 @@
   <link rel="stylesheet" href="../styles/diamondStore.css" />
 
   <link rel="stylesheet" href="../styles/dragon.css" />
+  <link rel="stylesheet" href="../styles/companionThoughts.css" />
+  <link rel="stylesheet" href="../styles/companionStatus.css" />
   <link rel="stylesheet" href="../styles/topbar.css" />
   <link rel="stylesheet" href="../styles/diamond.css" />
   <link rel="stylesheet" href="../styles/timer.css" />
   <link rel="stylesheet" href="../styles/tasks.css" />
   <link rel="stylesheet" href="../styles/ai-plan.css" />
   <link rel="stylesheet" href="../styles/store.css" />
+  <link rel="stylesheet" href="../styles/inventory.css" />
+  <link rel="stylesheet" href="../styles/history.css" />
   <link rel="stylesheet" href="../styles/animations.css" />
 
-  <!-- Life Circle CSS -->
-  <link rel="stylesheet" href="../styles/lifecircle.css" />
+  <!-- Life Circle CSS (disabled; using companionStatus instead) -->
+  <!-- <link rel="stylesheet" href="../styles/lifecircle.css" /> -->
 
-  <!-- Restore Life Segment CSS -->
-  <link rel="stylesheet" href="../styles/restorelifesegment.css" />
+  <!-- Restore Life Segment CSS (disabled; tied to LifeCircle) -->
+  <!-- <link rel="stylesheet" href="../styles/restorelifesegment.css" /> -->
 
   <!-- Rain overlay CSS -->
   <link rel="stylesheet" href="../styles/rain.css" />
@@ -51,6 +55,8 @@
   <!-- Background night/day switch (transition helper) -->
   <link rel="stylesheet" href="../styles/backgroundnight.css" />
 
+  <!-- Logout Modal -->
+  <link rel="stylesheet" href="../styles/logoutModal.css"
 
   <!-- Theme last so it can override colors if needed -->
   <link rel="stylesheet" href="../styles/themes.css" />
@@ -76,7 +82,30 @@
     <header class="topbar" aria-label="User header">
       <div class="top-chips">
 
-        <!-- Store chip (opens window) -->
+          <!-- History chip -->
+        <button class="chip glass-chip history-chip" id="historyChip" type="button">
+          <svg class="history-icon" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="histGoldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f7d073" />
+                <stop offset="100%" stop-color="#d39b2d" />
+              </linearGradient>
+              <radialGradient id="histGoldFill" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#fff6c3" />
+                <stop offset="55%" stop-color="#ffd36b" />
+                <stop offset="100%" stop-color="#f0b13a" />
+              </radialGradient>
+            </defs>
+            <circle cx="32" cy="32" r="29" fill="url(#histGoldRing)" />
+            <circle cx="32" cy="32" r="25" fill="url(#histGoldFill)" stroke="#b98627" stroke-width="2" />
+            <circle cx="32" cy="32" r="13" stroke="#2b2213" stroke-width="3.5" fill="none"/>
+            <path d="M32 22v10l7 5" stroke="#2b2213" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M18 32h-5m2.5-4-2.5 4 2.5 4" stroke="#2b2213" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          <span class="history-label">History</span>
+        </button>
+
+          <!-- Store chip (opens window) -->
         <button class="chip glass-chip store-chip" id="storeChip" type="button" aria-haspopup="dialog"
           aria-controls="storeDialog">
           <svg class="store-icon" viewBox="0 0 64 64" aria-hidden="true">
@@ -98,6 +127,29 @@
               fill="#2b2213" />
           </svg>
           <span class="store-label">Store</span>
+        </button>
+
+        <!-- Inventory chip (opens inventory window) -->
+        <button class="chip glass-chip inventory-chip" id="inventoryChip" type="button" aria-haspopup="dialog"
+          aria-expanded="false" aria-controls="inventoryDialog">
+          <svg class="inventory-icon" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="inventoryRing" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f7d073" />
+                <stop offset="100%" stop-color="#d39b2d" />
+              </linearGradient>
+              <radialGradient id="inventoryFill" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#fff6c3" />
+                <stop offset="55%" stop-color="#ffd36b" />
+                <stop offset="100%" stop-color="#f0b13a" />
+              </radialGradient>
+            </defs>
+            <circle cx="32" cy="32" r="29" fill="url(#inventoryRing)" />
+            <circle cx="32" cy="32" r="25" fill="url(#inventoryFill)" stroke="#b98627" stroke-width="2" />
+            <path d="M18 24h28v24a3 3 0 0 1-3 3H21a3 3 0 0 1-3-3V24z" fill="#2b2213" />
+            <path d="M23 24v-2a9 9 0 0 1 18 0v2h-4v-2a5 5 0 0 0-10 0v2h-4z" fill="#2b2213" />
+          </svg>
+          <span class="inventory-label">Inventory</span>
         </button>
 
         <!-- Diamond chip -->
@@ -160,9 +212,9 @@
           </button>
           <div id="greetMenu" class="greet-menu" role="menu" hidden>
             <div class="greet-menu-section" role="none">
-              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/account">Account
+              <button type="button" class="greet-menu-item" role="menuitem" data-nav="./account.html">Account
                 Settings</button>
-              <button type="button" class="greet-menu-item" role="menuitem" data-nav="/settings/profile">Profile
+              <button type="button" class="greet-menu-item" role="menuitem" data-nav="./profile.html">Profile
                 Settings</button>
             </div>
             <hr class="greet-menu-divider" />
@@ -263,15 +315,24 @@
     </section>
     <!-- <<< REPLACEMENT END <<< -->
 
-
-
-
-
     <!-- Timer & controls (right) -->
     <div class="right-ui">
-      <div id="modeLabel" class="timer-label">Idle</div>
+      <div class="timer-info-panel">
+        <div id="focusTaskName" class="focus-task-name" hidden></div>
+        <div id="modeLabel" class="timer-label">Idle</div>
+
+        <!-- Subtask selector — shown when a task is active -->
+        <div id="subtaskSelector" class="subtask-selector" hidden>
+          <label class="subtask-selector-label" for="subtaskSelect">Timing:</label>
+          <select id="subtaskSelect" class="subtask-select">
+            <option value="">— select subtask —</option>
+          </select>
+        </div>
+      </div>
+
       <div class="timer-card" aria-live="polite">
         <div id="timerDisplay" class="timer-value">25:00</div>
+        <div id="timerSessionCount" class="timer-session-count">0 sessions done</div>
       </div>
 
       <div class="btn-row">
@@ -414,6 +475,8 @@
           <button class="tab" role="tab" aria-selected="false" data-cat="play">Play</button>
           <button class="tab" role="tab" aria-selected="false" data-cat="water">Water</button>
           <button class="tab" role="tab" aria-selected="false" data-cat="medicine">Medicine</button>
+          <button class="tab tab-skins" role="tab" aria-selected="false" data-cat="skins">Skins</button>
+          <button class="tab tab-backgrounds" role="tab" aria-selected="false" data-cat="backgrounds">Backgrounds</button>
         </div>
 
         <div id="catalogGrid" class="catalog-grid" aria-live="polite"></div>
@@ -429,6 +492,53 @@
     <div class="store-footer">
       <button id="useSelectedBtn" class="btn-primary" type="button">Use Selected</button>
       <button id="storeCloseBottom" class="btn-secondary" type="button">Close</button>
+    </div>
+  </section>
+
+   <!-- Inventory dialog (window) -->
+   <div id="inventoryBackdrop" class="backdrop" hidden></div>
+
+   <section id="inventoryDialog" class="inventory-panel" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle"
+     hidden>
+     <div class="inventory-header">
+       <h2 id="inventoryTitle">Your Inventory</h2>
+       <button id="inventoryClose" class="icon-btn" aria-label="Close inventory">&times;</button>
+     </div>
+ 
+     <div class="inventory-content">
+       <div id="inventoryCategoryTabs" class="category-tabs" role="tablist" aria-label="Inventory categories"></div>
+       <div id="inventoryGrid" class="inventory-grid" aria-live="polite"></div>
+     </div>
+ 
+     <div class="inventory-footer">
+       <button id="inventoryCloseBottom" class="btn-secondary" type="button">Close</button>
+     </div>
+   </section>
+
+  <!-- History dialog -->
+  <div id="historyBackdrop" class="backdrop" hidden></div>
+
+  <section id="historyDialog" class="history-panel" role="dialog" aria-modal="true"
+    aria-labelledby="historyTitle" hidden>
+    <div class="history-header">
+      <h2 id="historyTitle">History</h2>
+      <button id="historyClose" class="icon-btn" type="button" aria-label="Close history">&times;</button>
+    </div>
+
+    <div class="history-tabs" role="tablist" aria-label="History periods">
+      <button class="tab is-active" role="tab" aria-selected="true"  data-period="daily">Daily</button>
+      <button class="tab" role="tab" aria-selected="false" data-period="weekly">Weekly</button>
+      <button class="tab" role="tab" aria-selected="false" data-period="monthly">Monthly</button>
+      <button class="tab" role="tab" aria-selected="false" data-period="yearly">Yearly</button>
+      <button class="tab" role="tab" aria-selected="false" data-period="lifetime">Lifetime</button>
+    </div>
+
+    <div id="historyContent" class="history-content" aria-live="polite">
+      <p class="history-empty">No history yet for this period.</p>
+    </div>
+
+    <div class="history-footer">
+      <button id="historyCloseBottom" class="btn-secondary" type="button">Close</button>
     </div>
   </section>
 
@@ -453,20 +563,29 @@
     </div>
   </section>
 
-  <!-- Life Circle logic (auto-mounts into #scene and positions under the dragon) -->
+  <div class="music-fab-wrap">
+    <button id="musicChip" class="music-fab" aria-label="Open music" aria-expanded="false">♫</button>
+    <section id="musicMiniPanel" class="music-mini-panel" hidden>
+      <!-- now playing + controls / track list -->
+    </section>
+  </div>
+
+  <!-- Life Circle logic disabled; companionStatus.js is now used -->
+  <!--
   <script src="../js/features/lifecircle.js"></script>
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       window.LifeCircle.init({
-        initial: 14,   // 0..14  (14 = full)
-        size: 120,     // px
+        initial: 14,
+        size: 120,
         altPrefix: 'Life'
       });
     });
   </script>
+  -->
 
-  <!-- Restore Life Segment behavior (listens for store item usage) -->
-  <script src="../js/features/restorelifesegment.js"></script>
+  <!-- Restore Life Segment behavior disabled; tied to LifeCircle -->
+  <!-- <script src="../js/features/restorelifesegment.js"></script> -->
 
   <!-- Rain overlay -->
   <script src="../js/features/rain.js"></script>
@@ -474,7 +593,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       Rain.init({ mount: '#scene', density: 0.7, speed: 1.0, wind: 0.5 });
 
-      <!-- >>> NEW: schedule ~10 random 5-minute showers per day -->
+      // NEW: schedule ~10 random 5-minute showers per day 
       Rain.enableRandomDaily({
         timesPerDay: 10,              // ~10 times/day
         durationMs: 5 * 60 * 1000,    // 5 minutes each
@@ -496,10 +615,14 @@
   <!-- Diamond balance logic -->
   <script src="../js/features/diamond.js"></script>
 
+  <!-- Companion status bars (health, happiness, thirst) -->
+  <script src="../js/features/companionStatus.js"></script>
+
   <!-- Entry script: lives in apps/web/js/main.js -->
   <script type="module" src="../js/main.js"></script>
 
   <script type="module" src="../js/features/store.js"></script>
+  <script type="module" src="../js/features/history.js"></script>
 </body>
 
 </html>

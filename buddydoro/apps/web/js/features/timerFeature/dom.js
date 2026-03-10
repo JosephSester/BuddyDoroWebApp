@@ -1,6 +1,8 @@
 // apps/web/js/features/timerFeature/dom.js
 // DOM lookups for timer UI and menus.
 
+const CRITICAL_IDS = ['timerChip', 'timerDisplay', 'startBtn'];
+
 export const getTimerDom = () => {
     const rightUi = document.querySelector('.right-ui');
     const display = document.getElementById('timerDisplay');
@@ -17,6 +19,12 @@ export const getTimerDom = () => {
         timerDurationValue: document.getElementById('timerDurationValue'),
         timerDurationOk: document.getElementById('timerDurationOk'),
     };
+
+    for (const id of CRITICAL_IDS) {
+        if (!document.getElementById(id)) {
+            console.warn(`[Timer] Missing required DOM element: #${id}`);
+        }
+    }
 
     return { rightUi, display, startBtn, endBtn, modeLabel, elements };
 };

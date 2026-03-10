@@ -2,11 +2,11 @@
 // FRONTEND API CLIENT
 // Location: apps/web/js/api/apiClient.js
 // Purpose: HTTP client that calls the backend API
-// Used by: Frontend code to send requests to http://localhost:3000
+// Used by: Frontend code to send requests to the backend API
 // Note: This runs IN THE BROWSER, not on the server
 // ============================================================
 
-const API_BASE = 'http://localhost:3000/api';
+export const API_BASE = 'http://localhost:3000/api';
 
 // Get auth token from localStorage
 function getAuthToken() {

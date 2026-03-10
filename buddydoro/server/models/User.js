@@ -43,6 +43,14 @@ const userSchema = new mongoose.Schema({
     min: 1}
   },
 
+  // Companion statuses
+  companionStatuses: {
+    health: { type: Number, default: 14, min: 0, max: 14 },
+    happiness: { type: Number, default: 14, min: 0, max: 14 },
+    thirst: { type: Number, default: 14, min: 0, max: 14 },
+    hunger: { type: Number, default: 14, min: 0, max: 14 }
+  },
+
   //User preferences
 
   settings: {
@@ -58,6 +66,16 @@ const userSchema = new mongoose.Schema({
       type: String,
       default: 'default'
     }
+  },
+
+  hasSeenOnboarding: {
+    type: Boolean,
+    default: false
+  },
+
+  lastSessionEnd: {
+    type: Date,
+    default: Date.now
   },
 
   createdAt: {

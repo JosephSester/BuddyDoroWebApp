@@ -98,10 +98,14 @@ export function initRender({ editors, deleteTask, renderTodoList }) {
         const right = document.createElement('div');
         right.className = 'task-right';
 
+        const subs = getSubtasks(task.id);
+        const subsDone = subs.filter(s => s.done).length;
+
         const bubble = document.createElement('div');
         bubble.className = 'session-bubble';
-        bubble.setAttribute('aria-label', `Completed ${formatSubtaskProgress(task)} subtasks`);
-        bubble.textContent = formatSubtaskProgress(task);
+        bubble.setAttribute('aria-label', `Subtasks: ${subsDone} of ${subs.length} complete`);
+        bubble.textContent = `${subsDone}/${subs.length}`;
+        bubble.hidden = subs.length === 0;
         bubble.addEventListener('click', evt => evt.stopPropagation());
         bubble.addEventListener('mousedown', evt => evt.stopPropagation());
 
@@ -184,7 +188,7 @@ export function initRender({ editors, deleteTask, renderTodoList }) {
 
             const stopPropagation = evt => evt.stopPropagation();
             [editor, nameInput, saveBtn, cancelBtn].forEach(el => {
-                ['click', 'mousedown', 'mouseup', 'dblclick'].forEach(evtName => el.addEventListener(evtName, stopPropagation));
+                ['click', 'mousedown', 'mouseup', 'dblclick', 'keydown'].forEach(evtName => el.addEventListener(evtName, stopPropagation));
             });
 
             const showError = (message) => {
@@ -217,11 +221,14 @@ export function initRender({ editors, deleteTask, renderTodoList }) {
                 const next = [...getSubtasks(task.id), sub];
                 setSubtasks(task.id, next);
                 renderList(task, subsSection.list, { onSetTimerFromEstimate: handleSubtaskEstimate, onChange: renderAllTasks });
-                bubble.textContent = formatSubtaskProgress(task);
-                bubble.setAttribute('aria-label', `Completed ${formatSubtaskProgress(task)} subtasks`);
                 subsSection.wrapInner.hidden = false;
                 subToggle.setAttribute('aria-expanded', 'true');
                 teardown(false);
+                const updatedSubs = getSubtasks(task.id);
+                const updatedDone = updatedSubs.filter(s => s.done).length;
+                bubble.textContent = `${updatedDone}/${updatedSubs.length}`;
+                bubble.setAttribute('aria-label', `Subtasks: ${updatedDone} of ${updatedSubs.length} complete`);
+                bubble.hidden = false;
             };
 
             const onKey = evt => {

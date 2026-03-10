@@ -1,3 +1,5 @@
+import { API_BASE } from './api/apiClient.js';
+
 // Ensure the DOM is fully loaded before running the script
 console.log('login.js loaded');
 
@@ -82,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const res = await fetch('http://localhost:3000/api/auth/login', {
+      const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }) // match backend field
@@ -100,32 +102,15 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('userId', data.userId);
       if (data.name) localStorage.setItem('userName', data.name);
+      localStorage.setItem('hasSeenOnboarding', data.hasSeenOnboarding ? 'true' : 'false');
 
-      console.log('Login successful! Redirecting to main app...');
-      window.location.href = 'index.html';
+      console.log('Login successful!');
+      window.location.href = data.hasSeenOnboarding ? 'index.html' : 'onboarding.html';
 
     } catch (err) {
       showLoginError('Server unreachable');
       console.error(err);
     }
-
-
-
-    // Validation checks
-    if (email === '' || password === '') {
-      showLoginError('Please enter both your email and password.');
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      showLoginError('Please enter a valid email address.');
-      return;
-    }
-
-    // If all validation passes
-    loginError.hidden = true;
-    console.log('Login successful! Redirecting to main app...');
-    window.location.href = 'index.html';
 
   });
 

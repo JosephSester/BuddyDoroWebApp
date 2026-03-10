@@ -14,7 +14,7 @@ export const createTimerControls = ({ state, emit, updateUI, showTimer, hideTime
         }
 
         state.isRunning = true;
-        state.lastTs = Date.now();
+        state.lastTs = performance.now();
         ensureTick();
         emit('onStart', { mode: state.mode });
         showTimer();

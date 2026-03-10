@@ -9,12 +9,17 @@ import { initManualPomodoroLogic } from './features/timerFeature/manualPomodoroL
 import { initTaskPomodoroLogic } from './features/timerFeature/taskPomodoroLogic.js';
 import { initEarnDoros } from './features/earndoros.js';
 import { initStore } from './features/store.js';
+import { initInventory } from './features/inventory.js';
 import { initDiamondStore } from './features/diamondStore.js';
 import { initTasks, getActiveTask } from './features/taskfeature/index.js';
 import { initAiPlan } from './features/aiPlan.js';
+import { initCompanionThoughts } from './features/companionThoughts.js';
+import { API_BASE } from './api/apiClient.js';
+import { saveSession } from './features/historyStorage.js';
+import { getSubtasks } from './features/subtasks.js';
 
 // ---- Auth guard -------------------------------------------------
-const authToken = localStorage.getItem('authToken');
+const authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
 if (!authToken) {
   console.log('No auth token found. Redirecting to login...');
   window.location.href = 'login.html';
@@ -27,6 +32,13 @@ if (!authToken) {
 //     spendDoros
 //   });
 // });
+// ---- Onboarding guard -------------------------------------------
+if (localStorage.getItem('hasSeenOnboarding') !== 'true') {
+  window.location.href = 'onboarding.html';
+  throw new Error('Onboarding not complete');
+}
+
+// UI features
 
 // ----- 1) Background & dragon -------------------------------------------------
 // ---- Scene ------------------------------------------------------
@@ -47,6 +59,9 @@ const timer = initTimer({
 
 const focusPanelSlot = document.getElementById('focusPanelSlot');
 const todoButton = document.getElementById('addTasksPanel');
+const tasksStack = document.getElementById('tasksStack');
+const focusTaskNameEl = document.getElementById('focusTaskName');
+const chipRow = document.querySelector('.tasks-chip-row');
 let currentFocusTask = null;
 
 const setTodoButtonVisible = (visible) => {
@@ -59,6 +74,12 @@ const clearFocusPanel = ({ clearTask = false } = {}) => {
   focusPanelSlot.innerHTML = '';
   focusPanelSlot.hidden = true;
   if (clearTask) currentFocusTask = null;
+  if (tasksStack) tasksStack.hidden = false;
+  if (chipRow) chipRow.hidden = false;
+  if (focusTaskNameEl) {
+    focusTaskNameEl.textContent = '';
+    focusTaskNameEl.hidden = true;
+  }
 };
 
 const showFocusPanel = (task) => {
@@ -80,12 +101,75 @@ const showFocusPanel = (task) => {
   focusPanelSlot.innerHTML = '';
   focusPanelSlot.appendChild(clone);
   focusPanelSlot.hidden = false;
+  if (tasksStack) tasksStack.hidden = true;
+  if (chipRow) chipRow.hidden = true;
+  if (focusTaskNameEl) {
+    focusTaskNameEl.textContent = task?.name || '';
+    focusTaskNameEl.hidden = !task?.name;
+  }
 };
+
+let completedFocusSessions = 0;
+const sessionCountEl = document.getElementById('timerSessionCount');
+if (sessionCountEl) sessionCountEl.hidden = false;
+
+const updateSessionCount = () => {
+  if (!sessionCountEl) return;
+  sessionCountEl.textContent = `${completedFocusSessions} session${completedFocusSessions !== 1 ? 's' : ''} done`;
+  sessionCountEl.hidden = false;
+};
+
+// ---- Subtask selector -------------------------------------------------------
+const subtaskSelectorEl = document.getElementById('subtaskSelector');
+const subtaskSelectEl   = document.getElementById('subtaskSelect');
+
+function populateSubtaskSelector(task) {
+  if (!subtaskSelectorEl || !subtaskSelectEl || !task) return;
+  const subtasks = getSubtasks(task.id);
+  subtaskSelectEl.innerHTML = '<option value="">— select subtask —</option>';
+  subtasks.forEach(sub => {
+    const opt = document.createElement('option');
+    opt.value = sub.title;
+    opt.textContent = sub.title;
+    subtaskSelectEl.appendChild(opt);
+  });
+  subtaskSelectorEl.hidden = subtasks.length === 0;
+}
+
+function clearSubtaskSelector() {
+  if (!subtaskSelectorEl || !subtaskSelectEl) return;
+  subtaskSelectEl.innerHTML = '<option value="">— select subtask —</option>';
+  subtaskSelectorEl.hidden = true;
+}
+// -----------------------------------------------------------------------------
 
 const taskPomodoro = initTaskPomodoroLogic({
   timer,
-  onFocusStart: ({ task }) => showFocusPanel(task),
-  onFocusStop: () => clearFocusPanel({ clearTask: true }),
+  onFocusStart: ({ task }) => {
+    completedFocusSessions = 0;
+    updateSessionCount();
+    showFocusPanel(task);
+    populateSubtaskSelector(task);
+  },
+  onFocusStop: () => {
+    clearFocusPanel({ clearTask: true });
+    clearSubtaskSelector();
+  },
+});
+
+timer.onComplete(({ mode }) => {
+  if (mode === 'focus') {
+    completedFocusSessions++;
+    updateSessionCount();
+  }
+});
+
+// Save a history record whenever a focus session summary fires
+timer.onSummary(({ minutes }) => {
+  if (minutes <= 0) return;
+  const subtaskName = subtaskSelectEl?.value || null;
+  const taskName    = currentFocusTask?.name  || null;
+  saveSession({ subtaskName, taskName, seconds: minutes * 60 });
 });
 
 const manualPomodoro = initManualPomodoroLogic({
@@ -118,7 +202,7 @@ timer.setLaunchHandler?.((mode) => {
 // ---- Topbar + EarnDoros -----------------------------------------------------
 async function initUserTopbarAndEarnDoros() {
   try {
-    const res = await fetch('http://localhost:3000/api/auth/me', {
+    const res = await fetch(`${API_BASE}/auth/me`, {
       headers: { Authorization: 'Bearer ' + authToken },
     });
 
@@ -144,6 +228,9 @@ async function initUserTopbarAndEarnDoros() {
 
     // This is all you need — topbar will paint the pill automatically
     earnDoros.setBalance(user?.doros ?? 0);
+    if (window.Diamonds) {
+      window.Diamonds.setBalance(user?.diamonds ?? 0);
+    }
 
     // Force greeting update only (keep this, it's safe)
     const greetTextEl = document.getElementById('greetText');
@@ -171,6 +258,9 @@ initStore({
   spendDoros: amount => earnDoros.spend(amount),
 });
 
+// Dedicated inventory modal (separate from store purchase flow).
+initInventory();
+
 // ----- Diamond Store ----------------------------------------------------------
 initDiamondStore();
 
@@ -193,6 +283,10 @@ await initTasks({
     minutes > 0 && timer.setPlannedFocusDuration(minutes * 60),
   onSubtaskEstimate: minutes =>
     minutes > 0 && timer.setPlannedFocusDuration(minutes * 60),
+});
+
+initCompanionThoughts({
+  getActiveTask: () => getActiveTask()
 });
 
 // ---- AI Plan ----------------------------------------------------

@@ -40,6 +40,8 @@ export function initStore({ getDoros, spendDoros }) {
   'Robot.png',
   'RockCreature.png',
   'Vampire.png',
+  'IceCream.png',
+  'Strawberry.png',
   'Werewolf.png'
 ];
 
@@ -68,6 +70,7 @@ export function initStore({ getDoros, spendDoros }) {
 
     // If Mars only has a day file in your folder, we just reuse day at night
     { key: 'Mars', day: 'MarsBackgroundDay.png', night: 'MarsBackgroundDay.png' },
+    { key: 'Dessert Land', day: 'DessertLandBackground.png', night: 'DessertLandBackground.png' },
   ];
 
   const BG_STORAGE_KEY = 'buddydoro:selectedBackground';

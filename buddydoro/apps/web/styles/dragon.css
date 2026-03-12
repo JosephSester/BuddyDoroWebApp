@@ -64,6 +64,7 @@
 #dragon img[src$="/Skins/Robot.png"]          { transform: translateY(-13%); }
 #dragon img[src$="/Skins/RockCreature.png"]   { transform: translateY(-13%); }
 #dragon img[src$="/Skins/Vampire.png"]        { transform: translateY(-17%); }
+#dragon img[src$="/Skins/IceCream.png"]       { transform: translateY(5%); }
 #dragon img[src$="/Skins/Strawberry.png"]     { transform: translateY(0%); }
 #dragon img[src$="/Skins/Werewolf.png"]       { transform: translateY(-11%); }
 

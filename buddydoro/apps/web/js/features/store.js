@@ -40,6 +40,7 @@ export function initStore({ getDoros, spendDoros }) {
   'Robot.png',
   'RockCreature.png',
   'Vampire.png',
+  'IceCream.png',
   'Strawberry.png',
   'Werewolf.png'
 ];

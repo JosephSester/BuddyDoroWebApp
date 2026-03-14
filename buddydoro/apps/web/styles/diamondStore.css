@@ -104,6 +104,29 @@
   outline-offset: 2px;
 }
 
+.payment-back-btn {
+  appearance: none;
+  border: 2px solid #e0a233;
+  background: linear-gradient(#ffd36b, #f2b942);
+  color: #2b2213;
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  margin-top: 4px;
+  font-size: 26px;
+  line-height: 1;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.payment-back-btn:focus-visible {
+  outline: 3px solid #2b2213;
+  outline-offset: 2px;
+}
+
 /* diamond store list */
 .diamond-store-list {
   display: flex;
@@ -436,4 +459,489 @@
 .payment-cancel-btn:active {
   transform: translateY(2px);
   box-shadow: 0 2px 0 rgba(130, 92, 36, 0.85), 0 6px 12px rgba(0, 0, 0, 0.18);
+}
+
+/* Secure payment step (after method selection) */
+.diamond-store-panel.secure-payment-view {
+  width: min(860px, 94vw);
+}
+
+.diamond-store-panel.secure-payment-view .diamond-store-list {
+  padding: 8px 16px 14px;
+}
+
+.secure-payment-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: -4px;
+  margin-bottom: 8px;
+}
+
+.secure-payment-title {
+  margin: 0;
+  text-align: center;
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 900;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.secure-nav-btn {
+  width: 34px;
+  height: 34px;
+  border: 2px solid #e0a233;
+  border-radius: 12px;
+  background: linear-gradient(#ffd36b, #f2b942);
+  color: #2b2213;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.secure-payment-shell {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.95fr) minmax(360px, 1.2fr);
+  gap: 14px;
+  border: 1px solid rgba(255, 230, 165, 0.6);
+  border-radius: 18px;
+  padding: 12px;
+  background: rgba(255, 225, 164, 0.08);
+}
+
+.secure-order-summary {
+  color: #ffffff;
+  padding: 10px 8px;
+}
+
+.secure-order-summary h4 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.secure-summary-row,
+.secure-summary-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 0;
+  color: #ffffff;
+}
+
+.secure-summary-row span,
+.secure-summary-total span {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.secure-summary-row strong,
+.secure-summary-total strong {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.secure-summary-tax {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  padding-bottom: 10px;
+}
+
+.secure-summary-tax small {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.secure-summary-total {
+  margin-top: 14px;
+}
+
+.secure-payment-form {
+  border: 1.5px solid rgba(255, 226, 150, 0.92);
+  border-radius: 14px;
+  padding: 12px;
+  color: #20160d;
+  background:
+    radial-gradient(160px circle at 18% 12%, rgba(255, 244, 203, 0.42), rgba(255, 244, 203, 0.08) 70%),
+    linear-gradient(180deg, rgba(255, 221, 150, 0.3) 0%, rgba(230, 178, 102, 0.24) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 246, 217, 0.38);
+}
+
+.secure-payment-form h4 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #20160d;
+  text-shadow: none;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.secure-field-label {
+  display: block;
+  margin: 6px 0 5px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2a1c10;
+}
+
+.secure-card-row,
+.secure-address-row {
+  display: grid;
+  grid-template-columns: 1fr 112px 112px;
+  gap: 8px;
+}
+
+.secure-address-row {
+  grid-template-columns: 1fr 180px;
+}
+
+.secure-expiry-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  position: relative;
+}
+
+.secure-expiry-wrap .secure-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.secure-expiry-picker-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(148, 112, 64, 0.42);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #5a3e2b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.secure-expiry-picker-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.secure-expiry-picker {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.secure-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(148, 112, 64, 0.42);
+  border-radius: 9px;
+  min-height: 34px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #20160d;
+  font-size: 13px;
+}
+
+.secure-input::placeholder {
+  color: rgba(88, 64, 39, 0.6);
+}
+
+.secure-input-small {
+  text-align: center;
+}
+
+.secure-terms {
+  margin-top: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  color: #20160d;
+}
+
+.secure-pay-btn {
+  display: block;
+  width: min(180px, 100%);
+  margin: 10px auto 0;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #62a9ff 0%, #2b7cff 100%);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 18px rgba(43, 124, 255, 0.28);
+}
+
+.secure-pay-btn:hover {
+  transform: translateY(-1px);
+}
+
+.secure-wallet-panel {
+  border: 1.5px solid rgba(255, 226, 150, 0.92);
+  border-radius: 14px;
+  padding: 12px;
+  color: #20160d;
+  background:
+    radial-gradient(160px circle at 18% 12%, rgba(255, 244, 203, 0.42), rgba(255, 244, 203, 0.08) 70%),
+    linear-gradient(180deg, rgba(255, 221, 150, 0.3) 0%, rgba(230, 178, 102, 0.24) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 246, 217, 0.38);
+}
+
+.secure-wallet-panel h4 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #20160d;
+  text-shadow: none;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  letter-spacing: 0.01em;
+}
+
+.secure-wallet-account {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
+.secure-wallet-logo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 6px;
+  padding: 3px;
+}
+
+.secure-wallet-account-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.secure-wallet-account-text strong {
+  font-size: 13px;
+  color: #2a1c10;
+}
+
+.secure-wallet-account-text span {
+  font-size: 11px;
+  color: rgba(42, 28, 16, 0.82);
+}
+
+.secure-wallet-unlink {
+  border: 1px solid rgba(148, 112, 64, 0.35);
+  background: #f8f8f8;
+  color: #4a3a24;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.secure-wallet-lines {
+  margin-top: 12px;
+  border-top: 1px solid rgba(148, 112, 64, 0.22);
+  padding-top: 10px;
+}
+
+.secure-wallet-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0;
+  font-size: 14px;
+  color: #3b2c1a;
+}
+
+.secure-wallet-line strong {
+  font-weight: 800;
+}
+
+.secure-wallet-total {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(148, 112, 64, 0.22);
+}
+
+.secure-wallet-pay-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #62a9ff 0%, #2b7cff 100%);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 18px rgba(43, 124, 255, 0.28);
+}
+
+.secure-wallet-pay-btn:hover {
+  transform: translateY(-1px);
+}
+
+.diamond-store-panel.success-view {
+  width: min(760px, 92vw);
+}
+
+.diamond-store-panel.success-view .diamond-store-list {
+  padding: 10px 18px 18px;
+}
+
+.payment-success-wrap {
+  text-align: center;
+  border: 1px solid rgba(255, 236, 180, 0.55);
+  border-radius: 18px;
+  padding: 24px 22px;
+  color: #ffffff;
+  background:
+    radial-gradient(220px circle at 50% 22%, rgba(255, 245, 208, 0.28), rgba(255, 245, 208, 0.04) 70%),
+    rgba(255, 222, 150, 0.12);
+}
+
+.payment-success-title {
+  margin: 2px 0 8px;
+  font-size: 46px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+.payment-success-check {
+  color: #55c34a;
+  font-size: 34px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.payment-success-heading {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 900;
+  color: #101010;
+}
+
+.payment-success-icon {
+  width: 88px;
+  height: 62px;
+  object-fit: contain;
+  margin: 4px auto 2px;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.28));
+}
+
+.payment-success-amount {
+  margin: 0 0 8px;
+  font-size: 52px;
+  font-weight: 900;
+  color: #101010;
+  line-height: 1.05;
+}
+
+.payment-success-copy {
+  margin: 0 auto 8px;
+  max-width: 620px;
+  font-size: 17px;
+  line-height: 1.4;
+  color: #ffffff;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.payment-success-signoff {
+  margin: 8px 0 14px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.payment-success-done-btn {
+  display: inline-block;
+  min-width: 180px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #62a9ff 0%, #2b7cff 100%);
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 18px rgba(43, 124, 255, 0.28);
+}
+
+.payment-success-done-btn:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 980px) {
+  .secure-payment-title {
+    font-size: 22px;
+  }
+
+  .secure-payment-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .secure-order-summary h4,
+  .secure-payment-form h4 {
+    font-size: 18px;
+  }
+
+  .secure-summary-row span,
+  .secure-summary-total span {
+    font-size: 15px;
+  }
+
+  .secure-summary-row strong,
+  .secure-summary-total strong {
+    font-size: 15px;
+  }
+
+  .secure-card-row {
+    grid-template-columns: 1fr;
+  }
+
+  .secure-address-row {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-success-title {
+    font-size: 30px;
+  }
+
+  .payment-success-heading {
+    font-size: 24px;
+  }
+
+  .payment-success-amount {
+    font-size: 38px;
+  }
+
+  .payment-success-copy,
+  .payment-success-signoff {
+    font-size: 15px;
+  }
+
+  .payment-success-done-btn {
+    font-size: 22px;
+  }
+
 }

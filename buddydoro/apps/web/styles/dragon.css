@@ -41,6 +41,19 @@
   height: auto;
 }
 
+.tombstone-img[hidden] {
+  display: none;
+}
+
+.tombstone-img {
+  display: block;
+  width: 75%;        /* ← resize here (33% = 1/3 of the character container width) */
+  height: auto;
+  position: absolute;
+  left: 15%;         /* ← move left/right here (0% = far left, 50% = centered) */
+  bottom: 15%;        /* ← move up/down here (0% = ground level, positive % = higher) */
+}
+
 /* ✅ Only nudge SKIN images upward (default dragon stays the same) */
 /*#dragon img[src*="/Skins/"],
 #dragon img[src*="\\Skins\\"] {

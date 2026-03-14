@@ -16,6 +16,7 @@ let CLOSED_EYES = DEFAULT_CLOSED_EYES;
 
 let dragonEl = null;
 let dragonImg = null;
+let tombstoneImg = null;
 let blinkTimer = null;
 let autoBlinkMs = 3500;
 
@@ -25,10 +26,23 @@ let autoBlinkMs = 3500;
  */
 export function initDragon({ enableAutoBlink = true, blinkMs = 3500 } = {}) {
   dragonEl = document.getElementById('dragon') || null;
-  dragonImg = dragonEl?.querySelector('img') || null;
+  dragonImg = dragonEl?.querySelector('.dragon-img') || null;
+  tombstoneImg = dragonEl?.querySelector('.tombstone-img') || null;
   autoBlinkMs = blinkMs;
 
   if (!dragonImg) return;
+
+  document.addEventListener('companion:died', () => {
+    stopAutoBlink();
+    dragonImg.style.visibility = 'hidden';  // hide but keep container height for tombstone positioning
+    if (tombstoneImg) tombstoneImg.hidden = false;
+  });
+
+  document.addEventListener('companion:revived', () => {
+    dragonImg.style.visibility = '';
+    if (tombstoneImg) tombstoneImg.hidden = true;
+    if (enableAutoBlink) startAutoBlink();
+  });
 
   // Load saved skin if it exists
   const savedOpen = localStorage.getItem(LS_OPEN_KEY);
@@ -99,7 +113,7 @@ export function hideDragon() {
  * @param {number} duration
  */
 export function blink(duration = 150) {
-  if (!dragonImg) return;
+  if (!dragonImg || dragonImg.style.visibility === 'hidden') return;
 
   dragonImg.src = `${ASSET_BASE}${CLOSED_EYES}`;
   setTimeout(() => {

@@ -20,22 +20,52 @@ let tombstoneImg = null;
 let blinkTimer = null;
 let autoBlinkMs = 3500;
 
+const happyMelody  = new Audio('./assets/soundeffects/HappyMelody/HappyMelody.mp3');
+happyMelody.loop   = true;
+happyMelody.volume = 0.3;
+
 const mourningSong = new Audio('./assets/soundeffects/CompanionDeathSFX/MourningSong.mp3');
-mourningSong.loop = true;
+mourningSong.loop   = true;
 mourningSong.volume = 0.3;
 
-function startMourningSong() {
-  if (!mourningSong.paused) return;
-  mourningSong.currentTime = 0;
-  mourningSong.play().catch(() => {
-    // Autoplay blocked on page load — start on first user interaction instead
-    const resume = () => {
-      if (!mourningSong.paused) return;
-      mourningSong.play().catch(() => {});
+// Whichever song is currently "on stage" — toggled by the music button
+let activeSong = happyMelody;
+
+// Pending autoplay-resume handler (cancelled when switching songs)
+let pendingResumeHandler = null;
+
+function cancelPendingResume() {
+  if (!pendingResumeHandler) return;
+  document.removeEventListener('click',      pendingResumeHandler);
+  document.removeEventListener('keydown',    pendingResumeHandler);
+  document.removeEventListener('touchstart', pendingResumeHandler);
+  pendingResumeHandler = null;
+}
+
+/**
+ * Switch to `song`, stop the other one, and start playing.
+ * Handles browser autoplay policy with a deferred resume on first interaction.
+ */
+function switchToSong(song) {
+  cancelPendingResume();
+
+  // Silence whichever song is not the new one
+  const other = song === happyMelody ? mourningSong : happyMelody;
+  other.pause();
+  other.currentTime = 0;
+
+  activeSong = song;
+  song.currentTime = 0;
+  song.play().catch(() => {
+    // Autoplay blocked — resume on first user interaction
+    pendingResumeHandler = () => {
+      if (!song.paused) return;
+      song.play().catch(() => {});
+      pendingResumeHandler = null;
     };
-    document.addEventListener('click', resume, { once: true });
-    document.addEventListener('keydown', resume, { once: true });
-    document.addEventListener('touchstart', resume, { once: true });
+    document.addEventListener('click',      pendingResumeHandler, { once: true });
+    document.addEventListener('keydown',    pendingResumeHandler, { once: true });
+    document.addEventListener('touchstart', pendingResumeHandler, { once: true });
   });
 }
 
@@ -56,24 +86,27 @@ export function initDragon({ enableAutoBlink = true, blinkMs = 3500 } = {}) {
 
   function updateMusicToggleIcon() {
     if (!musicToggleIcon) return;
-    musicToggleIcon.innerHTML = mourningSong.paused ? PLAY_ICON : PAUSE_ICON;
+    const isPaused = activeSong.paused;
+    musicToggleIcon.innerHTML = isPaused ? PLAY_ICON : PAUSE_ICON;
     if (musicToggleChip) {
-      musicToggleChip.setAttribute('aria-label', mourningSong.paused ? 'Play music' : 'Pause music');
-      musicToggleChip.title = mourningSong.paused ? 'Play music' : 'Pause music';
+      musicToggleChip.setAttribute('aria-label', isPaused ? 'Play music' : 'Pause music');
+      musicToggleChip.title = isPaused ? 'Play music' : 'Pause music';
     }
   }
 
   if (musicToggleChip) {
     musicToggleChip.addEventListener('click', () => {
-      if (mourningSong.paused) {
-        mourningSong.play().catch(() => {});
+      if (activeSong.paused) {
+        activeSong.play().catch(() => {});
       } else {
-        mourningSong.pause();
+        activeSong.pause();
       }
       updateMusicToggleIcon();
     });
   }
 
+  happyMelody.addEventListener('play',   updateMusicToggleIcon);
+  happyMelody.addEventListener('pause',  updateMusicToggleIcon);
   mourningSong.addEventListener('play',  updateMusicToggleIcon);
   mourningSong.addEventListener('pause', updateMusicToggleIcon);
 
@@ -168,26 +201,25 @@ export function initDragon({ enableAutoBlink = true, blinkMs = 3500 } = {}) {
     });
   }
 
-  if (!dragonImg) return;
-
   document.addEventListener('companion:died', () => {
     stopAutoBlink();
-    dragonImg.style.visibility = 'hidden';  // hide but keep container height for tombstone positioning
+    if (dragonImg) dragonImg.style.visibility = 'hidden';
     if (tombstoneImg) tombstoneImg.hidden = false;
     if (deadBtn) deadBtn.hidden = false;
     const deathSfx = new Audio('./assets/soundeffects/CompanionDeathSFX/CompanionDeath.mp3');
     deathSfx.play().catch(() => {});
-    startMourningSong();
+    switchToSong(mourningSong);
   });
 
   document.addEventListener('companion:revived', () => {
-    mourningSong.pause();
-    mourningSong.currentTime = 0;
-    dragonImg.style.visibility = '';
+    switchToSong(happyMelody);
+    if (dragonImg) dragonImg.style.visibility = '';
     if (tombstoneImg) tombstoneImg.hidden = true;
     if (deadBtn) deadBtn.hidden = true;
     if (enableAutoBlink) startAutoBlink();
   });
+
+  if (!dragonImg) return;
 
   // If companion is already dead on page load, apply death state immediately
   // (the companion:died event fires before this module's listener is registered)
@@ -197,7 +229,9 @@ export function initDragon({ enableAutoBlink = true, blinkMs = 3500 } = {}) {
     dragonImg.style.visibility = 'hidden';
     if (tombstoneImg) tombstoneImg.hidden = false;
     if (deadBtn) deadBtn.hidden = false;
-    startMourningSong();
+    switchToSong(mourningSong);
+  } else {
+    switchToSong(happyMelody);
   }
 
   // Load saved skin if it exists

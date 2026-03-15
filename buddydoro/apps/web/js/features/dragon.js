@@ -20,6 +20,25 @@ let tombstoneImg = null;
 let blinkTimer = null;
 let autoBlinkMs = 3500;
 
+const mourningSong = new Audio('./assets/soundeffects/CompanionDeathSFX/MourningSong.mp3');
+mourningSong.loop = true;
+mourningSong.volume = 0.3;
+
+function startMourningSong() {
+  if (!mourningSong.paused) return;
+  mourningSong.currentTime = 0;
+  mourningSong.play().catch(() => {
+    // Autoplay blocked on page load — start on first user interaction instead
+    const resume = () => {
+      if (!mourningSong.paused) return;
+      mourningSong.play().catch(() => {});
+    };
+    document.addEventListener('click', resume, { once: true });
+    document.addEventListener('keydown', resume, { once: true });
+    document.addEventListener('touchstart', resume, { once: true });
+  });
+}
+
 /**
  * Initialize the dragon sprite.
  * @param {{ enableAutoBlink?: boolean, blinkMs?: number }} opts
@@ -28,6 +47,7 @@ export function initDragon({ enableAutoBlink = true, blinkMs = 3500 } = {}) {
   dragonEl = document.getElementById('dragon') || null;
   dragonImg = dragonEl?.querySelector('.dragon-img') || null;
   tombstoneImg = dragonEl?.querySelector('.tombstone-img') || null;
+  const deadBtn = document.getElementById('companionDeadBtn') || null;
   autoBlinkMs = blinkMs;
 
   if (!dragonImg) return;
@@ -36,13 +56,31 @@ export function initDragon({ enableAutoBlink = true, blinkMs = 3500 } = {}) {
     stopAutoBlink();
     dragonImg.style.visibility = 'hidden';  // hide but keep container height for tombstone positioning
     if (tombstoneImg) tombstoneImg.hidden = false;
+    if (deadBtn) deadBtn.hidden = false;
+    const deathSfx = new Audio('./assets/soundeffects/CompanionDeathSFX/CompanionDeath.mp3');
+    deathSfx.play().catch(() => {});
+    startMourningSong();
   });
 
   document.addEventListener('companion:revived', () => {
+    mourningSong.pause();
+    mourningSong.currentTime = 0;
     dragonImg.style.visibility = '';
     if (tombstoneImg) tombstoneImg.hidden = true;
+    if (deadBtn) deadBtn.hidden = true;
     if (enableAutoBlink) startAutoBlink();
   });
+
+  // If companion is already dead on page load, apply death state immediately
+  // (the companion:died event fires before this module's listener is registered)
+  const currentStatus = window.CompanionStatus?.get?.();
+  if (currentStatus && currentStatus.health === 0) {
+    stopAutoBlink();
+    dragonImg.style.visibility = 'hidden';
+    if (tombstoneImg) tombstoneImg.hidden = false;
+    if (deadBtn) deadBtn.hidden = false;
+    startMourningSong();
+  }
 
   // Load saved skin if it exists
   const savedOpen = localStorage.getItem(LS_OPEN_KEY);

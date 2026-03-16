@@ -219,7 +219,7 @@ export function initDiamondStore() {
     const rightPanel = isWalletMethod
       ? `
         <section class="secure-wallet-panel" aria-label="Wallet payment summary">
-          <h4>Order summary</h4>
+          <h4>Payment Method</h4>
 
           <div class="secure-wallet-account">
             <img src="${walletLogo}" alt="${getMethodLabel(selectedMethod)}" class="secure-wallet-logo" />
@@ -608,8 +608,8 @@ export function initDiamondStore() {
         <img src="${selectedPack.image}" class="payment-success-icon" alt="Diamonds purchased" />
         <p class="payment-success-amount">+${selectedPack.amount} ${diamondLabel}</p>
         <p class="payment-success-copy">
-          Your account will be updated shortly. Payment method used: ${methodLabel}.
-          Check out BuddyDoro upgrades for your companion.
+          Thank you for your purchase! Your account will be updated shortly. Check out the top recommended BuddyDoro upgrades for you!<br />
+          Please visit our support page if you are experiencing any issues or have any questions.
         </p>
         <p class="payment-success-signoff">Thanks again,<br />The BuddyDoro Team</p>
         <button type="button" class="payment-success-done-btn" id="paymentSuccessDoneBtn">Done</button>

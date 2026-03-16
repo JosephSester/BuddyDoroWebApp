@@ -16,6 +16,7 @@ import { initCompanionThoughts } from './features/companionThoughts.js';
 import { API_BASE } from './api/apiClient.js';
 import { saveSession } from './features/historyStorage.js';
 import { getSubtasks } from './features/subtasks.js';
+import { initAppTour } from './features/appTour.js';
 
 // ---- Auth guard -------------------------------------------------
 const authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
@@ -283,3 +284,6 @@ initCompanionThoughts({
 
 // ---- AI Plan ----------------------------------------------------
 initAiPlan();
+
+// ---- First-visit app tour ---------------------------------------
+initAppTour();

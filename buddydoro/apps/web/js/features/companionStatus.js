@@ -33,6 +33,7 @@
   let timerId = 0;
   let syncInFlight = false;
   let syncQueued = false;
+  let isDead = false;
 
   function clampTicks(n) {
     return Math.max(MIN_TICKS, Math.min(MAX_TICKS, Math.trunc(Number(n) || 0)));
@@ -160,8 +161,20 @@
     emoji.style.left = `${emojiPct}%`;
   }
 
+  function checkDeathState() {
+    const nowDead = state.health === MIN_TICKS;
+    if (nowDead && !isDead) {
+      isDead = true;
+      document.dispatchEvent(new CustomEvent('companion:died'));
+    } else if (!nowDead && isDead) {
+      isDead = false;
+      document.dispatchEvent(new CustomEvent('companion:revived'));
+    }
+  }
+
   function renderAll() {
     for (const key of ALL_KEYS) renderStat(key);
+    checkDeathState();
   }
 
   function createRow(key) {

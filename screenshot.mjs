@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const require = createRequire(import.meta.url);
-const puppeteer = require('C:/Users/jchar/AppData/Local/Temp/puppeteer-test/node_modules/puppeteer-core/lib/cjs/puppeteer/puppeteer-core.js');
+const puppeteer = require('C:/Users/seste/AppData/Local/Temp/puppeteer-test/node_modules/puppeteer-core/lib/cjs/puppeteer/puppeteer-core.js');
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,7 +21,7 @@ const next = nums.length ? Math.max(...nums) + 1 : 1;
 const filename = label ? `screenshot-${next}-${label}.png` : `screenshot-${next}.png`;
 const outPath = path.join(dir, filename);
 
-const CHROME = 'C:/Users/jchar/.cache/puppeteer/chrome/win64-127.0.6533.88/chrome-win64/chrome.exe';
+const CHROME = 'C:/Users/seste/AppData/Local/Google/Chrome/Application/chrome.exe';
 
 const browser = await puppeteer.launch({
   executablePath: CHROME,

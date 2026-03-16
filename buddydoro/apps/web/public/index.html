@@ -56,7 +56,7 @@
   <link rel="stylesheet" href="../styles/backgroundnight.css" />
 
   <!-- Logout Modal -->
-  <link rel="stylesheet" href="../styles/logoutModal.css"
+  <link rel="stylesheet" href="../styles/logoutModal.css" />
 
   <!-- Theme last so it can override colors if needed -->
   <link rel="stylesheet" href="../styles/themes.css" />
@@ -67,7 +67,12 @@
   <div id="scene" class="scene" role="img" aria-label="Sunny forest clearing with a tree stump">
     <div id="dragon" class="sprite dragon">
       <img src="./assets/artwork/Dragon.png" alt="Friendly dragon" class="dragon-img" />
+      <img src="./assets/artwork/Tombstone/Tombstone.png" alt="Tombstone" class="tombstone-img" hidden />
     </div>
+    <button id="companionDeadBtn" class="companion-dead-btn" hidden>
+      <span class="companion-dead-text">Your companion has died.<br>Continue here.</span>
+      <span class="companion-dead-arrow">&#8250;</span>
+    </button>
   </div>
 
   <!-- UI overlay -->
@@ -81,6 +86,16 @@
     <!-- Top-right header (RIGHT → LEFT: Greeting, Profile, Doros, Store) -->
     <header class="topbar" aria-label="User header">
       <div class="top-chips">
+
+          <!-- Music toggle chip -->
+        <button class="chip glass-chip music-toggle-chip" id="musicToggleChip" type="button" aria-label="Pause music" title="Pause music">
+          <svg id="musicToggleIcon" class="music-toggle-icon" viewBox="0 0 32 32" aria-hidden="true">
+            <!-- Pause icon (shown while music plays) -->
+            <rect x="7" y="6" width="5" height="20" rx="2" fill="currentColor"/>
+            <rect x="20" y="6" width="5" height="20" rx="2" fill="currentColor"/>
+          </svg>
+          <span class="music-toggle-label">Music</span>
+        </button>
 
           <!-- History chip -->
         <button class="chip glass-chip history-chip" id="historyChip" type="button">
@@ -532,6 +547,89 @@
 
     <div class="history-footer">
       <button id="historyCloseBottom" class="btn-secondary" type="button">Close</button>
+    </div>
+  </section>
+
+  <!-- Dead Companion dialog -->
+  <div id="deadCompanionBackdrop" class="backdrop" hidden></div>
+
+  <section id="deadCompanionDialog" class="store-panel" role="dialog" aria-modal="true"
+    aria-labelledby="deadCompanionTitle" hidden>
+    <div class="store-header">
+      <h2 id="deadCompanionTitle">What would you like to do?</h2>
+      <button id="deadCompanionClose" class="icon-btn" type="button" aria-label="Close">&times;</button>
+    </div>
+    <div class="store-content" style="display:block; padding: 8px 18px 4px;">
+
+      <!-- Tabs -->
+      <div class="category-tabs" role="tablist" aria-label="Revival options" style="margin-bottom:14px;">
+        <button class="tab is-active" role="tab" aria-selected="true"  data-dead-tab="potions">Potions</button>
+        <button class="tab"           role="tab" aria-selected="false" data-dead-tab="new-companion">Choose a New Companion</button>
+      </div>
+
+      <!-- Potions tab panel -->
+      <div id="deadTabPotions" role="tabpanel">
+        <div class="catalog-grid" style="max-width: 400px;">
+          <div class="card">
+            <div class="skin-thumb" style="height:110px;">
+              <img src="./assets/artwork/DiamondProducts/RevivalPotion.png" alt="Revival Potion" style="max-width:100px; max-height:100px; object-fit:contain;" />
+            </div>
+            <div class="item-name">Revival Potion</div>
+            <div class="item-price">💎 2 Diamonds</div>
+            <div id="revivalPotionMsg" style="font-size:13px; color:#c0392b; font-weight:700; min-height:18px;"></div>
+            <div class="item-actions">
+              <button id="buyRevivalPotionBtn" class="buy-btn" type="button">Buy &amp; Use</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New companion tab panel -->
+      <div id="deadTabNewCompanion" role="tabpanel" hidden>
+        <div class="catalog-grid" style="max-width: 600px;">
+
+          <!-- Dragon -->
+          <div class="card skin-card">
+            <div class="skin-thumb">
+              <img src="./assets/artwork/Dragon.png" alt="Dragon" />
+            </div>
+            <div class="item-name">Dragon</div>
+            <div class="item-actions">
+              <button class="use-btn choose-companion-btn" type="button"
+                data-open="Dragon.png" data-closed="DragonEyesClosed.png">Choose</button>
+            </div>
+          </div>
+
+          <!-- Axolotl -->
+          <div class="card skin-card">
+            <div class="skin-thumb">
+              <img src="./assets/artwork/Skins/Axolotyl.png" alt="Axolotl" />
+            </div>
+            <div class="item-name">Axolotl</div>
+            <div class="item-actions">
+              <button class="use-btn choose-companion-btn" type="button"
+                data-open="Skins/Axolotyl.png" data-closed="Skins/Axolotyl.png">Choose</button>
+            </div>
+          </div>
+
+          <!-- Frog -->
+          <div class="card skin-card">
+            <div class="skin-thumb">
+              <img src="./assets/artwork/Skins/Frog.png" alt="Frog" />
+            </div>
+            <div class="item-name">Frog</div>
+            <div class="item-actions">
+              <button class="use-btn choose-companion-btn" type="button"
+                data-open="Skins/Frog.png" data-closed="Skins/Frog.png">Choose</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <div class="store-footer">
+      <button id="deadCompanionCloseBottom" class="btn-secondary" type="button">Close</button>
     </div>
   </section>
 

@@ -77,6 +77,42 @@
   font-weight: 800;
 }
 
+.inventory-card-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+/* Per-item action button used by inventory use flow. */
+.inventory-use-btn {
+  border: 2px solid #e0a233;
+  border-radius: 999px;
+  background: linear-gradient(#ffd36b, #f2b942);
+  color: #2b2213;
+  font-weight: 800;
+  padding: 6px 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.inventory-use-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
+}
+
+.inventory-use-btn:active {
+  transform: translateY(0);
+}
+
+.inventory-use-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .inventory-empty {
   border: 2px dashed rgba(224, 162, 51, 0.8);
   border-radius: 14px;

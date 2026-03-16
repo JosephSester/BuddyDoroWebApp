@@ -41,6 +41,7 @@
   <link rel="stylesheet" href="../styles/store.css" />
   <link rel="stylesheet" href="../styles/inventory.css" />
   <link rel="stylesheet" href="../styles/history.css" />
+  <link rel="stylesheet" href="../styles/music.css" />
   <link rel="stylesheet" href="../styles/animations.css" />
 
   <!-- Life Circle CSS (disabled; using companionStatus instead) -->
@@ -56,7 +57,7 @@
   <link rel="stylesheet" href="../styles/backgroundnight.css" />
 
   <!-- Logout Modal -->
-  <link rel="stylesheet" href="../styles/logoutModal.css"
+  <link rel="stylesheet" href="../styles/logoutModal.css" />
 
   <!-- Theme last so it can override colors if needed -->
   <link rel="stylesheet" href="../styles/themes.css" />
@@ -482,15 +483,23 @@
         <div id="catalogGrid" class="catalog-grid" aria-live="polite"></div>
       </div>
 
-      <!-- Right: inventory -->
-      <aside class="inventory-column" aria-label="Your Inventory">
-        <h3>Inventory</h3>
-        <ul id="inventoryList" class="inventory-list" aria-live="polite"></ul>
+      <!-- Right: store summary panel (replaces in-store inventory view) -->
+      <aside class="inventory-column" aria-label="Your balances">
+        <h3>Balances</h3>
+        <div class="store-balance-cards">
+          <div class="store-balance-card">
+            <span class="store-balance-label">Doros</span>
+            <span id="storeDorosBalance" class="store-balance-value">0</span>
+          </div>
+          <div class="store-balance-card">
+            <span class="store-balance-label">Diamonds</span>
+            <span id="storeDiamondsBalance" class="store-balance-value">0</span>
+          </div>
+        </div>
       </aside>
     </div>
 
     <div class="store-footer">
-      <button id="useSelectedBtn" class="btn-primary" type="button">Use Selected</button>
       <button id="storeCloseBottom" class="btn-secondary" type="button">Close</button>
     </div>
   </section>
@@ -563,10 +572,47 @@
     </div>
   </section>
 
+  <!-- Phase 1 music mini-player (local/default source + Spotify placeholder) -->
   <div class="music-fab-wrap">
-    <button id="musicChip" class="music-fab" aria-label="Open music" aria-expanded="false">♫</button>
+    <button id="musicChip" class="music-fab" type="button" aria-label="Open music" aria-expanded="false">♫</button>
     <section id="musicMiniPanel" class="music-mini-panel" hidden>
-      <!-- now playing + controls / track list -->
+      <div class="music-panel-header">
+        <h3>Music</h3>
+        <label class="music-toggle">
+          <input id="musicEnabledToggle" type="checkbox" checked />
+          <span class="music-toggle-ui" aria-hidden="true"></span>
+          <span class="music-toggle-text">On</span>
+        </label>
+      </div>
+
+      <div class="music-source-row" role="radiogroup" aria-label="Music source">
+        <label class="music-source-pill">
+          <input id="musicSourceDefault" type="radio" name="musicSource" value="default" checked />
+          <span>Default</span>
+        </label>
+        <label class="music-source-pill">
+          <input id="musicSourceSpotify" type="radio" name="musicSource" value="spotify" />
+          <span>Spotify</span>
+        </label>
+      </div>
+
+      <p id="musicNowPlaying" class="music-now-playing">Paused</p>
+
+      <div class="music-controls">
+        <button id="musicPrevBtn" type="button" class="music-control-btn" aria-label="Previous track">◀</button>
+        <button id="musicPlayPauseBtn" type="button" class="music-control-btn is-primary" aria-label="Play or pause">Play</button>
+        <button id="musicNextBtn" type="button" class="music-control-btn" aria-label="Next track">▶</button>
+      </div>
+
+      <div id="musicTrackList" class="music-track-list" aria-live="polite"></div>
+
+      <button id="musicSpotifyConnectBtn" type="button" class="music-spotify-btn" hidden>Connect Spotify</button>
+      <p id="musicSpotifyHint" class="music-spotify-hint" hidden>Spotify playback integration is coming in Phase 2.</p>
+
+      <div class="music-ambient">
+        <div class="music-ambient-title">Environment</div>
+        <div id="musicAmbientList" class="music-ambient-list" role="radiogroup" aria-label="Ambient sound mode"></div>
+      </div>
     </section>
   </div>
 

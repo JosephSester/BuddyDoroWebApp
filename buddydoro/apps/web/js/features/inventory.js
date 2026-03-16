@@ -1,4 +1,4 @@
-import { fetchInventory, inventoryToMap } from '../api/inventoryService.js';
+import { fetchInventory, inventoryToMap, useItem } from '../api/inventoryService.js';
 import { fetchCatalog } from '../api/storeService.js';
 import { showNotification, setBusy } from '../utils/notifications.js';
 
@@ -33,6 +33,8 @@ export function initInventory() {
   let allItems = [];
   let inventoryMap = new Map();
   let activeCategory = 'all';
+  // Tracks the item currently being used so only that card shows loading state.
+  let actionBusySku = null;
 
   // Join inventory counts with catalog metadata.
   // This keeps inventory endpoint small while still showing names/emojis/categories.
@@ -110,14 +112,24 @@ export function initInventory() {
     visibleRows.forEach((row) => {
       const card = document.createElement('div');
       card.className = 'inventory-card';
+      // Disable only the active item's Use button during async use request.
+      const isBusy = actionBusySku === row.sku;
       card.innerHTML = `
         <div class="inventory-card-emoji" aria-hidden="true">${row.emoji}</div>
         <div class="inventory-card-main">
           <div class="inventory-card-name">${row.name}</div>
           <div class="inventory-card-meta">${titleCase(row.category)}</div>
         </div>
-        <div class="inventory-card-count">x${row.count}</div>
+        <div class="inventory-card-actions">
+          <div class="inventory-card-count">x${row.count}</div>
+          <button class="inventory-use-btn" type="button" data-sku="${row.sku}" ${isBusy ? 'disabled' : ''}>
+            ${isBusy ? 'Using...' : 'Use'}
+          </button>
+        </div>
       `;
+
+      const useButton = card.querySelector('.inventory-use-btn');
+      useButton?.addEventListener('click', () => handleUseItem(row));
       inventoryGrid.appendChild(card);
     });
   }
@@ -152,6 +164,53 @@ export function initInventory() {
 
   function onKeyDown(event) {
     if (event.key === 'Escape') closeInventory();
+  }
+
+  function findItemBySku(sku) {
+    return allItems.find((item) => item.sku === sku) || null;
+  }
+
+  function emitItemUsed(sku) {
+    const meta = findItemBySku(sku);
+    if (!meta) return;
+
+    const detail = {
+      sku,
+      name: meta.name || sku,
+      emoji: meta.emoji || '',
+      category: meta.category || 'other',
+    };
+    // Reuse existing global event contract so companion/dragon effects stay centralized.
+    window.dispatchEvent(new CustomEvent('store:itemUsed', { detail }));
+  }
+
+  async function handleUseItem(row) {
+    if (!row?.sku) return;
+    if ((inventoryMap.get(row.sku) || 0) <= 0) {
+      showNotification('You do not own this item', 'error');
+      return;
+    }
+
+    // Optimistically switch this card into a loading state.
+    actionBusySku = row.sku;
+    render(resolveInventoryRows());
+
+    try {
+      setBusy(true, `Using ${row.name}...`);
+      // Backend response is the source of truth for updated item counts.
+      const response = await useItem(row.sku);
+      inventoryMap = inventoryToMap(response);
+      showNotification(`${row.name} used!`, 'success');
+      emitItemUsed(row.sku);
+    } catch (error) {
+      console.error('Failed to use item:', error);
+      showNotification(`Failed to use ${row.name}`, 'error');
+    } finally {
+      // Always restore UI state and re-render current inventory snapshot.
+      actionBusySku = null;
+      setBusy(false);
+      render(resolveInventoryRows());
+    }
   }
 
   async function openInventory() {

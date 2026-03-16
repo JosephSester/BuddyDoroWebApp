@@ -135,10 +135,20 @@
   /* no special styling needed yet */
 }
 
+.catalog-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Keep catalog usable with large item counts. */
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 12px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .card {
@@ -255,23 +265,31 @@
   font-weight: 800;
 }
 
-.inventory-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Balance cards replace inventory list in store right column. */
+.store-balance-cards {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
-.inventory-item {
+.store-balance-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: 12px;
   border: 2px solid #e0a233;
   background: rgba(255, 235, 160, .45);
+}
+
+.store-balance-label {
+  font-weight: 700;
+  opacity: .9;
+}
+
+.store-balance-value {
+  font-weight: 900;
+  font-size: 18px;
 }
 
 .store-footer {

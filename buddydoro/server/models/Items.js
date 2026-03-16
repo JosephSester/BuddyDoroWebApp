@@ -23,6 +23,12 @@ const itemSchema = new mongoose.Schema({
     required: true,
     min: 1,
   },
+  // Purchase currency for store buy flow.
+  currency: {
+    type: String,
+    enum: ['doros', 'diamonds'],
+    default: 'doros',
+  },
   emoji: {
     type: String,
     default: '🎁',

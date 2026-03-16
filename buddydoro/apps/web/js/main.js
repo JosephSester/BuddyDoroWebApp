@@ -13,6 +13,7 @@ import { initDiamondStore } from './features/diamondStore.js';
 import { initTasks, getActiveTask } from './features/taskfeature/index.js';
 import { initAiPlan } from './features/aiPlan.js';
 import { initCompanionThoughts } from './features/companionThoughts.js';
+import { initMusic } from './features/music.js';
 import { API_BASE } from './api/apiClient.js';
 import { saveSession } from './features/historyStorage.js';
 import { getSubtasks } from './features/subtasks.js';
@@ -252,6 +253,9 @@ initStore({
 
 // Dedicated inventory modal (separate from store purchase flow).
 initInventory();
+
+// Bottom-right mini music player (default tracks + ambient modes).
+initMusic();
 
 // ----- Diamond Store ----------------------------------------------------------
 initDiamondStore();

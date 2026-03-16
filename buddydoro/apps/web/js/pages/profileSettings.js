@@ -16,17 +16,7 @@ function requireToken() {
 function setMsg(el, text, type = 'info') {
   if (!el) return;
   el.textContent = text || '';
-
-  el.classList.remove('is-info', 'is-success', 'is-error');
-  if (type === 'success') el.classList.add('is-success');
-  else if (type === 'error') el.classList.add('is-error');
-  else el.classList.add('is-info');
-
-  // fallback colors (so feedback is always visible)
-  el.style.color =
-    type === 'success' ? 'green' :
-    type === 'error' ? 'crimson' :
-    '#2b2213';
+  el.className = `pr-msg${type === 'success' ? ' is-success' : type === 'error' ? ' is-error' : ''}`;
 }
 
 async function readJsonSafe(res) {

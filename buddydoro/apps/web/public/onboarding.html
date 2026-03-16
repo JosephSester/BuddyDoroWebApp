@@ -5,15 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Welcome to BuddyDoro</title>
 
-  <link rel="preload" as="image" href="./assets/artwork/BuddyDoroName.png" />
-  <link rel="preload" as="image" href="./assets/artwork/freepik__a-focus-environment__56350.png" />
-  <link rel="preload" as="image" href="./assets/artwork/freepik__gold-coins-with-the-letter-d-engraved-on-them__56349.png" />
-  <link rel="preload" as="image" href="./assets/artwork/mushroom.png" />
-  <link rel="preload" as="image" href="./assets/artwork/CelebrationDragon.png" />
+  <link rel="preload" as="image" href="./assets/onboardingAssets/welcoming screen.png" />
+  <link rel="preload" as="image" href="./assets/onboardingAssets/BuddyDoroName.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="../styles/onboarding.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -24,145 +21,117 @@
 <body>
 <div class="ob-wrap">
 
-  <button class="skip-btn">Skip</button>
+  <!-- Fantasy atmosphere -->
+  <div class="ob-orb ob-orb--1" aria-hidden="true"></div>
+  <div class="ob-orb ob-orb--2" aria-hidden="true"></div>
+  <div class="ob-orb ob-orb--3" aria-hidden="true"></div>
+  <div class="ob-orb ob-orb--4" aria-hidden="true"></div>
 
-  <!-- ══ SLIDE 0 — Welcome ═══════════════════════════════════ -->
+  <!-- Floating magic sparks -->
+  <div class="ob-spark" style="left:6%;--dur:6s;--delay:0s;--dx:18px;--col:rgba(246,191,81,0.9)" aria-hidden="true"></div>
+  <div class="ob-spark" style="left:14%;--dur:8s;--delay:1.5s;--dx:-12px;--col:rgba(13,214,200,0.8)" aria-hidden="true"></div>
+  <div class="ob-spark" style="left:28%;--dur:5.5s;--delay:0.7s;--dx:22px;--col:rgba(246,191,81,0.7)" aria-hidden="true"></div>
+  <div class="ob-spark" style="left:45%;--dur:7s;--delay:2.1s;--dx:-8px;--col:rgba(212,228,255,0.6)" aria-hidden="true"></div>
+  <div class="ob-spark" style="left:60%;--dur:6.5s;--delay:0.3s;--dx:14px;--col:rgba(13,214,200,0.7)" aria-hidden="true"></div>
+  <div class="ob-spark" style="left:72%;--dur:9s;--delay:1s;--dx:-20px;--col:rgba(246,191,81,0.8)" aria-hidden="true"></div>
+  <div class="ob-spark" style="left:85%;--dur:5s;--delay:2.8s;--dx:10px;--col:rgba(212,228,255,0.5)" aria-hidden="true"></div>
+  <div class="ob-spark" style="left:93%;--dur:7.5s;--delay:0.9s;--dx:-15px;--col:rgba(246,191,81,0.6)" aria-hidden="true"></div>
+
+
+  <!-- ══ SLIDE 0 — Welcome ═══════════════════════════════════════ -->
   <div class="slide slide-welcome active" data-slide="0">
-    <img class="ob-bg-img" src="./assets/artwork/freepik__a-focus-environment__56350.png" alt="" aria-hidden="true" />
+    <img class="ob-bg-img" src="./assets/onboardingAssets/welcoming screen.png" alt="" aria-hidden="true" />
     <div class="ob-welcome-overlay"></div>
     <div class="ob-welcome-inner">
-      <img class="ob-logo" src="./assets/artwork/BuddyDoroName.png" alt="BuddyDoro" />
-      <p class="ob-welcome-tagline">Your focus companion awaits.</p>
+      <span class="ob-welcome-to">WELCOME TO</span>
+      <h1 class="ob-welcome-brand">BuddyDoro</h1>
+      <p class="ob-welcome-name"><span class="user-name">you</span>.</p>
     </div>
   </div>
 
-  <!-- ══ SLIDE 1 — Focus ════════════════════════════════════ -->
-  <div class="slide slide-feature" data-slide="1">
-    <div class="ob-feature-grid">
-      <div class="ob-feature-content">
-        <div class="ob-section-tag">
-          <span class="ob-num-big">01</span>
-          <div class="ob-rule"></div>
-        </div>
-        <h1 class="ob-title">FOCUS.</h1>
-        <p class="ob-body">Work in sprints, earn as you go.<br>Every focused minute builds momentum.</p>
-        <ul class="ob-list">
-          <li>Customizable Pomodoro intervals</li>
-          <li>Break reminders so you actually rest</li>
-          <li>Link tasks directly to your timer</li>
-        </ul>
+  <!-- ══ SLIDE 1 — About BuddyDoro ══════════════════════════════ -->
+  <div class="slide slide-about" data-slide="1">
+    <div class="ob-about-inner">
+      <div class="ob-about-text">
+        <span class="ob-about-eyebrow">What is BuddyDoro?</span>
+        <h2 class="ob-about-title">
+          <span class="ob-title-line">FOCUS.</span>
+          <span class="ob-title-line">EARN.</span>
+          <span class="ob-title-line">GROW.</span>
+        </h2>
+        <p class="ob-about-sub">A Pomodoro timer with a virtual companion, a reward system, and AI-powered planning.</p>
       </div>
-      <div class="ob-feature-visual">
-        <div class="ob-img-frame">
-          <img src="./assets/artwork/mushroom.png" alt="Your focus world" />
+      <div class="ob-about-feats">
+        <div class="ob-about-feat">
+          <div class="ob-about-feat-icon"><i class="fas fa-stopwatch"></i></div>
+          <h3>Focus Timer</h3>
+          <p>25-minute work sessions with built-in breaks to keep you sharp.</p>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ SLIDE 2 — Earn ═════════════════════════════════════ -->
-  <div class="slide slide-feature slide-feature--flip" data-slide="2">
-    <div class="ob-feature-grid">
-      <div class="ob-feature-visual">
-        <div class="ob-img-frame ob-img-frame--gold">
-          <img src="./assets/artwork/freepik__gold-coins-with-the-letter-d-engraved-on-them__56349.png" alt="Doro coins" />
+        <div class="ob-about-feat">
+          <div class="ob-about-feat-icon ob-about-feat-icon--buddy"><i class="fas fa-dragon"></i></div>
+          <h3>Your Buddy</h3>
+          <p>A companion that reacts and evolves alongside your focus sessions.</p>
         </div>
-      </div>
-      <div class="ob-feature-content">
-        <div class="ob-section-tag">
-          <span class="ob-num-big">02</span>
-          <div class="ob-rule"></div>
+        <div class="ob-about-feat">
+          <div class="ob-about-feat-icon ob-about-feat-icon--doros"><i class="fas fa-coins"></i></div>
+          <h3>Earn Doros</h3>
+          <p>Complete sessions to earn currency and unlock items in the shop.</p>
         </div>
-        <h1 class="ob-title">EARN.</h1>
-        <p class="ob-body">Focus sessions fill your Doro wallet.<br>Spend them to care for your companion.</p>
-        <ul class="ob-list">
-          <li>Earn Doros every session</li>
-          <li>Organize goals in task panels</li>
-          <li>Shop treats &amp; upgrades for your buddy</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ SLIDE 3 — Companion ════════════════════════════════ -->
-  <div class="slide slide-feature" data-slide="3">
-    <div class="ob-feature-grid">
-      <div class="ob-feature-content">
-        <div class="ob-section-tag">
-          <span class="ob-num-big">03</span>
-          <div class="ob-rule"></div>
-        </div>
-        <h1 class="ob-title">YOUR BUDDY.</h1>
-        <p class="ob-body">Your companion grows with every session.<br>Keep them fed, happy, and thriving.</p>
-        <ul class="ob-list">
-          <li>Feed your buddy with earned Doros</li>
-          <li>Watch them react to your focus</li>
-          <li>Unlock new companions as you grow</li>
-        </ul>
-      </div>
-      <div class="ob-feature-visual">
-        <div class="ob-img-frame">
-          <img src="./assets/artwork/CelebrationDragon.png" alt="Your companion" />
+        <div class="ob-about-feat">
+          <div class="ob-about-feat-icon ob-about-feat-icon--ai"><i class="fas fa-brain"></i></div>
+          <h3>AI Plans</h3>
+          <p>Let AI break your goals into focused, session-ready task lists.</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ══ SLIDE 4 — Settings ════════════════════════════════ -->
-  <div class="slide slide-settings" data-slide="4">
-    <div class="ob-feature-grid">
-      <div class="ob-feature-content ob-settings-inner">
-        <div class="ob-section-tag">
-          <span class="ob-num-big">04</span>
-          <div class="ob-rule"></div>
-        </div>
-        <h1 class="ob-title ob-title--settings">MAKE IT<br>YOURS.</h1>
-        <p class="ob-body">Set your Pomodoro rhythm. Adjust anytime.</p>
-        <div class="ob-sliders">
-          <div class="ob-slider-row">
-            <div class="ob-slider-meta">
-              <span class="ob-slider-label">FOCUS TIME</span>
-              <span class="ob-slider-val"><span id="focusDisplay">25</span><span class="ob-unit"> MIN</span></span>
-            </div>
-            <input class="ob-slider" type="range" id="focusSlider" min="5" max="60" step="5" value="25" />
-            <div class="ob-ticks">
-              <span>5</span><span>15</span><span>25</span><span>35</span><span>45</span><span>60</span>
-            </div>
+  <!-- ══ SLIDE 2 — Choose Your Buddy ═══════════════════════════ -->
+  <div class="slide slide-characters" data-slide="2">
+    <div class="ob-char-inner">
+      <div class="ob-char-heading">
+        <span class="ob-slide-num">02</span>
+        <h2 class="ob-char-title">CHOOSE YOUR BUDDY.</h2>
+        <p class="ob-char-sub">Your companion through every focus session.</p>
+      </div>
+      <div class="ob-char-grid">
+        <button class="ob-char-card" data-skin="DragonSkin.png" type="button">
+          <div class="ob-char-img-wrap">
+            <img src="./assets/artwork/Skins/DragonSkin.png" alt="Dragon" draggable="false" />
           </div>
-          <div class="ob-slider-row">
-            <div class="ob-slider-meta">
-              <span class="ob-slider-label">BREAK TIME</span>
-              <span class="ob-slider-val"><span id="breakDisplay">5</span><span class="ob-unit"> MIN</span></span>
-            </div>
-            <input class="ob-slider" type="range" id="breakSlider" min="1" max="30" step="1" value="5" />
-            <div class="ob-ticks">
-              <span>1</span><span>8</span><span>15</span><span>22</span><span>30</span>
-            </div>
+          <span class="ob-char-name">Dragon</span>
+          <span class="ob-char-check"><i class="fas fa-check"></i></span>
+        </button>
+        <button class="ob-char-card" data-skin="Axolotyl.png" type="button">
+          <div class="ob-char-img-wrap">
+            <img src="./assets/artwork/Skins/Axolotyl.png" alt="Axolotl" draggable="false" />
           </div>
-        </div>
-      </div>
-      <div class="ob-feature-visual">
-        <div class="ob-img-frame ob-img-frame--glow">
-          <img src="./assets/artwork/freepik__a-focus-environment__56350.png" alt="Your focus world" />
-        </div>
+          <span class="ob-char-name">Axolotl</span>
+          <span class="ob-char-check"><i class="fas fa-check"></i></span>
+        </button>
+        <button class="ob-char-card" data-skin="Frog.png" type="button">
+          <div class="ob-char-img-wrap">
+            <img src="./assets/artwork/Skins/Frog.png" alt="Frog" draggable="false" />
+          </div>
+          <span class="ob-char-name">Frog</span>
+          <span class="ob-char-check"><i class="fas fa-check"></i></span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Hidden nav buttons (JS still references them; scroll is primary navigation) -->
+  <!-- Hidden nav buttons — JS references them -->
   <div hidden aria-hidden="true">
     <button class="prev-btn"></button>
     <button class="next-btn"></button>
   </div>
 
-  <!-- ══ Footer ═════════════════════════════════════════════ -->
+  <!-- ══ Footer ═════════════════════════════════════════════════ -->
   <div class="onboarding-footer">
     <div class="progress-dots">
       <span class="dot active" data-slide="0"></span>
       <span class="dot" data-slide="1"></span>
       <span class="dot" data-slide="2"></span>
-      <span class="dot" data-slide="3"></span>
-      <span class="dot" data-slide="4"></span>
     </div>
     <div class="ob-scroll-hint" id="scrollHint">
       <i class="fas fa-chevron-down"></i>
@@ -177,6 +146,7 @@
   </div>
 
 </div>
+<script src="../js/lib/anime.umd.min.js"></script>
 <script type="module" src="../js/onboarding.js"></script>
 </body>
 </html>

@@ -3,110 +3,175 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <title>Account Settings • BuddyDoro</title>
 
-  <!-- Core styles -->
-  <link rel="stylesheet" href="../styles/base.css" />
-  <link rel="stylesheet" href="../styles/layout2.css" />
-  <link rel="stylesheet" href="../styles/components.css" />
-  <link rel="stylesheet" href="../styles/themes.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 
-  <!-- Page styles -->
   <link rel="stylesheet" href="../styles/accountSettings.css" />
-
-  <!-- Preload (optional) -->
-  <link rel="preload" as="image" href="./assets/artwork/BackgroundDay.jpg" />
 </head>
 
-<body class="bd-page">
-  <header class="bd-settings-top">
-    <a href="index.html" class="bd-back-link" aria-label="Back to home">← Back</a>
+<body>
 
-    <div class="bd-settings-header">
-      <h1 class="bd-settings-title">Account Settings</h1>
-      <p class="bd-settings-subtitle">Update your email and password.</p>
-    </div>
-  </header>
+  <!-- Ambient orbs -->
+  <div class="ac-orb ac-orb-1" aria-hidden="true"></div>
+  <div class="ac-orb ac-orb-2" aria-hidden="true"></div>
+  <div class="ac-orb ac-orb-3" aria-hidden="true"></div>
 
-  <main class="bd-settings-shell">
-    <form id="accountForm" class="bd-form" novalidate>
+  <div class="ac-wrap">
 
-      <!-- Email card -->
-      <section class="bd-card" aria-labelledby="emailCardTitle">
-        <h2 id="emailCardTitle" class="bd-card-title">Email</h2>
-      
-        <div class="bd-field">
-          <!-- Current Email (read-only) -->
-          <label for="currentEmail" class="bd-label">Current email</label>
-          <input id="currentEmail" type="email" class="bd-input" autocomplete="email" disabled />
-      
-          <!-- New Email -->
-          <label for="newEmail" class="bd-label">New email</label>
-          <input id="newEmail" type="email" class="bd-input" autocomplete="off" placeholder="you@example.com"
-           />
-      
-          <!-- Confirm New Email -->
-          <label for="confirmNewEmail" class="bd-label">Confirm new email</label>
-          <input id="confirmNewEmail" type="email" class="bd-input" autocomplete="off" placeholder="re-enter new email"
-            />
-          <div class="bd-hint">We’ll use this to identify your account.</div>
+    <!-- Header -->
+    <header class="ac-header">
+      <a href="index.html" class="ac-back" aria-label="Back to app">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M13 4l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back
+      </a>
+      <div class="ac-header-copy">
+        <h1 class="ac-page-title">Account Settings</h1>
+        <p class="ac-page-sub">Manage your email, password, and preferences</p>
+      </div>
+    </header>
+
+    <main class="ac-main">
+      <form id="accountForm" novalidate>
+
+        <!-- Email card -->
+        <section class="ac-card" aria-labelledby="emailTitle">
+          <div class="ac-card-head">
+            <div class="ac-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M2 8l10 6 10-6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <h2 id="emailTitle" class="ac-card-title">Email address</h2>
+              <p class="ac-card-sub">Update the email tied to your account</p>
+            </div>
+          </div>
+
+          <div class="ac-fields">
+            <div class="ac-field">
+              <label for="currentEmail" class="ac-label">Current email</label>
+              <input id="currentEmail" type="email" class="ac-input ac-input-readonly" autocomplete="email" disabled />
+            </div>
+            <div class="ac-divider"></div>
+            <div class="ac-field">
+              <label for="newEmail" class="ac-label">New email</label>
+              <input id="newEmail" type="email" class="ac-input" autocomplete="off" placeholder="you@example.com" />
+            </div>
+            <div class="ac-field">
+              <label for="confirmNewEmail" class="ac-label">Confirm new email</label>
+              <input id="confirmNewEmail" type="email" class="ac-input" autocomplete="off" placeholder="Re-enter new email" />
+            </div>
+          </div>
+        </section>
+
+        <!-- Password card -->
+        <section class="ac-card" aria-labelledby="pwTitle">
+          <div class="ac-card-head">
+            <div class="ac-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="5" y="11" width="14" height="10" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <circle cx="12" cy="16" r="1.4" fill="currentColor"/>
+              </svg>
+            </div>
+            <div>
+              <h2 id="pwTitle" class="ac-card-title">Password</h2>
+              <p class="ac-card-sub">Leave blank if you don't want to change it</p>
+            </div>
+          </div>
+
+          <div class="ac-fields">
+            <div class="ac-field">
+              <label for="currentPassword" class="ac-label">Current password</label>
+              <input id="currentPassword" type="password" class="ac-input" autocomplete="current-password" />
+            </div>
+            <div class="ac-divider"></div>
+            <div class="ac-field">
+              <label for="newPassword" class="ac-label">New password</label>
+              <input id="newPassword" type="password" class="ac-input" autocomplete="new-password" minlength="8" placeholder="8+ characters" />
+            </div>
+            <div class="ac-field">
+              <label for="confirmNewPassword" class="ac-label">Confirm new password</label>
+              <input id="confirmNewPassword" type="password" class="ac-input" autocomplete="new-password" minlength="8" placeholder="Re-enter new password" />
+            </div>
+          </div>
+        </section>
+
+        <!-- Save actions -->
+        <div class="ac-save-row">
+          <button type="submit" class="ac-btn ac-btn-primary" id="saveBtn">Save changes</button>
+          <a href="./index.html" class="ac-btn ac-btn-ghost">Cancel</a>
+          <p id="accountMsg" class="ac-msg" role="status" aria-live="polite"></p>
+        </div>
+
+      </form>
+
+      <!-- FAQ / Help card -->
+      <section class="ac-card ac-card-faq" aria-labelledby="faqTitle">
+        <div class="ac-card-head">
+          <div class="ac-card-icon ac-card-icon-faq">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M12 8.5a2.2 2.2 0 0 1 2.2 2.2c0 1.2-.9 1.9-1.6 2.4-.4.3-.6.6-.6 1V15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="12" cy="17.5" r="0.9" fill="currentColor"/>
+            </svg>
+          </div>
+          <div>
+            <h2 id="faqTitle" class="ac-card-title">Help &amp; FAQ</h2>
+            <p class="ac-card-sub">Common actions and answers</p>
+          </div>
+        </div>
+
+        <div class="ac-faq-list">
+
+          <details class="ac-faq-item">
+            <summary class="ac-faq-q">How do I earn Doros?</summary>
+            <p class="ac-faq-a">Complete focus sessions using the timer. You earn 1 Doro for every focused minute — the longer your session, the more you earn.</p>
+          </details>
+
+          <details class="ac-faq-item">
+            <summary class="ac-faq-q">How do I change my Buddy?</summary>
+            <p class="ac-faq-a">Open the Store from the top bar, browse skins, and purchase one with Doros. Then open your Inventory and click "Use" to equip it.</p>
+          </details>
+
+          <details class="ac-faq-item">
+            <summary class="ac-faq-q">Can I reset the app tour?</summary>
+            <p class="ac-faq-a">Yes — click the button below to replay the interactive feature tour the next time you open the app.</p>
+          </details>
+
+          <details class="ac-faq-item">
+            <summary class="ac-faq-q">What is AI Plan?</summary>
+            <p class="ac-faq-a">AI Plan breaks any goal into focused, actionable tasks automatically. Click "AI Plan" on the main screen, describe your goal, and let BuddyDoro build your to-do list.</p>
+          </details>
+
+        </div>
+
+        <div class="ac-faq-actions">
+          <button type="button" class="ac-btn ac-btn-outline" id="redoOnboardingBtn">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="ac-btn-icon">
+              <path d="M4 10a6 6 0 1 1 1.6 4.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M4 14v-4h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Replay onboarding
+          </button>
+          <button type="button" class="ac-btn ac-btn-outline" id="redoTourBtn">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="ac-btn-icon">
+              <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            Replay app tour
+          </button>
         </div>
       </section>
 
-      <!-- Password card -->
-      <section class="bd-card" aria-labelledby="pwCardTitle">
-        <h2 id="pwCardTitle" class="bd-card-title">Password</h2>
-
-        <div class="bd-hint bd-hint-strong">
-          Leave these blank if you don’t want to change your password.
-        </div>
-        <!-- Current Password -->
-        <div class="bd-field">
-          <label for="currentPassword" class="bd-label">Current password</label>
-          <input
-            id="currentPassword"
-            type="password"
-            autocomplete="off"
-            class="bd-input"
-          />
-        </div>
-        <!-- New Password -->
-        <div class="bd-field">
-          <label for="newPassword" class="bd-label">New password</label>
-          <input
-            id="newPassword"
-            type="password"
-            autocomplete="new-password"
-            minlength="8"
-            class="bd-input"
-            aria-describedby="pwHint"
-          />
-          <!-- Confirm New Password -->
-          <label for="confirmNewPassword" class="bd-label">Confirm New password</label>
-          <input
-            id="confirmNewPassword"
-            type="password"
-            autocomplete="new-password"
-            minlength="8"
-            class="bd-input"
-            aria-describedby="pwHint"
-          />
-          <div id="pwHint" class="bd-hint">Use 8+ characters. Avoid common words.</div>
-        </div>
-      </section>
-
-      <!-- Actions -->
-      <section class="bd-card bd-card-muted" aria-label="Save changes">
-        <div class="bd-actions">
-          <button type="submit" class="bd-btn bd-btn-primary" id="saveBtn">Save changes</button>
-          <a href="./index.html" class="bd-btn bd-btn-secondary">Cancel</a>
-        </div>
-
-        <p id="accountMsg" class="bd-msg is-info" role="status" aria-live="polite"></p>
-      </section>
-    </form>
-  </main>
+    </main>
+  </div>
 
   <script type="module" src="../js/pages/accountSettings.js"></script>
 </body>

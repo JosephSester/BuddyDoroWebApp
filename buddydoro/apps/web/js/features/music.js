@@ -1,7 +1,8 @@
 import { AMBIENT_AUDIO, AMBIENT_MODES, BUDDYDORO_TRACKS } from './musicCatalog.js';
 import { showNotification } from '../utils/notifications.js';
+import { API_BASE } from '../api/apiClient.js';
 
-// Persisted UI/player settings for Phase 1 local music experience.
+// Persisted UI/player settings for the music mini-player.
 const STORAGE_KEY = 'buddydoro:musicState:v1';
 
 export function initMusic() {
@@ -41,13 +42,18 @@ export function initMusic() {
   // Central state for mini-player UI, source selection, and playback behavior.
   const state = {
     enabled: true,
-    source: 'default', // default | spotify
+    source: 'default',       // 'default' | 'spotify'
     currentTrackIndex: 0,
     isPlaying: false,
     ambientMode: 'forest',
     spotifyConnected: false,
     panelOpen: false,
   };
+
+  // Spotify Web Playback SDK references (populated after successful connect).
+  let spotifyPlayer = null;   // Spotify.Player instance
+  let spotifyDeviceId = null;  // Device ID assigned by Spotify after SDK ready
+  let spotifyToken = null;     // Current Spotify access token
 
   // Day/night detection used by forest ambience to pick correct variant.
   function isNightNow() {
@@ -163,13 +169,234 @@ export function initMusic() {
     state.isPlaying = false;
   }
 
-  // Source switching behavior for Default vs Spotify placeholder.
+  // Source switching: pause default tracks when switching to Spotify and vice-versa.
   async function applySourceBehavior() {
     if (state.source === 'spotify') {
       stopCurrentTrack();
-    } else if (state.enabled && state.isPlaying) {
-      await playCurrentDefaultTrack();
+      // If Spotify is connected, make sure the SDK player is initialized.
+      if (state.spotifyConnected && !spotifyPlayer) {
+        await bootSpotifyPlayer();
+      }
+    } else {
+      // Switching back to default — pause Spotify playback if active.
+      if (spotifyPlayer) {
+        try { await spotifyPlayer.pause(); } catch { /* ignore */ }
+      }
+      if (state.enabled && state.isPlaying) {
+        await playCurrentDefaultTrack();
+      }
     }
+  }
+
+  /* ----------------------------------------------------------------
+   * Spotify Web Playback SDK Integration
+   *
+   * The SDK lets BuddyDoro act as a Spotify Connect device so music
+   * streams directly inside the browser tab. Requires Premium.
+   * ---------------------------------------------------------------- */
+
+  /**
+   * Fetches a fresh Spotify access token from our backend.
+   * The backend auto-refreshes expired tokens using the stored refresh token.
+   */
+  async function fetchSpotifyToken() {
+    const authToken = localStorage.getItem('authToken');
+    const res = await fetch(`${API_BASE}/spotify/token`, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to get Spotify token');
+    }
+    const data = await res.json();
+    spotifyToken = data.accessToken;
+    return spotifyToken;
+  }
+
+  /**
+   * Initializes the Spotify Web Playback SDK player instance.
+   * Listens for ready, state-change, and error events to keep
+   * our UI in sync with Spotify's playback state.
+   */
+  async function bootSpotifyPlayer() {
+    if (spotifyPlayer) return; // already initialized
+
+    try {
+      spotifyToken = await fetchSpotifyToken();
+    } catch (err) {
+      showNotification(err.message, 'error');
+      state.spotifyConnected = false;
+      render();
+      saveState();
+      return;
+    }
+
+    // The SDK exposes window.Spotify after the <script> loads.
+    if (typeof window.Spotify === 'undefined') {
+      showNotification('Spotify SDK not loaded. Please refresh the page.', 'error');
+      return;
+    }
+
+    spotifyPlayer = new window.Spotify.Player({
+      name: 'BuddyDoro',
+      // The SDK calls this whenever it needs a token (including refresh).
+      getOAuthToken: async (cb) => {
+        try {
+          const token = await fetchSpotifyToken();
+          cb(token);
+        } catch {
+          cb('');
+        }
+      },
+      volume: 0.6,
+    });
+
+    // Fires when the SDK has a device ready for playback.
+    spotifyPlayer.addListener('ready', ({ device_id }) => {
+      spotifyDeviceId = device_id;
+      showNotification('Spotify connected! Select a playlist or press Play.', 'success');
+      render();
+    });
+
+    spotifyPlayer.addListener('not_ready', () => {
+      spotifyDeviceId = null;
+    });
+
+    // Keep our status line updated with whatever Spotify is playing.
+    spotifyPlayer.addListener('player_state_changed', (playerState) => {
+      if (!playerState) return;
+      state.isPlaying = !playerState.paused;
+      render();
+    });
+
+    // Premium-only guard: the SDK emits this for free-tier accounts.
+    spotifyPlayer.addListener('authentication_error', () => {
+      showNotification('Spotify Premium is required for in-app playback.', 'error');
+      cleanupSpotifyPlayer();
+    });
+
+    spotifyPlayer.addListener('initialization_error', ({ message }) => {
+      showNotification(`Spotify init error: ${message}`, 'error');
+      cleanupSpotifyPlayer();
+    });
+
+    spotifyPlayer.addListener('account_error', () => {
+      showNotification('Spotify Premium is required for in-app playback.', 'error');
+      cleanupSpotifyPlayer();
+    });
+
+    const connected = await spotifyPlayer.connect();
+    if (!connected) {
+      showNotification('Could not connect to Spotify. Try again.', 'error');
+      cleanupSpotifyPlayer();
+    }
+  }
+
+  /** Tear down the SDK player and reset Spotify-specific state. */
+  function cleanupSpotifyPlayer() {
+    if (spotifyPlayer) {
+      spotifyPlayer.disconnect();
+      spotifyPlayer = null;
+    }
+    spotifyDeviceId = null;
+    spotifyToken = null;
+    _playlistsRendered = false;
+    state.spotifyConnected = false;
+    render();
+    saveState();
+  }
+
+  /**
+   * Transfers playback to BuddyDoro's SDK device so audio plays here
+   * instead of another Spotify Connect device the user might have open.
+   */
+  async function transferPlaybackHere() {
+    if (!spotifyDeviceId || !spotifyToken) return;
+    await fetch('https://api.spotify.com/v1/me/player', {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${spotifyToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ device_ids: [spotifyDeviceId], play: false }),
+    });
+  }
+
+  /**
+   * Fetches the user's Spotify playlists and renders them in the
+   * track-list area when source is set to Spotify.
+   * Uses a simple flag to avoid re-fetching on every render() cycle.
+   */
+  let _playlistsRendered = false;
+  async function renderSpotifyPlaylists() {
+    if (_playlistsRendered) return;
+    _playlistsRendered = true;
+    tracksRoot.innerHTML = '<div class="music-empty">Loading playlists…</div>';
+    try {
+      const token = await fetchSpotifyToken();
+      const res = await fetch('https://api.spotify.com/v1/me/playlists?limit=10', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to load playlists');
+      const data = await res.json();
+
+      tracksRoot.innerHTML = '';
+      if (!data.items?.length) {
+        tracksRoot.innerHTML = '<div class="music-empty">No playlists found.</div>';
+        return;
+      }
+
+      data.items.forEach((pl) => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'music-track-row';
+        row.textContent = pl.name;
+        row.addEventListener('click', () => playSpotifyContext(pl.uri));
+        tracksRoot.appendChild(row);
+      });
+    } catch (err) {
+      tracksRoot.innerHTML = `<div class="music-empty">${err.message}</div>`;
+    }
+  }
+
+  /**
+   * Starts playback of a Spotify context (playlist/album URI) on the
+   * BuddyDoro SDK device.
+   */
+  async function playSpotifyContext(contextUri) {
+    if (!spotifyDeviceId) {
+      showNotification('Spotify device not ready. Try again.', 'error');
+      return;
+    }
+    try {
+      const token = await fetchSpotifyToken();
+      await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ context_uri: contextUri }),
+      });
+      state.isPlaying = true;
+      render();
+      saveState();
+    } catch {
+      showNotification('Could not start Spotify playback.', 'error');
+    }
+  }
+
+  /** Disconnects Spotify on both frontend and backend. */
+  async function disconnectSpotify() {
+    const authToken = localStorage.getItem('authToken');
+    try {
+      await fetch(`${API_BASE}/spotify/disconnect`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+    } catch { /* best-effort */ }
+    cleanupSpotifyPlayer();
+    showNotification('Spotify disconnected.', 'success');
   }
 
   // Renders clickable default-track list and active row state.
@@ -233,24 +460,56 @@ export function initMusic() {
     sourceDefault.checked = state.source === 'default';
     sourceSpotify.checked = state.source === 'spotify';
 
-    const currentTrack = getCurrentTrack();
-    statusEl.textContent = state.source === 'spotify'
-      ? (state.spotifyConnected ? 'Spotify connected (Phase 2 playback)' : 'Spotify selected (not connected)')
-      : (currentTrack ? `${state.isPlaying ? 'Playing' : 'Paused'}: ${currentTrack.title}` : 'No default tracks');
-
     const defaultActive = state.source === 'default';
-    prevBtn.disabled = !defaultActive || !state.enabled || !BUDDYDORO_TRACKS.length;
-    // Keep Play enabled while off so users can start playback directly.
-    playPauseBtn.disabled = !defaultActive || !BUDDYDORO_TRACKS.length;
-    nextBtn.disabled = !defaultActive || !state.enabled || !BUDDYDORO_TRACKS.length;
+    const spotifyReady = state.spotifyConnected && spotifyDeviceId;
+
+    // Status line reflects current source and playback state.
+    if (state.source === 'spotify') {
+      if (spotifyReady) {
+        statusEl.textContent = state.isPlaying ? 'Playing from Spotify' : 'Spotify ready';
+      } else if (state.spotifyConnected) {
+        statusEl.textContent = 'Connecting to Spotify…';
+      } else {
+        statusEl.textContent = 'Spotify not connected';
+      }
+    } else {
+      const currentTrack = getCurrentTrack();
+      statusEl.textContent = currentTrack
+        ? `${state.isPlaying ? 'Playing' : 'Paused'}: ${currentTrack.title}`
+        : 'No default tracks';
+    }
+
+    // Transport controls: enabled for default tracks OR a connected Spotify device.
+    if (defaultActive) {
+      prevBtn.disabled = !state.enabled || !BUDDYDORO_TRACKS.length;
+      playPauseBtn.disabled = !BUDDYDORO_TRACKS.length;
+      nextBtn.disabled = !state.enabled || !BUDDYDORO_TRACKS.length;
+    } else {
+      prevBtn.disabled = !spotifyReady;
+      playPauseBtn.disabled = !spotifyReady;
+      nextBtn.disabled = !spotifyReady;
+    }
     playPauseBtn.textContent = state.isPlaying ? 'Pause' : 'Play';
 
-    tracksRoot.hidden = !defaultActive;
-    spotifyHint.hidden = defaultActive;
-    spotifyConnectBtn.hidden = defaultActive;
-    spotifyConnectBtn.textContent = state.spotifyConnected ? 'Reconnect Spotify' : 'Connect Spotify';
+    // Show default track list or Spotify playlists depending on source.
+    tracksRoot.hidden = false;
+    spotifyHint.hidden = defaultActive || state.spotifyConnected;
 
-    renderTrackList();
+    // Connect/Disconnect button text and visibility.
+    if (defaultActive) {
+      spotifyConnectBtn.hidden = true;
+    } else {
+      spotifyConnectBtn.hidden = false;
+      spotifyConnectBtn.textContent = state.spotifyConnected ? 'Disconnect Spotify' : 'Connect Spotify';
+    }
+
+    if (defaultActive) {
+      renderTrackList();
+    } else if (state.spotifyConnected) {
+      renderSpotifyPlaylists();
+    } else {
+      tracksRoot.innerHTML = '<div class="music-empty">Connect Spotify to see your playlists.</div>';
+    }
     renderAmbientOptions();
   }
 
@@ -301,7 +560,7 @@ export function initMusic() {
     saveState();
   });
 
-  // Source selector: Spotify placeholder (full OAuth/playback in Phase 2).
+  // Source selector: Spotify — switches audio source and boots SDK if connected.
   sourceSpotify.addEventListener('change', async () => {
     if (!sourceSpotify.checked) return;
     state.source = 'spotify';
@@ -310,36 +569,52 @@ export function initMusic() {
     saveState();
   });
 
-  // Placeholder connect action for future Spotify integration.
-  spotifyConnectBtn.addEventListener('click', () => {
-    state.spotifyConnected = true;
-    showNotification('Spotify connect UI is ready. OAuth playback comes in Phase 2.', 'success');
-    render();
-    saveState();
+  // Connect / Disconnect Spotify depending on current state.
+  spotifyConnectBtn.addEventListener('click', async () => {
+    if (state.spotifyConnected) {
+      // Already connected — user wants to disconnect.
+      await disconnectSpotify();
+    } else {
+      // Redirect to our backend which kicks off the Spotify OAuth flow.
+      const token = localStorage.getItem('authToken');
+      window.location.href = `${API_BASE}/spotify/login?token=${encodeURIComponent(token)}`;
+    }
   });
 
-  // Transport controls for default track list.
+  // Transport: Previous track (default tracks or Spotify).
   prevBtn.addEventListener('click', async () => {
-    setTrack(state.currentTrackIndex - 1);
-    state.isPlaying = true;
-    await playCurrentDefaultTrack();
+    if (state.source === 'spotify' && spotifyPlayer) {
+      await spotifyPlayer.previousTrack();
+    } else {
+      setTrack(state.currentTrackIndex - 1);
+      state.isPlaying = true;
+      await playCurrentDefaultTrack();
+    }
     render();
     saveState();
   });
 
+  // Transport: Next track (default tracks or Spotify).
   nextBtn.addEventListener('click', async () => {
-    setTrack(state.currentTrackIndex + 1);
-    state.isPlaying = true;
-    await playCurrentDefaultTrack();
+    if (state.source === 'spotify' && spotifyPlayer) {
+      await spotifyPlayer.nextTrack();
+    } else {
+      setTrack(state.currentTrackIndex + 1);
+      state.isPlaying = true;
+      await playCurrentDefaultTrack();
+    }
     render();
     saveState();
   });
 
-  // Play/Pause: pressing Play while off turns music on and starts playback.
+  // Transport: Play/Pause — routes to Spotify SDK or default audio engine.
   playPauseBtn.addEventListener('click', async () => {
+    if (state.source === 'spotify' && spotifyPlayer) {
+      await spotifyPlayer.togglePlay();
+      return;
+    }
     if (state.source !== 'default') return;
     if (!state.isPlaying) {
-      // UX shortcut: pressing play while off turns music on and starts playback.
       if (!state.enabled) {
         state.enabled = true;
         enableToggle.checked = true;
@@ -365,10 +640,35 @@ export function initMusic() {
     }
   });
 
+  // --- Initialization ---
+
+  // Detect Spotify OAuth redirect results in the URL query string.
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('spotifyConnected') === 'true') {
+    state.spotifyConnected = true;
+    state.source = 'spotify';
+    showNotification('Spotify account connected!', 'success');
+    // Clean the URL so the flag doesn't persist on refresh.
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+  if (urlParams.get('spotifyError')) {
+    showNotification(`Spotify error: ${urlParams.get('spotifyError')}`, 'error');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
   loadState();
   setTrack(state.currentTrackIndex);
   syncAmbientPlayback();
   render();
+  saveState();
+
+  // If Spotify was previously connected, boot the SDK player automatically
+  // so playback is available as soon as the user opens the panel.
+  if (state.spotifyConnected) {
+    window.onSpotifyWebPlaybackSDKReady = () => bootSpotifyPlayer();
+    // If the SDK script already loaded before this code ran, boot now.
+    if (typeof window.Spotify !== 'undefined') bootSpotifyPlayer();
+  }
 
   // Retry ambient playback after first user interaction
   // in case initial autoplay was blocked by browser policy.
@@ -387,6 +687,9 @@ export function initMusic() {
     stop() {
       // Stop track playback while keeping ambient environment active.
       pauseTrackAudio();
+      if (spotifyPlayer) {
+        spotifyPlayer.pause().catch(() => {});
+      }
       render();
       saveState();
     },

@@ -669,6 +669,11 @@
 
   <script type="module" src="../js/features/store.js"></script>
   <script type="module" src="../js/features/history.js"></script>
+
+  <!-- Spotify Web Playback SDK — must load before music.js so window.Spotify is available.
+       The SDK calls window.onSpotifyWebPlaybackSDKReady when ready; music.js sets that callback. -->
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
+
 </body>
 
 </html>

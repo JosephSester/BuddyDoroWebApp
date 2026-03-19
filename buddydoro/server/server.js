@@ -30,6 +30,9 @@ app.use('/api/items', ItemsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/user', userRoutes);
 
+const spotifyRoutes = require('./routes/spotify');
+app.use('/api/spotify', spotifyRoutes);
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/buddydoro')
   .then(() => console.log('MongoDB connected'))

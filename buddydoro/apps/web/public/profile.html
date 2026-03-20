@@ -3,81 +3,106 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <title>Profile Settings • BuddyDoro</title>
 
-  <!-- Core styles -->
-  <link rel="stylesheet" href="../styles/base.css" />
-  <link rel="stylesheet" href="../styles/layout2.css" />
-  <link rel="stylesheet" href="../styles/components.css" />
-  <link rel="stylesheet" href="../styles/topbar.css" />
-  <link rel="stylesheet" href="../styles/themes.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 
-  <!-- Page styles (new) -->
   <link rel="stylesheet" href="../styles/profileSettings.css" />
-
-  <!-- Background Image -->
-  <link rel="preload" as="image" href="./assets/artwork/BackgroundDay.jpg" />
-
 </head>
 
-<body class="bd-page">
-  <!-- Top bar (optional if you want it on settings pages too)
-       If you don't want the topbar here, delete this header.
-  -->
+<body>
 
-  <header class="bd-settings-top">
-    <a href="./index.html" class="bd-back-link" aria-label="Back to home">← Back</a>
-    <div class="bd-settings-header">
-      <h1 class="bd-settings-title">Profile Settings</h1>
-      <p class="bd-settings-subtitle">Update how your name appears in BuddyDoro.</p>
-    </div>
-  </header>
+  <!-- Ambient orbs -->
+  <div class="pr-orb pr-orb-1" aria-hidden="true"></div>
+  <div class="pr-orb pr-orb-2" aria-hidden="true"></div>
+  <div class="pr-orb pr-orb-3" aria-hidden="true"></div>
 
-  <main class="bd-settings-shell">
-    <section class="bd-card" aria-labelledby="profileCardTitle">
-      <h2 id="profileCardTitle" class="bd-card-title">Display name</h2>
+  <div class="pr-wrap">
 
-      <form id="profileForm" class="bd-form" novalidate>
-        <div class="bd-field">
-          <label for="nameInput" class="bd-label">Name</label>
-          <input
-            id="nameInput"
-            name="name"
-            type="text"
-            autocomplete="name"
-            maxlength="32"
-            placeholder="e.g., Melanie"
-            class="bd-input"
-            aria-describedby="nameHint"
-          />
-          <div id="nameHint" class="bd-hint">
-            This is shown in your greeting and profile.
+    <!-- Header -->
+    <header class="pr-header">
+      <a href="./index.html" class="pr-back" aria-label="Back to app">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M13 4l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back
+      </a>
+      <div class="pr-header-copy">
+        <h1 class="pr-page-title">Profile Settings</h1>
+        <p class="pr-page-sub">Update how your name appears in BuddyDoro</p>
+      </div>
+    </header>
+
+    <main class="pr-main">
+
+      <!-- Display name card -->
+      <section class="pr-card" aria-labelledby="nameTitle">
+        <div class="pr-card-head">
+          <div class="pr-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h2 id="nameTitle" class="pr-card-title">Display name</h2>
+            <p class="pr-card-sub">Shown in your greeting chip and profile</p>
           </div>
         </div>
 
-        <div class="bd-actions">
-          <button type="submit" class="bd-btn bd-btn-primary" id="saveBtn">
-            Save changes
-          </button>
+        <form id="profileForm" novalidate>
+          <div class="pr-fields">
+            <div class="pr-field">
+              <label for="nameInput" class="pr-label">Your name</label>
+              <input
+                id="nameInput"
+                name="name"
+                type="text"
+                autocomplete="name"
+                maxlength="32"
+                placeholder="e.g. Alex"
+                class="pr-input"
+                aria-describedby="nameHint"
+              />
+              <p id="nameHint" class="pr-hint">Keep it short — it appears on the top-right greeting chip.</p>
+            </div>
+          </div>
 
-          <a href="./index.html" class="bd-btn bd-btn-secondary">
-            Cancel
+          <div class="pr-save-row">
+            <button type="submit" class="pr-btn pr-btn-primary" id="saveBtn">Save changes</button>
+            <a href="./index.html" class="pr-btn pr-btn-ghost">Cancel</a>
+            <p id="profileMsg" class="pr-msg" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </section>
+
+      <!-- Account link card -->
+      <section class="pr-card pr-card-link" aria-label="Account settings shortcut">
+        <div class="pr-card-head pr-card-head-inline">
+          <div class="pr-card-icon pr-card-icon-alt">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="5" y="11" width="14" height="10" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="pr-card-link-copy">
+            <span class="pr-card-title">Account Settings</span>
+            <span class="pr-card-sub">Change your email or password</span>
+          </div>
+          <a href="./account.html" class="pr-btn pr-btn-outline pr-btn-sm" aria-label="Go to account settings">
+            Open
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="pr-btn-icon">
+              <path d="M4 8h8M9 5l3 3-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </a>
         </div>
+      </section>
 
-        <!-- Status message area -->
-        <p id="profileMsg" class="bd-msg is-info" role="status" aria-live="polite"></p>
-      </form>
-    </section>
+    </main>
+  </div>
 
-    <!-- Optional: small helper card for UX clarity -->
-    <section class="bd-card bd-card-muted" aria-label="Tip">
-      <p class="bd-tip">
-        Tip: Keep it short—this name appears on the top-right greeting chip.
-      </p>
-    </section>
-  </main>
   <script type="module" src="../js/pages/profileSettings.js"></script>
 </body>
 </html>

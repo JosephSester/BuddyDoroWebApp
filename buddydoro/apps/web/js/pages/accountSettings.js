@@ -14,7 +14,7 @@ function requireToken() {
 function setMsg(el, text, ok = true) {
   if (!el) return;
   el.textContent = text || '';
-  el.style.color = ok ? 'green' : 'crimson';
+  el.className = `ac-msg ${ok ? 'is-success' : 'is-error'}`;
 }
 
 async function fetchMe(token) {
@@ -40,7 +40,23 @@ async function updateAccount(token, payload) {
   return data;
 }
 
+// ── Replay helpers ─────────────────────────────────────
+function setupFaqButtons() {
+  document.getElementById('redoOnboardingBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('hasSeenOnboarding');
+    localStorage.removeItem('hasTakenTour');
+    window.location.href = 'onboarding.html';
+  });
+
+  document.getElementById('redoTourBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('hasTakenTour');
+    window.location.href = 'index.html';
+  });
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
+  setupFaqButtons();
+
   const token = requireToken();
 
   const form = document.getElementById('accountForm');

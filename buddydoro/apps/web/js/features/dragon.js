@@ -16,8 +16,58 @@ let CLOSED_EYES = DEFAULT_CLOSED_EYES;
 
 let dragonEl = null;
 let dragonImg = null;
+let tombstoneImg = null;
 let blinkTimer = null;
 let autoBlinkMs = 3500;
+
+const happyMelody  = new Audio('./assets/soundeffects/HappyMelody/HappyMelody.mp3');
+happyMelody.loop   = true;
+happyMelody.volume = 0.3;
+
+const mourningSong = new Audio('./assets/soundeffects/CompanionDeathSFX/MourningSong.mp3');
+mourningSong.loop   = true;
+mourningSong.volume = 0.3;
+
+// Whichever song is currently "on stage" — toggled by the music button
+let activeSong = happyMelody;
+
+// Pending autoplay-resume handler (cancelled when switching songs)
+let pendingResumeHandler = null;
+
+function cancelPendingResume() {
+  if (!pendingResumeHandler) return;
+  document.removeEventListener('click',      pendingResumeHandler);
+  document.removeEventListener('keydown',    pendingResumeHandler);
+  document.removeEventListener('touchstart', pendingResumeHandler);
+  pendingResumeHandler = null;
+}
+
+/**
+ * Switch to `song`, stop the other one, and start playing.
+ * Handles browser autoplay policy with a deferred resume on first interaction.
+ */
+function switchToSong(song) {
+  cancelPendingResume();
+
+  // Silence whichever song is not the new one
+  const other = song === happyMelody ? mourningSong : happyMelody;
+  other.pause();
+  other.currentTime = 0;
+
+  activeSong = song;
+  song.currentTime = 0;
+  song.play().catch(() => {
+    // Autoplay blocked — resume on first user interaction
+    pendingResumeHandler = () => {
+      if (!song.paused) return;
+      song.play().catch(() => {});
+      pendingResumeHandler = null;
+    };
+    document.addEventListener('click',      pendingResumeHandler, { once: true });
+    document.addEventListener('keydown',    pendingResumeHandler, { once: true });
+    document.addEventListener('touchstart', pendingResumeHandler, { once: true });
+  });
+}
 
 /**
  * Initialize the dragon sprite.
@@ -25,10 +75,164 @@ let autoBlinkMs = 3500;
  */
 export function initDragon({ enableAutoBlink = true, blinkMs = 3500 } = {}) {
   dragonEl = document.getElementById('dragon') || null;
-  dragonImg = dragonEl?.querySelector('img') || null;
+  dragonImg = dragonEl?.querySelector('.dragon-img') || null;
+  tombstoneImg = dragonEl?.querySelector('.tombstone-img') || null;
+  const musicToggleChip = document.getElementById('musicToggleChip') || null;
+  const musicToggleIcon = document.getElementById('musicToggleIcon') || null;
+
+  const PAUSE_ICON = `<rect x="7" y="6" width="5" height="20" rx="2" fill="currentColor"/>
+            <rect x="20" y="6" width="5" height="20" rx="2" fill="currentColor"/>`;
+  const PLAY_ICON  = `<polygon points="6,4 28,16 6,28" fill="currentColor"/>`;
+
+  function updateMusicToggleIcon() {
+    if (!musicToggleIcon) return;
+    const isPaused = activeSong.paused;
+    musicToggleIcon.innerHTML = isPaused ? PLAY_ICON : PAUSE_ICON;
+    if (musicToggleChip) {
+      musicToggleChip.setAttribute('aria-label', isPaused ? 'Play music' : 'Pause music');
+      musicToggleChip.title = isPaused ? 'Play music' : 'Pause music';
+    }
+  }
+
+  if (musicToggleChip) {
+    musicToggleChip.addEventListener('click', () => {
+      if (activeSong.paused) {
+        activeSong.play().catch(() => {});
+      } else {
+        activeSong.pause();
+      }
+      updateMusicToggleIcon();
+    });
+  }
+
+  happyMelody.addEventListener('play',   updateMusicToggleIcon);
+  happyMelody.addEventListener('pause',  updateMusicToggleIcon);
+  mourningSong.addEventListener('play',  updateMusicToggleIcon);
+  mourningSong.addEventListener('pause', updateMusicToggleIcon);
+
+  const deadBtn = document.getElementById('companionDeadBtn') || null;
+  const deadDialog = document.getElementById('deadCompanionDialog') || null;
+  const deadBackdrop = document.getElementById('deadCompanionBackdrop') || null;
+  const deadClose = document.getElementById('deadCompanionClose') || null;
+  const deadCloseBottom = document.getElementById('deadCompanionCloseBottom') || null;
   autoBlinkMs = blinkMs;
 
+  function openDeadDialog() {
+    if (deadBackdrop) deadBackdrop.hidden = false;
+    if (deadDialog) { deadDialog.hidden = false; deadDialog.removeAttribute('aria-hidden'); }
+  }
+
+  function closeDeadDialog() {
+    if (deadBackdrop) deadBackdrop.hidden = true;
+    if (deadDialog) { deadDialog.hidden = true; deadDialog.setAttribute('aria-hidden', 'true'); }
+  }
+
+  if (deadBtn) deadBtn.addEventListener('click', openDeadDialog);
+  if (deadClose) deadClose.addEventListener('click', closeDeadDialog);
+  if (deadCloseBottom) deadCloseBottom.addEventListener('click', closeDeadDialog);
+  if (deadBackdrop) deadBackdrop.addEventListener('click', closeDeadDialog);
+
+  // Tab switching for dead companion dialog
+  const deadTabBtns = deadDialog ? deadDialog.querySelectorAll('[data-dead-tab]') : [];
+  const deadTabPotions = document.getElementById('deadTabPotions') || null;
+  const deadTabNewCompanion = document.getElementById('deadTabNewCompanion') || null;
+
+  deadTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.getAttribute('data-dead-tab');
+      deadTabBtns.forEach(b => {
+        b.classList.toggle('is-active', b === btn);
+        b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+      });
+      if (deadTabPotions) deadTabPotions.hidden = target !== 'potions';
+      if (deadTabNewCompanion) deadTabNewCompanion.hidden = target !== 'new-companion';
+    });
+  });
+
+  const buyRevivalBtn = document.getElementById('buyRevivalPotionBtn') || null;
+  const revivalMsg = document.getElementById('revivalPotionMsg') || null;
+
+  if (buyRevivalBtn) {
+    buyRevivalBtn.addEventListener('click', async () => {
+      const diamonds = window.Diamonds;
+      if (!diamonds || diamonds.getBalance() < 2) {
+        if (revivalMsg) revivalMsg.textContent = 'Not enough diamonds!';
+        return;
+      }
+      buyRevivalBtn.disabled = true;
+      const spent = await diamonds.spendDiamond(2);
+      if (!spent) {
+        if (revivalMsg) revivalMsg.textContent = 'Not enough diamonds!';
+        buyRevivalBtn.disabled = false;
+        return;
+      }
+      // Play revival sound effect
+      const revivalSfx = new Audio('./assets/soundeffects/RevivalSFX/RevivalSFX.mp3');
+      revivalSfx.play().catch(() => {});
+      // Revive companion to full stats
+      const cs = window.CompanionStatus;
+      if (cs) {
+        cs.set('happiness', 14);
+        cs.set('thirst', 14);
+        cs.set('hunger', 14);
+      }
+      closeDeadDialog();
+      buyRevivalBtn.disabled = false;
+      if (revivalMsg) revivalMsg.textContent = '';
+    });
+  }
+
+  // "Choose a new companion" buttons
+  if (deadDialog) {
+    deadDialog.addEventListener('click', (e) => {
+      const btn = e.target.closest('.choose-companion-btn');
+      if (!btn) return;
+      const open = btn.getAttribute('data-open');
+      const closed = btn.getAttribute('data-closed');
+      setDragonSkin({ open, closed });
+      // Revive companion to full stats
+      const cs = window.CompanionStatus;
+      if (cs) {
+        cs.set('happiness', 14);
+        cs.set('thirst', 14);
+        cs.set('hunger', 14);
+      }
+      closeDeadDialog();
+    });
+  }
+
+  document.addEventListener('companion:died', () => {
+    stopAutoBlink();
+    if (dragonImg) dragonImg.style.visibility = 'hidden';
+    if (tombstoneImg) tombstoneImg.hidden = false;
+    if (deadBtn) deadBtn.hidden = false;
+    const deathSfx = new Audio('./assets/soundeffects/CompanionDeathSFX/CompanionDeath.mp3');
+    deathSfx.play().catch(() => {});
+    switchToSong(mourningSong);
+  });
+
+  document.addEventListener('companion:revived', () => {
+    switchToSong(happyMelody);
+    if (dragonImg) dragonImg.style.visibility = '';
+    if (tombstoneImg) tombstoneImg.hidden = true;
+    if (deadBtn) deadBtn.hidden = true;
+    if (enableAutoBlink) startAutoBlink();
+  });
+
   if (!dragonImg) return;
+
+  // If companion is already dead on page load, apply death state immediately
+  // (the companion:died event fires before this module's listener is registered)
+  const currentStatus = window.CompanionStatus?.get?.();
+  if (currentStatus && currentStatus.health === 0) {
+    stopAutoBlink();
+    dragonImg.style.visibility = 'hidden';
+    if (tombstoneImg) tombstoneImg.hidden = false;
+    if (deadBtn) deadBtn.hidden = false;
+    switchToSong(mourningSong);
+  } else {
+    switchToSong(happyMelody);
+  }
 
   // Load saved skin if it exists
   const savedOpen = localStorage.getItem(LS_OPEN_KEY);
@@ -99,7 +303,7 @@ export function hideDragon() {
  * @param {number} duration
  */
 export function blink(duration = 150) {
-  if (!dragonImg) return;
+  if (!dragonImg || dragonImg.style.visibility === 'hidden') return;
 
   dragonImg.src = `${ASSET_BASE}${CLOSED_EYES}`;
   setTimeout(() => {

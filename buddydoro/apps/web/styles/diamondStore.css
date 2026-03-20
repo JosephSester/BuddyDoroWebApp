@@ -684,6 +684,52 @@
   box-shadow: 0 10px 18px rgba(43, 124, 255, 0.28);
 }
 
+.secure-pay-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Stripe Card Element container */
+.stripe-card-element-wrap {
+  background: #fff;
+  border: 1.5px solid rgba(43, 34, 19, 0.25);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  transition: border-color 0.2s;
+}
+
+.stripe-card-element-wrap.StripeElement--focus {
+  border-color: #2b7cff;
+  box-shadow: 0 0 0 3px rgba(43, 124, 255, 0.18);
+}
+
+.stripe-card-element-wrap.StripeElement--invalid {
+  border-color: #e53e3e;
+}
+
+/* Stripe error message */
+.stripe-card-errors {
+  color: #e53e3e;
+  font-size: 12px;
+  min-height: 16px;
+  margin-bottom: 6px;
+}
+
+/* Expiry + CVC side by side */
+.stripe-expiry-cvc-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.stripe-billing-row {
+  margin-top: -4px;
+  margin-bottom: 4px;
+}
+
 .secure-pay-btn:hover {
   transform: translateY(-1px);
 }

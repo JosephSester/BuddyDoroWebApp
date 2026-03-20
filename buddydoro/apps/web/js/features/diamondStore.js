@@ -1,4 +1,5 @@
 // Diamonds Store modal (Buy Diamonds)
+const STRIPE_CONFIG_URL = 'http://localhost:3000/api/stripe/config';
 
 const DIAMOND_PACKS = [
   { amount: 1, price: 1.99, image: './assets/artwork/diamond-pack-1.png' },
@@ -24,6 +25,20 @@ export function initDiamondStore() {
   let selectedPack = null;
   let selectedMethod = null;
   let currentView = 'packs'; // 'packs', 'methods', 'secure', or 'success'
+  let stripePublishableKey = null;
+
+  async function getStripePublishableKey() {
+    if (stripePublishableKey) return stripePublishableKey;
+
+    const res = await fetch(STRIPE_CONFIG_URL);
+    const data = await res.json();
+    if (!res.ok || !data.publishableKey) {
+      throw new Error(data.error || 'Stripe config missing.');
+    }
+
+    stripePublishableKey = data.publishableKey;
+    return stripePublishableKey;
+  }
 
   // No quantity controls: each pack is bought as a single unit
 
@@ -180,7 +195,7 @@ export function initDiamondStore() {
     return labels[method] || 'Credit / Debit Card';
   }
 
-  function renderSecurePayment() {
+  async function renderSecurePayment() {
     if (!selectedPack || !selectedMethod) return;
 
     const header = dialog.querySelector('.diamond-store-header');
@@ -243,242 +258,49 @@ export function initDiamondStore() {
         <form class="secure-payment-form" id="securePaymentForm" novalidate>
           <h4>Payment Method</h4>
 
-          <label class="secure-field-label" for="secureCardNumber">Card information</label>
-          <div class="secure-card-row">
-            <input id="secureCardNumber" class="secure-input" type="text" inputmode="numeric" autocomplete="cc-number" placeholder="1234 1234 1234 1234" required />
-            <div class="secure-expiry-wrap">
-              <input id="secureCardExpiry" class="secure-input secure-input-small" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY" maxlength="5" minlength="5" pattern="^(0[1-9]|1[0-2])/[0-9]{2}$" required />
-              <button type="button" class="secure-expiry-picker-btn" id="secureExpiryPickerBtn" aria-label="Pick expiry month">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2" />
-                  <path d="M3 9h18" stroke="currentColor" stroke-width="2" />
-                  <path d="M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                </svg>
-              </button>
-              <input type="month" id="secureExpiryPicker" class="secure-expiry-picker" tabindex="-1" aria-hidden="true" />
-            </div>
-            <input class="secure-input secure-input-small" type="text" inputmode="numeric" autocomplete="cc-csc" placeholder="CVC" required />
-          </div>
-
           <label class="secure-field-label" for="secureCardHolder">Cardholder name</label>
           <input id="secureCardHolder" class="secure-input" type="text" autocomplete="cc-name" placeholder="Full name on card" required />
 
-          <label class="secure-field-label" for="secureCountry">Billing information</label>
-          <select id="secureCountry" class="secure-input" required>
-            <option value="">Select country</option>
-            <option value="AF">Afghanistan</option>
-            <option value="AL">Albania</option>
-            <option value="DZ">Algeria</option>
-            <option value="AD">Andorra</option>
-            <option value="AO">Angola</option>
-            <option value="AG">Antigua and Barbuda</option>
-            <option value="AR">Argentina</option>
-            <option value="AM">Armenia</option>
-            <option value="AU">Australia</option>
-            <option value="AT">Austria</option>
-            <option value="AZ">Azerbaijan</option>
-            <option value="BS">Bahamas</option>
-            <option value="BH">Bahrain</option>
-            <option value="BD">Bangladesh</option>
-            <option value="BB">Barbados</option>
-            <option value="BY">Belarus</option>
-            <option value="BE">Belgium</option>
-            <option value="BZ">Belize</option>
-            <option value="BJ">Benin</option>
-            <option value="BT">Bhutan</option>
-            <option value="BO">Bolivia</option>
-            <option value="BA">Bosnia and Herzegovina</option>
-            <option value="BW">Botswana</option>
-            <option value="BR">Brazil</option>
-            <option value="BN">Brunei</option>
-            <option value="BG">Bulgaria</option>
-            <option value="BF">Burkina Faso</option>
-            <option value="BI">Burundi</option>
-            <option value="CV">Cabo Verde</option>
-            <option value="KH">Cambodia</option>
-            <option value="CM">Cameroon</option>
-            <option value="CA">Canada</option>
-            <option value="CF">Central African Republic</option>
-            <option value="TD">Chad</option>
-            <option value="CL">Chile</option>
-            <option value="CN">China</option>
-            <option value="CO">Colombia</option>
-            <option value="KM">Comoros</option>
-            <option value="CG">Congo</option>
-            <option value="CD">Congo, Democratic Republic of the</option>
-            <option value="CR">Costa Rica</option>
-            <option value="CI">Cote d'Ivoire</option>
-            <option value="HR">Croatia</option>
-            <option value="CU">Cuba</option>
-            <option value="CY">Cyprus</option>
-            <option value="CZ">Czechia</option>
-            <option value="DK">Denmark</option>
-            <option value="DJ">Djibouti</option>
-            <option value="DM">Dominica</option>
-            <option value="DO">Dominican Republic</option>
-            <option value="EC">Ecuador</option>
-            <option value="EG">Egypt</option>
-            <option value="SV">El Salvador</option>
-            <option value="GQ">Equatorial Guinea</option>
-            <option value="ER">Eritrea</option>
-            <option value="EE">Estonia</option>
-            <option value="SZ">Eswatini</option>
-            <option value="ET">Ethiopia</option>
-            <option value="FJ">Fiji</option>
-            <option value="FI">Finland</option>
-            <option value="FR">France</option>
-            <option value="GA">Gabon</option>
-            <option value="GM">Gambia</option>
-            <option value="GE">Georgia</option>
-            <option value="DE">Germany</option>
-            <option value="GH">Ghana</option>
-            <option value="GR">Greece</option>
-            <option value="GD">Grenada</option>
-            <option value="GT">Guatemala</option>
-            <option value="GN">Guinea</option>
-            <option value="GW">Guinea-Bissau</option>
-            <option value="GY">Guyana</option>
-            <option value="HT">Haiti</option>
-            <option value="HN">Honduras</option>
-            <option value="HK">Hong Kong</option>
-            <option value="HU">Hungary</option>
-            <option value="IS">Iceland</option>
-            <option value="IN">India</option>
-            <option value="ID">Indonesia</option>
-            <option value="IR">Iran</option>
-            <option value="IQ">Iraq</option>
-            <option value="IE">Ireland</option>
-            <option value="IL">Israel</option>
-            <option value="IT">Italy</option>
-            <option value="JM">Jamaica</option>
-            <option value="JP">Japan</option>
-            <option value="JO">Jordan</option>
-            <option value="KZ">Kazakhstan</option>
-            <option value="KE">Kenya</option>
-            <option value="KI">Kiribati</option>
-            <option value="KP">Korea, North</option>
-            <option value="KR">Korea, South</option>
-            <option value="KW">Kuwait</option>
-            <option value="KG">Kyrgyzstan</option>
-            <option value="LA">Laos</option>
-            <option value="LV">Latvia</option>
-            <option value="LB">Lebanon</option>
-            <option value="LS">Lesotho</option>
-            <option value="LR">Liberia</option>
-            <option value="LY">Libya</option>
-            <option value="LI">Liechtenstein</option>
-            <option value="LT">Lithuania</option>
-            <option value="LU">Luxembourg</option>
-            <option value="MO">Macao</option>
-            <option value="MG">Madagascar</option>
-            <option value="MW">Malawi</option>
-            <option value="MY">Malaysia</option>
-            <option value="MV">Maldives</option>
-            <option value="ML">Mali</option>
-            <option value="MT">Malta</option>
-            <option value="MH">Marshall Islands</option>
-            <option value="MR">Mauritania</option>
-            <option value="MU">Mauritius</option>
-            <option value="MX">Mexico</option>
-            <option value="FM">Micronesia</option>
-            <option value="MD">Moldova</option>
-            <option value="MC">Monaco</option>
-            <option value="MN">Mongolia</option>
-            <option value="ME">Montenegro</option>
-            <option value="MA">Morocco</option>
-            <option value="MZ">Mozambique</option>
-            <option value="MM">Myanmar</option>
-            <option value="NA">Namibia</option>
-            <option value="NR">Nauru</option>
-            <option value="NP">Nepal</option>
-            <option value="NL">Netherlands</option>
-            <option value="NZ">New Zealand</option>
-            <option value="NI">Nicaragua</option>
-            <option value="NE">Niger</option>
-            <option value="NG">Nigeria</option>
-            <option value="MK">North Macedonia</option>
-            <option value="NO">Norway</option>
-            <option value="OM">Oman</option>
-            <option value="PK">Pakistan</option>
-            <option value="PW">Palau</option>
-            <option value="PS">Palestine</option>
-            <option value="PA">Panama</option>
-            <option value="PG">Papua New Guinea</option>
-            <option value="PY">Paraguay</option>
-            <option value="PE">Peru</option>
-            <option value="PH">Philippines</option>
-            <option value="PL">Poland</option>
-            <option value="PT">Portugal</option>
-            <option value="QA">Qatar</option>
-            <option value="RO">Romania</option>
-            <option value="RU">Russia</option>
-            <option value="RW">Rwanda</option>
-            <option value="KN">Saint Kitts and Nevis</option>
-            <option value="LC">Saint Lucia</option>
-            <option value="VC">Saint Vincent and the Grenadines</option>
-            <option value="WS">Samoa</option>
-            <option value="SM">San Marino</option>
-            <option value="ST">Sao Tome and Principe</option>
-            <option value="SA">Saudi Arabia</option>
-            <option value="SN">Senegal</option>
-            <option value="RS">Serbia</option>
-            <option value="SC">Seychelles</option>
-            <option value="SL">Sierra Leone</option>
-            <option value="SG">Singapore</option>
-            <option value="SK">Slovakia</option>
-            <option value="SI">Slovenia</option>
-            <option value="SB">Solomon Islands</option>
-            <option value="SO">Somalia</option>
-            <option value="ZA">South Africa</option>
-            <option value="ES">Spain</option>
-            <option value="LK">Sri Lanka</option>
-            <option value="SD">Sudan</option>
-            <option value="SR">Suriname</option>
-            <option value="SE">Sweden</option>
-            <option value="CH">Switzerland</option>
-            <option value="SY">Syria</option>
-            <option value="TW">Taiwan</option>
-            <option value="TJ">Tajikistan</option>
-            <option value="TZ">Tanzania</option>
-            <option value="TH">Thailand</option>
-            <option value="TL">Timor-Leste</option>
-            <option value="TG">Togo</option>
-            <option value="TO">Tonga</option>
-            <option value="TT">Trinidad and Tobago</option>
-            <option value="TN">Tunisia</option>
-            <option value="TR">Turkey</option>
-            <option value="TM">Turkmenistan</option>
-            <option value="TV">Tuvalu</option>
-            <option value="UG">Uganda</option>
-            <option value="UA">Ukraine</option>
-            <option value="AE">United Arab Emirates</option>
-            <option value="GB">United Kingdom</option>
-            <option value="US">United States</option>
-            <option value="UY">Uruguay</option>
-            <option value="UZ">Uzbekistan</option>
-            <option value="VU">Vanuatu</option>
-            <option value="VA">Vatican City</option>
-            <option value="VE">Venezuela</option>
-            <option value="VN">Vietnam</option>
-            <option value="YE">Yemen</option>
-            <option value="ZM">Zambia</option>
-            <option value="ZW">Zimbabwe</option>
-            <option value="other">Other</option>
-          </select>
+          <label class="secure-field-label">Card number</label>
+          <div id="stripe-card-number" class="stripe-card-element-wrap"></div>
 
-          <input class="secure-input" type="text" autocomplete="address-line1" placeholder="Address" required />
-
-          <div class="secure-address-row">
-            <input class="secure-input" type="text" autocomplete="address-level2" placeholder="City" required />
-            <input class="secure-input" type="text" autocomplete="postal-code" placeholder="ZIP Code" required />
+          <div class="stripe-expiry-cvc-row">
+            <div>
+              <label class="secure-field-label">Expiry date</label>
+              <div id="stripe-card-expiry" class="stripe-card-element-wrap"></div>
+            </div>
+            <div>
+              <label class="secure-field-label">CVC</label>
+              <div id="stripe-card-cvc" class="stripe-card-element-wrap"></div>
+            </div>
           </div>
+
+          <div id="stripe-card-errors" class="stripe-card-errors" role="alert"></div>
+
+            <div class="secure-address-row stripe-billing-row">
+              <div>
+                <label class="secure-field-label" for="secureBillingCountry">Country</label>
+                <select id="secureBillingCountry" class="secure-input" autocomplete="country" required>
+                  <option value="">Select country</option>
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="AU">Australia</option>
+                  <option value="MX">Mexico</option>
+                </select>
+              </div>
+              <div>
+                <label class="secure-field-label" for="secureBillingPostalCode">ZIP code</label>
+                <input id="secureBillingPostalCode" class="secure-input" type="text" inputmode="text" autocomplete="postal-code" placeholder="10001" required />
+              </div>
+            </div>
 
           <label class="secure-terms">
             <input type="checkbox" id="secureTerms" required />
             <span>I agree to the Terms of Service and Privacy Policy.</span>
           </label>
 
-          <button type="submit" class="secure-pay-btn">Pay</button>
+          <button type="submit" class="secure-pay-btn" id="securePayBtn">Pay $${selectedPack.totalPrice}</button>
         </form>
       `;
 
@@ -515,70 +337,130 @@ export function initDiamondStore() {
     } else {
       const secureForm = list.querySelector('#securePaymentForm');
       if (secureForm) {
-        const expiryInput = list.querySelector('#secureCardExpiry');
-        const expiryPickerBtn = list.querySelector('#secureExpiryPickerBtn');
-        const expiryPicker = list.querySelector('#secureExpiryPicker');
+        let publishableKey;
+        try {
+          publishableKey = await getStripePublishableKey();
+        } catch (err) {
+          const errorEl = list.querySelector('#stripe-card-errors');
+          if (errorEl) errorEl.textContent = err.message || 'Stripe is not configured.';
+          return;
+        }
 
-        const formatExpiry = (value) => {
-          const digits = value.replace(/\D/g, '').slice(0, 4);
-          if (digits.length <= 2) return digits;
-          return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+        // Mount Stripe split elements
+        const stripeInstance = window.Stripe(publishableKey);
+        const elements = stripeInstance.elements();
+        const stripeStyle = {
+          base: {
+            fontSize: '16px',
+            color: '#2b2213',
+            fontFamily: 'inherit',
+            '::placeholder': { color: '#aaa' },
+          },
+          invalid: { color: '#e53e3e' },
         };
+        const cardNumber = elements.create('cardNumber', { style: stripeStyle, placeholder: '1234 1234 1234 1234' });
+        const cardExpiry = elements.create('cardExpiry', { style: stripeStyle });
+        const cardCvc   = elements.create('cardCvc',    { style: stripeStyle });
+        cardNumber.mount('#stripe-card-number');
+        cardExpiry.mount('#stripe-card-expiry');
+        cardCvc.mount('#stripe-card-cvc');
 
-        if (expiryInput) {
-          expiryInput.addEventListener('input', () => {
-            expiryInput.value = formatExpiry(expiryInput.value);
-            expiryInput.setCustomValidity('');
+        [cardNumber, cardExpiry, cardCvc].forEach(el => {
+          el.on('change', (event) => {
+            const errorEl = list.querySelector('#stripe-card-errors');
+            if (errorEl) errorEl.textContent = event.error ? event.error.message : '';
           });
+        });
 
-          expiryInput.addEventListener('blur', () => {
-            const [mm] = expiryInput.value.split('/');
-            const month = Number(mm);
-
-            if (!expiryInput.value) {
-              expiryInput.setCustomValidity('');
-              return;
-            }
-
-            if (expiryInput.value.length !== 5) {
-              expiryInput.setCustomValidity('Use MM/YY format.');
-              return;
-            }
-
-            if (!month || month < 1 || month > 12) {
-              expiryInput.setCustomValidity('Enter a valid month (01-12).');
-              return;
-            }
-
-            expiryInput.setCustomValidity('');
-          });
-        }
-
-        if (expiryPickerBtn && expiryPicker && expiryInput) {
-          expiryPickerBtn.onclick = () => {
-            if (typeof expiryPicker.showPicker === 'function') {
-              expiryPicker.showPicker();
-            } else {
-              expiryPicker.click();
-            }
-          };
-
-          expiryPicker.addEventListener('change', () => {
-            if (!expiryPicker.value) return;
-            const [year, month] = expiryPicker.value.split('-');
-            if (!year || !month) return;
-            expiryInput.value = `${month}/${year.slice(-2)}`;
-            expiryInput.setCustomValidity('');
-          });
-        }
-
-        secureForm.onsubmit = (e) => {
+        secureForm.onsubmit = async (e) => {
           e.preventDefault();
-          if (!secureForm.checkValidity()) {
+          const cardHolder = list.querySelector('#secureCardHolder');
+          const billingCountry = list.querySelector('#secureBillingCountry');
+          const billingPostalCode = list.querySelector('#secureBillingPostalCode');
+          const termsCheck = list.querySelector('#secureTerms');
+          const payBtn = list.querySelector('#securePayBtn');
+          const errorEl = list.querySelector('#stripe-card-errors');
+
+          if (!cardHolder?.value.trim()) {
+            cardHolder?.setCustomValidity('Please enter cardholder name.');
             secureForm.reportValidity();
             return;
           }
-          processPayment(selectedMethod);
+          cardHolder.setCustomValidity('');
+
+          if (!billingCountry?.value) {
+            billingCountry?.setCustomValidity('Please select a billing country.');
+            secureForm.reportValidity();
+            return;
+          }
+          billingCountry.setCustomValidity('');
+
+          if (!billingPostalCode?.value.trim()) {
+            billingPostalCode?.setCustomValidity('Please enter a ZIP or postal code.');
+            secureForm.reportValidity();
+            return;
+          }
+          billingPostalCode.setCustomValidity('');
+
+          if (!termsCheck?.checked) {
+            termsCheck?.setCustomValidity('You must agree to the terms.');
+            secureForm.reportValidity();
+            return;
+          }
+          termsCheck.setCustomValidity('');
+
+          if (payBtn) payBtn.disabled = true;
+          if (errorEl) errorEl.textContent = '';
+
+          try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+              throw new Error('Your session expired. Please log in again, then retry payment.');
+            }
+            const amountCents = Math.round(parseFloat(selectedPack.totalPrice) * 100);
+            const res = await fetch('http://localhost:3000/api/stripe/create-payment-intent', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify({ amount: amountCents }),
+            });
+            const text = await res.text();
+            let data;
+            try { data = JSON.parse(text); } catch { throw new Error(`Server error (${res.status})`); }
+            if (res.status === 401 || res.status === 403) {
+              throw new Error('Your session expired. Please log in again, then retry payment.');
+            }
+            if (!res.ok || data.error) throw new Error(data.error || data.message || `Server error (${res.status})`);
+
+            const { paymentIntent, error } = await stripeInstance.confirmCardPayment(data.clientSecret, {
+              payment_method: {
+                card: cardNumber,
+                billing_details: {
+                  name: cardHolder.value.trim(),
+                  address: {
+                    country: billingCountry.value,
+                    postal_code: billingPostalCode.value.trim(),
+                  },
+                },
+              },
+            });
+
+            if (error) {
+              if (errorEl) errorEl.textContent = error.message;
+              if (payBtn) payBtn.disabled = false;
+              return;
+            }
+
+            if (paymentIntent.status === 'succeeded') {
+              await processPayment(selectedMethod);
+            }
+          } catch (err) {
+            console.error('Payment error:', err);
+            if (errorEl) errorEl.textContent = err.message || 'Payment failed. Please try again.';
+            if (payBtn) payBtn.disabled = false;
+          }
         };
       }
     }

@@ -11,10 +11,21 @@ const inventoryRoutes = require('./routes/inventory');
 const ItemsRoutes = require('./routes/items');
 const aiRoutes = require('./routes/ai');
 const userRoutes = require('./routes/user');
+const historyRoutes = require('./routes/history');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// Request logger
+app.use((req, res, next) => {
+  const send = res.json.bind(res);
+  res.json = (body) => {
+    console.log(`${req.method} ${req.path} → ${res.statusCode} | Auth: ${req.headers.authorization ? 'present' : 'MISSING'}`);
+    return send(body);
+  };
+  next();
+});
 
 const PORT = 3000;
 
@@ -29,6 +40,7 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/items', ItemsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/history', historyRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/buddydoro')

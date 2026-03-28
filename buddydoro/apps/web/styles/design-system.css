@@ -9,66 +9,58 @@
 /* ── 1. TOKENS: Color ─────────────────────────────────────────────────────── */
 :root {
 
-  /* Sunlight — primary actions, high-impact CTAs */
-  --color-primary:               #844f00;
-  --color-primary-container:     #fd9d06;
-  --color-primary-fixed:         #fd9d06;
-  --color-primary-fixed-dim:     #eb9100;
-  --color-primary-dim:           #734500;
+  /* Terracotta — primary actions, high-impact CTAs */
+  --color-primary:               #c0622a;
+  --color-primary-dim:           #a8501f;
+  --color-primary-dark:          #8a3f18;
   --color-on-primary:            #fff0e4;
-  --color-on-primary-container:  #4b2b00;
-  --color-on-primary-fixed:      #2b1600;
 
-  /* Canopy — secondary / supporting elements */
-  --color-secondary:             #386631;
-  --color-secondary-container:   #b9eeab;
-  --color-secondary-fixed:       #b9eeab;
-  --color-secondary-fixed-dim:   #abdf9e;
-  --color-secondary-dim:         #2d5927;
-  --color-on-secondary:          #d2ffc4;
-  --color-on-secondary-container:#2d5a27;
+  /* Ochre — accent, highlights, secondary actions */
+  --color-accent:                #c98a2e;
+  --color-accent-dim:            #a8711f;
+  --color-on-accent:             #fff0e4;
 
-  /* Tertiary — accent warmth (golden yellow) */
-  --color-tertiary:              #6d5a00;
-  --color-tertiary-container:    #fcd846;
-  --color-tertiary-fixed:        #fcd846;
-  --color-tertiary-dim:          #5f4e00;
-  --color-on-tertiary:           #fff2cf;
-  --color-on-tertiary-container: #5c4b00;
+  /* Sage — success states, nature tags, active indicators only */
+  --color-sage:                  #6e8c70;
+  --color-sage-dim:              #4e6650;
+  --color-sage-glass:            rgba(110, 140, 112, 0.15);
+  --color-sage-border:           rgba(110, 140, 112, 0.35);
+  --color-on-sage:               #2b2213;
 
-  /* Surface tiers — glass sheets stacked from low to high */
-  --color-background:                 #e4fede;
-  --color-surface:                    #e4fede;
-  --color-surface-bright:             #e4fede;
-  --color-surface-dim:                #b9deb5;
-  --color-surface-container-lowest:   #ffffff;
-  --color-surface-container-low:      #ddf8d7;
-  --color-surface-container:          #d2f0cd;
-  --color-surface-container-high:     #cbebc6;
-  --color-surface-container-highest:  #c4e6be;
-  --color-surface-variant:            #c4e6be;
-  --color-surface-tint:               #844f00;
+  /* Surface tiers — warm parchment stack */
+  --color-background:            #faf4e8;
+  --color-surface:               #faf4e8;
+  --color-surface-parchment:     #f5efe3;
+  --color-surface-container:     rgba(250, 244, 232, 0.72);
+  --color-surface-container-low: rgba(250, 244, 232, 0.55);
+  --color-surface-elevated:      rgba(250, 244, 232, 0.88);
 
   /* On-surface ink */
-  --color-on-surface:         #1f331f;
-  --color-on-surface-variant: #4b6149;
-  --color-on-background:      #1f331f;
+  --color-on-surface:            #2b2213;
+  --color-on-surface-mid:        #5c4033;
+  --color-on-surface-muted:      #8c6b55;
+  --color-on-background:         #2b2213;
 
-  /* Outline */
-  --color-outline:         #667d63;
-  --color-outline-variant: #9cb497;
+  /* Outline / border */
+  --color-outline:               rgba(232, 180, 120, 0.40);
+  --color-outline-strong:        rgba(192, 98, 42, 0.35);
+  --color-outline-sage:          rgba(110, 140, 112, 0.35);
 
-  /* Inverse */
-  --color-inverse-surface:    #011203;
-  --color-inverse-on-surface: #8ca388;
-  --color-inverse-primary:    #fd9d06;
+  /* Glassmorphism */
+  --glass-bg:                    rgba(250, 244, 232, 0.72);
+  --glass-blur:                  blur(14px) saturate(160%);
+  --glass-bg-low:                rgba(250, 244, 232, 0.55);
+  --glass-bg-high:               rgba(250, 244, 232, 0.88);
+  --glass-sage:                  rgba(110, 140, 112, 0.15);
 
   /* Error */
-  --color-error:           #b02500;
-  --color-error-container: #f95630;
-  --color-error-dim:       #b92902;
-  --color-on-error:        #ffefec;
-  --color-on-error-container: #520c00;
+  --color-error:                 #b02500;
+  --color-error-container:       rgba(176, 37, 0, 0.10);
+  --color-on-error:              #ffefec;
+
+  /* Inverse */
+  --color-inverse-surface:       #2b2213;
+  --color-inverse-on-surface:    #faf4e8;
 }
 
 
@@ -134,35 +126,29 @@
 
 /* ── 5. TOKENS: Elevation & Shadow ───────────────────────────────────────── */
 :root {
-  /* Shadows are ALWAYS tinted with on-surface color, never grey */
-  --shadow-ambient: 0 24px 48px -12px rgba(31, 51, 31, 0.08);
-  --shadow-float:   0 12px 32px -8px  rgba(31, 51, 31, 0.12);
-  --shadow-panel:   0 6px  20px -4px  rgba(31, 51, 31, 0.10);
-  --shadow-sun:     0 8px  24px -4px  rgba(253, 157, 6, 0.35); /* primary CTA glow */
-  --shadow-canopy:  0 6px  20px -4px  rgba(56, 102, 49, 0.25); /* secondary CTA glow */
+  /* Shadows tinted with brown-dark, never grey */
+  --shadow-ambient: 0 24px 48px -12px rgba(43, 34, 19, 0.10);
+  --shadow-float:   0 12px 32px -8px  rgba(43, 34, 19, 0.12);
+  --shadow-panel:   0 6px  20px -4px  rgba(43, 34, 19, 0.10);
+  --shadow-primary: 0 8px  24px -4px  rgba(192, 98, 42, 0.35);
+  --shadow-accent:  0 6px  20px -4px  rgba(201, 138, 46, 0.28);
 
-  /* Ghost border — felt but not seen */
-  --ghost-border: 1px solid rgba(156, 180, 151, 0.15); /* outline-variant @ 15% */
+  /* Ghost border */
+  --ghost-border: 1px solid rgba(232, 180, 120, 0.40);
 }
 
 
 /* ── 6. TOKENS: Glassmorphism ─────────────────────────────────────────────── */
 :root {
-  /* Primary page glass — main panels, auth cards */
-  --glass-bg:           rgba(228, 254, 222, 0.68);
-  --glass-blur:         blur(28px);
+  /* card-blur kept for legacy references */
+  --glass-card-bg:      rgba(250, 244, 232, 0.55);
+  --glass-card-blur:    blur(14px) saturate(160%);
 
-  /* Secondary glass — cards floating above glass-bg */
-  --glass-card-bg:      rgba(228, 254, 222, 0.55);
-  --glass-card-blur:    blur(20px);
+  --glass-elevated-bg:  rgba(250, 244, 232, 0.88);
+  --glass-elevated-blur:blur(14px) saturate(160%);
 
-  /* Elevated glass — tooltips, companion bubbles, dialogs */
-  --glass-elevated-bg:  rgba(228, 254, 222, 0.82);
-  --glass-elevated-blur:blur(32px);
-
-  /* Subtle glass — list items, inner panels */
-  --glass-subtle-bg:    rgba(255, 255, 255, 0.40);
-  --glass-subtle-blur:  blur(12px);
+  --glass-subtle-bg:    rgba(250, 244, 232, 0.40);
+  --glass-subtle-blur:  blur(10px);
 }
 
 
@@ -187,14 +173,6 @@ body {
   min-height: 100vh;
 }
 
-/* App-wide background (forest scene) */
-body.rg-scene {
-  background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDOfqY_U-9qhG1xjKVtD5R7MnQNuN-XPv6YiVYHbJyRUEjDwet2LFKIoG16Z7DkZTYnWkMk6FwvjenyHZK38AJ8cWpBMuR0Fj-HeJZbwgOqUYhxSmz_E8eF9bV6NyUxl96yMFdAmQGD3DBfIXrAnIgFG4ooZicDamNt1qDlszY7hsMMyhx8B2TZMUeqro2Yp83zPuf8faBv9QoDXP6Hqefses34lgYaVwfnW1_mDSKvYdNeHBEJ2EQifwmAJvBKiBNkcEteFL-2YSEi);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-}
-
 input, button, textarea, select {
   font-family: var(--font-family);
 }
@@ -209,7 +187,7 @@ a:hover { text-decoration: underline; }
 /* Remove default focus outline — we use glow states instead */
 :focus { outline: none; }
 :focus-visible {
-  box-shadow: 0 0 0 3px rgba(253, 157, 6, 0.4);
+  box-shadow: 0 0 0 3px rgba(192, 98, 42, 0.4);
   border-radius: var(--radius-full);
 }
 
@@ -260,15 +238,15 @@ a:hover { text-decoration: underline; }
   z-index: -1;
 }
 .rg-orb-sun {
-  background: rgba(253, 157, 6, 0.12);
+  background: rgba(192, 98, 42, 0.12);
   filter: blur(80px);
 }
 .rg-orb-canopy {
-  background: rgba(56, 102, 49, 0.12);
+  background: rgba(110, 140, 112, 0.10);
   filter: blur(90px);
 }
 .rg-orb-surface {
-  background: rgba(228, 254, 222, 0.3);
+  background: rgba(250, 244, 232, 0.40);
   filter: blur(120px);
 }
 
@@ -305,10 +283,10 @@ a:hover { text-decoration: underline; }
 
 /* Secondary — elevated surface, no border */
 .rg-btn-secondary {
-  background: var(--color-surface-container-highest);
+  background: var(--color-surface-parchment);
   color: var(--color-on-surface);
 }
-.rg-btn-secondary:hover { background: var(--color-surface-container-high); }
+.rg-btn-secondary:hover { background: var(--color-surface-container); }
 
 /* Ghost — translucent, muted */
 .rg-btn-ghost {
@@ -325,7 +303,7 @@ a:hover { text-decoration: underline; }
   padding-right: var(--space-3);
   font-weight: 800;
 }
-.rg-btn-tertiary:hover { background: rgba(253, 157, 6, 0.08); }
+.rg-btn-tertiary:hover { background: rgba(192, 98, 42, 0.08); }
 
 /* Outline — ghost with primary text */
 .rg-btn-outline {
@@ -380,17 +358,17 @@ a:hover { text-decoration: underline; }
 }
 
 .rg-input:focus {
-  box-shadow: 0 0 0 4px rgba(253, 157, 6, 0.22);
+  box-shadow: 0 0 0 4px rgba(192, 98, 42, 0.22);
 }
 
 .rg-input:disabled {
   background: rgba(255, 255, 255, 0.45);
-  color: rgba(31, 51, 31, 0.5);
+  color: rgba(43, 34, 19, 0.5);
   cursor: not-allowed;
 }
 
 .rg-input::placeholder {
-  color: rgba(75, 97, 73, 0.45);
+  color: rgba(92, 64, 51, 0.45);
 }
 
 /* Input with leading icon */
@@ -403,7 +381,7 @@ a:hover { text-decoration: underline; }
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(75, 97, 73, 0.55);
+  color: rgba(92, 64, 51, 0.55);
   font-size: 18px;
   pointer-events: none;
 }
@@ -419,7 +397,7 @@ a:hover { text-decoration: underline; }
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  color: rgba(75, 97, 73, 0.6);
+  color: rgba(92, 64, 51, 0.6);
   background: none;
   border: none;
   padding: 0;
@@ -431,7 +409,7 @@ a:hover { text-decoration: underline; }
 
 .rg-hint {
   font-size: var(--text-label-sm);
-  color: rgba(75, 97, 73, 0.7);
+  color: rgba(92, 64, 51, 0.7);
   margin-left: 16px;
 }
 
@@ -449,10 +427,10 @@ a:hover { text-decoration: underline; }
   font-size: 20px;
 }
 
-.rg-icon-chip-sun    { background: rgba(253, 157, 6, 0.18);  color: var(--color-primary); }
-.rg-icon-chip-canopy { background: rgba(56, 102, 49, 0.15);  color: var(--color-secondary); }
-.rg-icon-chip-warm   { background: rgba(253, 200, 0, 0.18);  color: var(--color-tertiary); }
-.rg-icon-chip-error  { background: rgba(176, 37, 0, 0.10);   color: var(--color-error); }
+.rg-icon-chip-sun    { background: rgba(192, 98, 42, 0.15);   color: var(--color-primary); }
+.rg-icon-chip-sage   { background: var(--color-sage-glass);  color: var(--color-sage-dim); }
+.rg-icon-chip-ochre  { background: rgba(201, 138, 46, 0.15); color: var(--color-accent); }
+.rg-icon-chip-error  { background: var(--color-error-container); color: var(--color-error); }
 
 /* Large variant */
 .rg-icon-chip-lg {
@@ -520,14 +498,14 @@ a:hover { text-decoration: underline; }
   width: 100%;
   height: 8px;
   border-radius: var(--radius-full);
-  background: rgba(56, 102, 49, 0.15);
+  background: rgba(110, 140, 112, 0.15);
   overflow: hidden;
 }
 
 .rg-vitals-bar-fill {
   height: 100%;
   border-radius: var(--radius-full);
-  background: linear-gradient(to right, var(--color-secondary), var(--color-secondary-fixed));
+  background: linear-gradient(to right, var(--color-sage), var(--color-sage));
   transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -554,10 +532,10 @@ a:hover { text-decoration: underline; }
   font-weight: var(--text-label-weight);
 }
 
-.rg-tag-sun    { background: rgba(253, 157, 6, 0.18);  color: var(--color-primary); }
-.rg-tag-canopy { background: rgba(56, 102, 49, 0.15);  color: var(--color-secondary); }
-.rg-tag-warm   { background: rgba(252, 216, 70, 0.25); color: var(--color-tertiary); }
-.rg-tag-surface{ background: rgba(255, 255, 255, 0.5); color: var(--color-on-surface-variant); }
+.rg-tag-primary { background: rgba(192, 98, 42, 0.12);  color: var(--color-primary); }
+.rg-tag-sage    { background: var(--color-sage-glass);  color: var(--color-sage-dim); }
+.rg-tag-ochre   { background: rgba(201, 138, 46, 0.12); color: var(--color-accent); }
+.rg-tag-surface { background: rgba(245, 239, 227, 0.70); color: var(--color-on-surface-mid); }
 
 
 /* ── 15. COMPONENT: Dividers ──────────────────────────────────────────────── */
@@ -567,7 +545,7 @@ a:hover { text-decoration: underline; }
 
 .rg-section-break {
   height: 1px;
-  background: rgba(75, 97, 73, 0.10);
+  background: rgba(92, 64, 51, 0.10);
   margin: var(--space-5) 0;
   border: none;
 }
@@ -621,8 +599,8 @@ a:hover { text-decoration: underline; }
 }
 
 .rg-toast-success {
-  background: rgba(56, 102, 49, 0.15);
-  color: var(--color-secondary);
+  background: var(--color-sage-glass);
+  color: var(--color-sage-dim);
 }
 
 .rg-toast-error {
@@ -631,7 +609,7 @@ a:hover { text-decoration: underline; }
 }
 
 .rg-toast-info {
-  background: rgba(253, 157, 6, 0.12);
+  background: rgba(192, 98, 42, 0.12);
   color: var(--color-primary);
 }
 
@@ -727,7 +705,7 @@ a:hover { text-decoration: underline; }
   gap: var(--space-8);
   padding-bottom: 0;
   margin-bottom: var(--space-8);
-  border-bottom: 1px solid rgba(75, 97, 73, 0.12);
+  border-bottom: 1px solid rgba(92, 64, 51, 0.12);
 }
 
 .rg-auth-tab {
@@ -760,7 +738,7 @@ a:hover { text-decoration: underline; }
 /* ── 20. COMPONENT: FAQ Accordion ─────────────────────────────────────────── */
 
 .rg-faq details + details {
-  border-top: 1px solid rgba(75, 97, 73, 0.08);
+  border-top: 1px solid rgba(92, 64, 51, 0.08);
 }
 
 .rg-faq summary {
@@ -813,9 +791,9 @@ a:hover { text-decoration: underline; }
 
 .rg-msg:empty { display: none; }
 
-.rg-msg-success { color: var(--color-secondary);  background: rgba(56,102,49,0.12); }
+.rg-msg-success { color: var(--color-sage-dim); background: var(--color-sage-glass); }
 .rg-msg-error   { color: var(--color-error);       background: rgba(176,37,0,0.10); }
-.rg-msg-info    { color: var(--color-primary);     background: rgba(253,157,6,0.12); }
+.rg-msg-info    { color: var(--color-primary);     background: rgba(192,98,42,0.10); }
 
 
 /* ── 22. UTILITY CLASSES ──────────────────────────────────────────────────── */
@@ -835,7 +813,7 @@ a:hover { text-decoration: underline; }
 
 /* Color shortcuts */
 .rg-text-primary  { color: var(--color-primary); }
-.rg-text-secondary{ color: var(--color-secondary); }
+.rg-text-secondary{ color: var(--color-sage); }
 .rg-text-on       { color: var(--color-on-surface); }
 .rg-text-muted    { color: var(--color-on-surface-variant); }
 .rg-text-error    { color: var(--color-error); }

@@ -19,6 +19,7 @@ export const state = {
         onTaskEstimate: null,
         onSubtaskEstimate: null,
         onTaskVisualsRefresh: () => { },
+        onAfterRender: null,
     },
 };
 

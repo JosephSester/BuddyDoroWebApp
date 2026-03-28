@@ -90,11 +90,11 @@ export function initAppTour() {
     const tourStyle = document.createElement('style');
     tourStyle.id = 'tour-styles';
     tourStyle.textContent = `
-        /* Radiant Grove Tour — forest dark shade */
+        /* BuddyDoro Tour — warm earthy shade */
         .tour-shade {
             position: fixed;
             z-index: 9000;
-            background: rgba(10, 20, 10, 0.80);
+            background: rgba(26, 18, 10, 0.80);
             pointer-events: auto;
             transition: left 0.38s cubic-bezier(0.4,0,0.2,1),
                         top  0.38s cubic-bezier(0.4,0,0.2,1),
@@ -102,12 +102,12 @@ export function initAppTour() {
                         height 0.38s cubic-bezier(0.4,0,0.2,1);
         }
 
-        /* Spotlight ring — amber sunlight */
+        /* Spotlight ring — terracotta */
         #tour-spotlight-ring {
             position: fixed;
             border-radius: 1.5rem;
-            border: 2px solid rgba(253, 157, 6, 0.75);
-            box-shadow: 0 0 0 4px rgba(253,157,6,0.10), 0 0 28px rgba(253,157,6,0.35);
+            border: 2px solid rgba(192, 98, 42, 0.75);
+            box-shadow: 0 0 0 4px rgba(192,98,42,0.10), 0 0 28px rgba(192,98,42,0.35);
             pointer-events: none;
             z-index: 9001;
             transition: left 0.38s cubic-bezier(0.4,0,0.2,1),
@@ -116,36 +116,36 @@ export function initAppTour() {
                         height 0.38s cubic-bezier(0.4,0,0.2,1);
         }
 
-        /* Tour card — Radiant Grove glass */
+        /* Tour card — cream glass */
         #tour-card {
             position: fixed;
             z-index: 9010;
             width: 272px;
             opacity: 0;
-            background: rgba(228, 254, 222, 0.82);
+            background: rgba(250, 244, 232, 0.90);
             backdrop-filter: blur(28px);
             -webkit-backdrop-filter: blur(28px);
-            border: 1px solid rgba(255, 255, 255, 0.35);
+            border: 1px solid rgba(232, 180, 120, 0.30);
             border-radius: 1.5rem;
             padding: 20px 22px 18px;
-            box-shadow: 0 12px 40px rgba(31,51,31,0.18), 0 0 0 1px rgba(156,180,151,0.15);
+            box-shadow: 0 12px 40px rgba(43,34,19,0.18), 0 0 0 1px rgba(232,180,120,0.15);
             pointer-events: auto;
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
         }
 
-        /* Step badge — amber gradient */
+        /* Step badge — terracotta gradient */
         #tour-badge {
             width: 30px; height: 30px; border-radius: 9999px;
-            background: linear-gradient(to bottom, #fd9d06, #844f00);
+            background: linear-gradient(to bottom, #c0622a, #a8501f);
             display: flex; align-items: center; justify-content: center;
             font-size: 11px; font-weight: 800; color: #fff0e4;
-            box-shadow: 0 0 0 3px rgba(253,157,6,0.20), 0 4px 16px rgba(253,157,6,0.45);
+            box-shadow: 0 0 0 3px rgba(192,98,42,0.20), 0 4px 16px rgba(192,98,42,0.45);
             margin-bottom: 12px;
         }
 
         #tour-tip {
             font-size: 13px; font-weight: 500; line-height: 1.6;
-            color: #1f331f; margin: 0 0 16px;
+            color: #2b2213; margin: 0 0 16px;
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
         }
 
@@ -157,7 +157,7 @@ export function initAppTour() {
         #tour-counter {
             font-size: 10px; font-weight: 700;
             letter-spacing: 1.5px;
-            color: rgba(75, 97, 73, 0.60);
+            color: rgba(92, 64, 51, 0.60);
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
         }
 
@@ -167,24 +167,24 @@ export function initAppTour() {
             background: none; border: none;
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
             font-size: 11px; font-weight: 700;
-            color: rgba(75, 97, 73, 0.55);
+            color: rgba(92, 64, 51, 0.55);
             cursor: pointer; padding: 5px 8px; border-radius: 9999px;
             transition: color 0.15s ease, background 0.15s ease;
         }
         #tour-skip-btn:hover {
-            color: #4b6149;
-            background: rgba(255,255,255,0.5);
+            color: #5c4033;
+            background: rgba(192,98,42,0.10);
         }
 
-        /* Next button — Radiant Grove primary gradient */
+        /* Next button — terracotta gradient */
         #tour-next-btn {
             display: flex; align-items: center; gap: 6px;
-            background: linear-gradient(to bottom, #fd9d06, #844f00);
+            background: linear-gradient(to bottom, #c0622a, #a8501f);
             border: none; border-radius: 9999px;
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
             font-size: 12px; font-weight: 700; color: #fff0e4;
             padding: 8px 16px; cursor: pointer;
-            box-shadow: 0 4px 16px rgba(253,157,6,0.40);
+            box-shadow: 0 4px 16px rgba(192,98,42,0.40);
             transition: transform 0.15s ease, filter 0.15s ease;
         }
         #tour-next-btn:hover  { transform: translateY(-1px); filter: brightness(1.06); }

@@ -37,6 +37,7 @@ router.get('/', authMiddleware, async (req, res) => {
             text: task.text,
             completed: task.completed,
             panelId: task.panelId || 'tasksPanel-1',
+            subtasks: task.subtasks || [],
             createdAt: task.createdAt,
             updatedAt: task.updatedAt
         }));
@@ -152,6 +153,33 @@ router.put('/:id', authMiddleware, async (req, res) => {
     } catch (error) {
         console.error('PUT /api/tasks/:id error:', error);
         res.status(500).json({ error: 'Failed to update task. Please try again.' });
+    }
+});
+
+// PUT replace subtasks for a task
+router.put('/:id/subtasks', authMiddleware, async (req, res) => {
+    try {
+        const task = await Task.findById(req.params.id);
+        if (!task) return res.status(404).json({ error: 'Task not found' });
+        if (task.userId.toString() !== req.user.userId) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+        const { subtasks } = req.body;
+        if (!Array.isArray(subtasks)) {
+            return res.status(400).json({ error: 'subtasks must be an array' });
+        }
+        task.subtasks = subtasks.map(s => ({
+            id:       String(s.id),
+            title:    String(s.title || ''),
+            estimate: s.estimate != null ? Number(s.estimate) : null,
+            done:     !!s.done,
+        }));
+        task.updatedAt = new Date();
+        await task.save();
+        res.json({ subtasks: task.subtasks });
+    } catch (error) {
+        console.error('PUT /api/tasks/:id/subtasks error:', error);
+        res.status(500).json({ error: 'Failed to update subtasks' });
     }
 });
 

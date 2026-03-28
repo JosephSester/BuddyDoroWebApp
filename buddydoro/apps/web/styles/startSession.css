@@ -1,0 +1,231 @@
+/* ===== Start Session — button & 2-step picker modal ===== */
+
+/* ---- Trigger button (in sidebar, below goals) ---- */
+.start-session-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 24px);
+  margin: 12px 12px 4px;
+  padding: 13px 16px;
+  background: linear-gradient(135deg, #c0622a 0%, #b84f1e 100%);
+  border: none;
+  border-radius: 12px;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(192, 98, 42, 0.38);
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.start-session-btn:hover {
+  background: linear-gradient(135deg, #b84f1e 0%, #a84018 100%);
+  box-shadow: 0 6px 22px rgba(192, 98, 42, 0.52);
+}
+
+.start-session-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(192, 98, 42, 0.30);
+}
+
+.start-session-btn:focus-visible {
+  outline: 3px solid rgba(192, 98, 42, 0.50);
+  outline-offset: 2px;
+}
+
+/* ---- Backdrop ---- */
+.ss-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  z-index: 2000;
+}
+
+/* ---- Modal shell ---- */
+.ss-modal {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(300px, 88vw, 400px);
+  background: #faf4e8;
+  border: 1px solid rgba(232, 180, 120, 0.45);
+  border-radius: 22px;
+  box-shadow:
+    0 24px 64px rgba(43, 34, 19, 0.28),
+    0 4px 16px rgba(43, 34, 19, 0.12);
+  z-index: 2001;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  overflow: hidden;
+}
+
+/* ---- Step wrapper ---- */
+.ss-step {
+  padding: 22px 20px 20px;
+}
+
+/* ---- Header row ---- */
+.ss-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.ss-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2b2213;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.ss-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(192, 98, 42, 0.10);
+  color: #5c4033;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.14s ease;
+  flex-shrink: 0;
+}
+
+.ss-close-btn:hover  { background: rgba(192, 98, 42, 0.20); }
+.ss-close-btn:active { background: rgba(192, 98, 42, 0.30); }
+
+/* ---- Back button ---- */
+.ss-back-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #c0622a;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.14s;
+}
+
+.ss-back-btn:hover { color: #a84018; text-decoration: underline; }
+
+/* ---- Subtitle / goal label ---- */
+.ss-subtitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8c6b55;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 10px;
+}
+
+.ss-goal-label {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2b2213;
+  margin: 0 0 2px;
+  letter-spacing: -0.01em;
+}
+
+/* ---- Scrollable list ---- */
+.ss-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(192, 98, 42, 0.18) transparent;
+}
+
+/* ---- Goal / task items ---- */
+.ss-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(232, 180, 120, 0.30);
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  user-select: none;
+}
+
+.ss-item:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(192, 98, 42, 0.28);
+}
+
+.ss-item.is-selected {
+  background: rgba(192, 98, 42, 0.09);
+  border-color: #c0622a;
+}
+
+.ss-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2b2213;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ss-item-meta {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8c6b55;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+/* ---- Completed (session-done) task items ---- */
+.ss-item.is-done {
+  cursor: default;
+  pointer-events: none;
+  background: rgba(110, 140, 112, 0.08);
+  border-color: rgba(110, 140, 112, 0.40);
+}
+
+.ss-item.is-done .ss-item-name {
+  color: #6e8c70;
+  text-decoration: line-through;
+  font-weight: 700;
+}
+
+/* ---- Empty state ---- */
+.ss-empty {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8c6b55;
+  text-align: center;
+  padding: 24px 12px;
+}
+
+/* ---- Actions row ---- */
+.ss-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.ss-btn {
+  padding: 11px 22px;
+  font-size: 14px;
+  border-radius: 10px;
+  width: auto;
+}

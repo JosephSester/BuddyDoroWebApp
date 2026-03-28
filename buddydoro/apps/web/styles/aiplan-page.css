@@ -1,0 +1,346 @@
+/* ---- AI Plan Page ---- */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(201, 138, 46, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(192, 98, 42, 0.14) 0%, transparent 55%),
+    linear-gradient(160deg, #f7efe2 0%, #eddfc8 50%, #e4cfa8 100%);
+  color: #2b2213;
+}
+
+/* ---- Top bar ---- */
+.aipage-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 24px;
+  height: 58px;
+  background: rgba(250, 244, 232, 0.75);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-bottom: 1px solid rgba(232, 180, 120, 0.35);
+}
+
+.aipage-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(232, 180, 120, 0.40);
+  background: rgba(250, 244, 232, 0.55);
+  color: #5c4033;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s;
+}
+
+.aipage-back-btn:hover {
+  background: rgba(192, 98, 42, 0.12);
+  border-color: rgba(192, 98, 42, 0.35);
+}
+
+.aipage-topbar-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #2b2213;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aipage-topbar-title svg {
+  color: #c0622a;
+}
+
+/* ---- Page layout ---- */
+.aipage-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  grid-template-rows: 1fr auto;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 24px 100px;
+  min-height: calc(100vh - 58px);
+}
+
+/* ---- Glass card ---- */
+.aipage-card {
+  background: rgba(250, 244, 232, 0.72);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border: 1.5px solid rgba(232, 180, 120, 0.40);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow:
+    0 4px 24px rgba(43, 34, 19, 0.10),
+    0 1px 4px rgba(192, 98, 42, 0.08);
+}
+
+/* ---- Left: input panel ---- */
+.aipage-input-panel {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-self: start;
+  position: sticky;
+  top: 78px;
+}
+
+.aipage-input-heading {
+  font-size: 15px;
+  font-weight: 800;
+  color: #2b2213;
+  letter-spacing: -0.01em;
+  margin-bottom: 2px;
+}
+
+.aipage-input-sub {
+  font-size: 12.5px;
+  color: #8c6b55;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.aipage-textarea {
+  width: 100%;
+  border-radius: 14px;
+  border: 1.5px solid rgba(232, 180, 120, 0.50);
+  padding: 13px 15px;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.70);
+  color: #2b2213;
+  resize: vertical;
+  min-height: 110px;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  line-height: 1.55;
+}
+
+.aipage-textarea::placeholder { color: #b89c84; }
+.aipage-textarea:focus {
+  outline: none;
+  border-color: rgba(192, 98, 42, 0.50);
+  box-shadow: 0 0 0 3px rgba(192, 98, 42, 0.10);
+}
+
+.aipage-generate-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #c0622a 0%, #a8501f 100%);
+  color: #fff;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 14.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(192, 98, 42, 0.35);
+  transition: filter 0.15s, transform 0.12s, box-shadow 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.aipage-generate-btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(192, 98, 42, 0.42);
+}
+
+.aipage-generate-btn:active { transform: translateY(0); }
+
+.aipage-hint {
+  font-size: 12px;
+  color: #8c6b55;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ---- Right: preview panel ---- */
+.aipage-preview-panel {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.aipage-preview-heading {
+  font-size: 15px;
+  font-weight: 800;
+  color: #2b2213;
+  letter-spacing: -0.01em;
+}
+
+#aiPlanDescription {
+  font-size: 13px;
+  color: #5c4033;
+  font-weight: 600;
+  font-style: italic;
+  min-height: 0;
+}
+
+#aiPlanPreview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---- Task cards (override ai-plan.css for page context) ---- */
+.aipage-preview-panel .ai-plan-task {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1.5px solid rgba(232, 180, 120, 0.45);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 10px rgba(43, 34, 19, 0.07);
+}
+
+.aipage-preview-panel .ai-plan-empty {
+  background: rgba(250, 244, 232, 0.55);
+  border: 1.5px dashed rgba(192, 98, 42, 0.30);
+  border-radius: 16px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #8c6b55;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.aipage-preview-panel .ai-plan-input {
+  border: 1.5px solid rgba(232, 180, 120, 0.45);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.80);
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #2b2213;
+  padding: 7px 10px;
+}
+
+.aipage-preview-panel .ai-plan-remove {
+  border: 1.5px solid rgba(192, 98, 42, 0.35);
+  background: rgba(250, 230, 220, 0.70);
+  color: #7a2a10;
+  border-radius: 8px;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  width: auto;
+  cursor: pointer;
+  transition: background 0.13s;
+}
+
+.aipage-preview-panel .ai-plan-remove:hover {
+  background: rgba(192, 98, 42, 0.18);
+}
+
+.aipage-preview-panel .ai-plan-add-subtask {
+  border: 1.5px solid rgba(201, 138, 46, 0.40);
+  background: rgba(250, 244, 200, 0.60);
+  color: #5c4033;
+  border-radius: 8px;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  width: auto;
+  cursor: pointer;
+  transition: background 0.13s;
+}
+
+.aipage-preview-panel .ai-plan-add-subtask:hover {
+  background: rgba(201, 138, 46, 0.20);
+}
+
+/* ---- Sticky footer ---- */
+.aipage-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  background: rgba(250, 244, 232, 0.88);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-top: 1px solid rgba(232, 180, 120, 0.35);
+  z-index: 10;
+}
+
+.aipage-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(232, 180, 120, 0.50);
+  background: rgba(250, 244, 232, 0.65);
+  color: #5c4033;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s;
+}
+
+.aipage-add-btn:hover {
+  background: rgba(192, 98, 42, 0.10);
+  border-color: rgba(192, 98, 42, 0.35);
+}
+
+.aipage-create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #c0622a 0%, #a8501f 100%);
+  color: #fff;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 3px 14px rgba(192, 98, 42, 0.35);
+  transition: filter 0.15s, transform 0.12s;
+}
+
+.aipage-create-btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.aipage-create-btn:active { transform: translateY(0); }
+
+/* ---- Responsive ---- */
+@media (max-width: 760px) {
+  .aipage-layout {
+    grid-template-columns: 1fr;
+    padding: 16px 14px 90px;
+  }
+  .aipage-input-panel {
+    position: static;
+  }
+}

@@ -1,9 +1,9 @@
 // apps/web/js/features/taskfeature/index.js
 // Tasks feature composition root.
 
-import { fetchTasks, updateTask } from '../../api/taskService.js';
-import { fetchPanels } from '../../api/panelService.js';
-import { setSubtasks, makeSubtaskId } from '../subtasks.js';
+import { fetchTasks, updateTask, createTask } from '../../api/taskService.js';
+import { fetchPanels, createPanel as apiCreatePanel } from '../../api/panelService.js';
+import { setSubtasks, makeSubtaskId, syncSubtasksFromTasks } from '../subtasks.js';
 
 import { state } from './state.js';
 import { CREATE_DEFAULT_ESTIMATE } from './constants.js';
@@ -173,6 +173,7 @@ export async function initTasks(opts = {}) {
         });
 
         console.log(`Loaded ${state.tasks.length} tasks from API`);
+        syncSubtasksFromTasks(apiTasks);
 
         try {
             const localMap = readTaskPanelMap();
@@ -211,6 +212,10 @@ export function getActiveTaskId() {
     return state.activeTaskId;
 }
 
+export function activateTask(taskId) {
+    renderRef?.setActiveTask(taskId);
+}
+
 export function getActiveTask() {
     if (state.activeTaskId == null) return null;
     return state.tasks.find(t => String(t.id) === String(state.activeTaskId)) || null;
@@ -221,24 +226,16 @@ export async function createPlanFromAI(plan) {
         throw new Error('Plan is empty.');
     }
 
-    if (!crudRef || !renderRef) {
-        throw new Error('Tasks have not been initialized.');
-    }
-
     const title = String(plan.title || 'Goal').trim().slice(0, 100) || 'Goal';
-    const panel = await createPanelWithTitle({
-        title,
-        onAddTaskClick: onAddTaskClickRef || (() => { }),
-        updateActiveTaskVisuals: renderRef?.updateActiveTaskVisuals || (() => { }),
-        notifyActiveChange: renderRef?.notifyActiveChange || (() => { }),
-    });
-    const panelId = panel?.panelId || panel?.id;
-    if (!panelId) throw new Error('Unable to create goal panel.');
+
+    // Create the panel directly via API — works on any page, no DOM required
+    const serverPanel = await apiCreatePanel(title);
+    const panelId = String(serverPanel.id);
 
     for (const task of plan.tasks) {
         const taskTitle = String(task.title || '').trim();
         if (!taskTitle) continue;
-        const created = await crudRef.addTask(taskTitle, CREATE_DEFAULT_ESTIMATE, { panelId });
+        const created = await createTask(taskTitle, panelId);
         const subtasks = Array.isArray(task.subtasks) ? task.subtasks : [];
         if (created && subtasks.length) {
             const mapped = subtasks.map(sub => ({
@@ -251,6 +248,10 @@ export async function createPlanFromAI(plan) {
         }
     }
 
-    renderTodoList();
-    syncTodoDialogState();
+    // If on index.html where task feature is initialized, refresh the UI
+    if (crudRef && renderRef) {
+        renderRef.renderAllTasks();
+        renderTodoList();
+        syncTodoDialogState();
+    }
 }

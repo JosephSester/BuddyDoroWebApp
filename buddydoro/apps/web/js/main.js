@@ -1,22 +1,21 @@
 // apps/web/js/main.js
 
-import { initScene } from './features/scene.js';
+import { initScene, setBackground } from './features/scene.js';
 import { initDragon } from './features/dragon.js';
 import { initTopbar } from './features/topbar.js';
 import { initTimer } from './features/timerFeature/index.js';
 import { initManualPomodoroLogic } from './features/timerFeature/manualPomodoroLogic.js';
 import { initTaskPomodoroLogic } from './features/timerFeature/taskPomodoroLogic.js';
 import { initEarnDoros } from './features/earndoros.js';
-import { initStore } from './features/store.js';
 import { initInventory } from './features/inventory.js';
 import { initDiamondStore } from './features/diamondStore.js';
 import { initTasks, getActiveTask } from './features/taskfeature/index.js';
-import { initAiPlan } from './features/aiPlan.js';
+import { state as taskState } from './features/taskfeature/state.js';
 import { initCompanionThoughts } from './features/companionThoughts.js';
 import { API_BASE } from './api/apiClient.js';
 import { saveSession } from './features/historyStorage.js';
-import { getSubtasks } from './features/subtasks.js';
 import { initAppTour } from './features/appTour.js';
+import { initSession, applySessionDoneVisuals } from './features/session.js';
 
 // ---- Auth guard -------------------------------------------------
 const authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
@@ -39,6 +38,11 @@ initScene({
   background: 'BackgroundDay.jpg',
   preloadExtra: ['Dragon.png'],
 });
+
+// Apply background saved from the store page
+const savedBackground = localStorage.getItem('buddydoro.background');
+if (savedBackground) setBackground(savedBackground);
+
 initDragon?.();
 
 // Timer
@@ -50,147 +54,43 @@ const timer = initTimer({
   onStop: () => topbar?.setTimerActive?.(false),
 });
 
-const focusPanelSlot = document.getElementById('focusPanelSlot');
-const todoButton = document.getElementById('addTasksPanel');
-const tasksStack = document.getElementById('tasksStack');
-const focusTaskNameEl = document.getElementById('focusTaskName');
-const chipRow = document.querySelector('.tasks-chip-row');
-let currentFocusTask = null;
+const taskPomodoro = initTaskPomodoroLogic({ timer });
+initSession(timer);
 
-const setTodoButtonVisible = (visible) => {
-  if (!todoButton) return;
-  todoButton.style.display = visible ? '' : 'none';
-};
+// ---- Pomodoro flow --------------------------------------------------
+// Tracks completed focus rounds to decide short vs long break.
+let pomodoroFocusCount = 0;
 
-const clearFocusPanel = ({ clearTask = false } = {}) => {
-  if (!focusPanelSlot) return;
-  focusPanelSlot.innerHTML = '';
-  focusPanelSlot.hidden = true;
-  if (clearTask) currentFocusTask = null;
-  if (tasksStack) tasksStack.hidden = false;
-  if (chipRow) chipRow.hidden = false;
-  if (focusTaskNameEl) {
-    focusTaskNameEl.textContent = '';
-    focusTaskNameEl.hidden = true;
-  }
-};
-
-const showFocusPanel = (task) => {
-  if (!focusPanelSlot || !task) return;
-  currentFocusTask = task;
-  const panelId = task.panelId ? String(task.panelId) : null;
-  if (!panelId) return;
-
-  const panel = document.getElementById(panelId)
-    || document.querySelector(`.tasks-list[data-panel-id="${panelId}"]`)?.closest('.tasks-panel');
-  if (!panel) return;
-
-  const clone = panel.cloneNode(true);
-  clone.removeAttribute('id');
-  clone.classList.add('focus-panel');
-  clone.querySelectorAll('.task-add').forEach(btn => btn.remove());
-  clone.querySelectorAll('.tasks-header-actions').forEach(el => el.remove());
-
-  focusPanelSlot.innerHTML = '';
-  focusPanelSlot.appendChild(clone);
-  focusPanelSlot.hidden = false;
-  if (tasksStack) tasksStack.hidden = true;
-  if (chipRow) chipRow.hidden = true;
-  if (focusTaskNameEl) {
-    focusTaskNameEl.textContent = task?.name || '';
-    focusTaskNameEl.hidden = !task?.name;
-  }
-};
-
-let completedFocusSessions = 0;
-const sessionCountEl = document.getElementById('timerSessionCount');
-if (sessionCountEl) sessionCountEl.hidden = false;
-
-const updateSessionCount = () => {
-  if (!sessionCountEl) return;
-  sessionCountEl.textContent = `${completedFocusSessions} session${completedFocusSessions !== 1 ? 's' : ''} done`;
-  sessionCountEl.hidden = false;
-};
-
-// ---- Subtask selector -------------------------------------------------------
-const subtaskSelectorEl = document.getElementById('subtaskSelector');
-const subtaskSelectEl   = document.getElementById('subtaskSelect');
-
-function populateSubtaskSelector(task) {
-  if (!subtaskSelectorEl || !subtaskSelectEl || !task) return;
-  const subtasks = getSubtasks(task.id);
-  subtaskSelectEl.innerHTML = '<option value="">— select subtask —</option>';
-  subtasks.forEach(sub => {
-    const opt = document.createElement('option');
-    opt.value = sub.title;
-    opt.textContent = sub.title;
-    subtaskSelectEl.appendChild(opt);
-  });
-  subtaskSelectorEl.hidden = subtasks.length === 0;
+function advancePomodoro(fromMode) {
+  if (fromMode === 'focus') pomodoroFocusCount++;
+  const nextMode = fromMode === 'focus'
+    ? (pomodoroFocusCount % 4 === 0 ? 'longBreak' : 'break')
+    : 'focus';
+  timer.setMode(nextMode);
+  timer.activateChip(nextMode);
+  // Do NOT auto-start — user presses Start
 }
 
-function clearSubtaskSelector() {
-  if (!subtaskSelectorEl || !subtaskSelectEl) return;
-  subtaskSelectEl.innerHTML = '<option value="">— select subtask —</option>';
-  subtaskSelectorEl.hidden = true;
-}
-// -----------------------------------------------------------------------------
-
-const taskPomodoro = initTaskPomodoroLogic({
-  timer,
-  onFocusStart: ({ task }) => {
-    completedFocusSessions = 0;
-    updateSessionCount();
-    showFocusPanel(task);
-    populateSubtaskSelector(task);
-  },
-  onFocusStop: () => {
-    clearFocusPanel({ clearTask: true });
-    clearSubtaskSelector();
-  },
-});
-
-timer.onComplete(({ mode }) => {
-  if (mode === 'focus') {
-    completedFocusSessions++;
-    updateSessionCount();
+timer.onComplete(({ mode, duration }) => {
+  if (mode === 'focus' && duration > 0) {
+    const taskName = getActiveTask()?.name || null;
+    saveSession({ taskName, seconds: duration });
   }
+  advancePomodoro(mode);
 });
 
-// Save a history record whenever a focus session summary fires
-timer.onSummary(({ minutes }) => {
-  if (minutes <= 0) return;
-  const subtaskName = subtaskSelectEl?.value || null;
-  const taskName    = currentFocusTask?.name  || null;
-  saveSession({ subtaskName, taskName, seconds: minutes * 60 });
+document.getElementById('resetBtn')?.addEventListener('click', () => {
+  timer.reset();
+});
+
+document.getElementById('nextBtn')?.addEventListener('click', () => {
+  advancePomodoro(timer.getMode());
 });
 
 const manualPomodoro = initManualPomodoroLogic({
   timer,
 });
 
-timer.onStart(({ mode }) => {
-  if (mode === 'break') {
-    clearFocusPanel();
-  }
-});
-
-timer.onSummaryBreak(() => clearFocusPanel());
-timer.onSummaryHome(() => clearFocusPanel({ clearTask: true }));
-timer.onBreakLater(() => clearFocusPanel({ clearTask: true }));
-timer.onBreakResume(() => {
-  if (currentFocusTask) showFocusPanel(currentFocusTask);
-});
-
-timer.setLaunchHandler?.((mode) => {
-  if (mode === 'focus') {
-    taskPomodoro.stop?.();
-    clearFocusPanel({ clearTask: true });
-    timer.stop();
-    manualPomodoro.startManualFocus?.();
-    return;
-  }
-});
 
 // ---- Topbar + EarnDoros -----------------------------------------------------
 async function initUserTopbarAndEarnDoros() {
@@ -199,12 +99,38 @@ async function initUserTopbarAndEarnDoros() {
       headers: { Authorization: 'Bearer ' + authToken },
     });
 
-    if (!res.ok) throw new Error('Auth lookup failed');
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('hasSeenOnboarding');
+      window.location.href = 'login.html';
+      throw new Error('Unauthorized');
+    }
+    if (!res.ok) throw new Error(`Auth lookup failed: ${res.status}`);
 
     const user = await res.json();
 
     if (user?.name) {
       localStorage.setItem('userName', user.name);
+    }
+
+    // Apply saved timer settings
+    if (user?.settings) {
+      const { focusMinutes, breakMinutes } = user.settings;
+      if (focusMinutes || breakMinutes) {
+        timer.applyDefaults({ focusMinutes, breakMinutes });
+        if (focusMinutes) {
+          const inputEl = document.getElementById('settingFocus');
+          const chip = document.querySelector('.chip[data-mode="focus"]');
+          if (inputEl) inputEl.value = focusMinutes;
+          if (chip) chip.dataset.minutes = focusMinutes;
+        }
+        if (breakMinutes) {
+          const inputEl = document.getElementById('settingShort');
+          const chip = document.querySelector('.chip[data-mode="break"]');
+          if (inputEl) inputEl.value = breakMinutes;
+          if (chip) chip.dataset.minutes = breakMinutes;
+        }
+      }
     }
 
     const topbar = initTopbar({
@@ -245,12 +171,6 @@ async function initUserTopbarAndEarnDoros() {
 
 const { topbar, earnDoros } = await initUserTopbarAndEarnDoros();
 
-// Store
-initStore({
-  getDoros: () => earnDoros.getBalance(),
-  spendDoros: amount => earnDoros.spend(amount),
-});
-
 // Dedicated inventory modal (separate from store purchase flow).
 initInventory();
 
@@ -278,12 +198,14 @@ await initTasks({
     minutes > 0 && timer.setPlannedFocusDuration(minutes * 60),
 });
 
+taskState.handlers.onAfterRender = applySessionDoneVisuals;
+applySessionDoneVisuals();
+
 initCompanionThoughts({
   getActiveTask: () => getActiveTask()
 });
 
 // ---- AI Plan ----------------------------------------------------
-initAiPlan();
 
 // ---- First-visit app tour ---------------------------------------
 initAppTour();

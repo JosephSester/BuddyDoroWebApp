@@ -96,13 +96,15 @@ export function initSidebar() {
     window.location.href = 'login.html';
   });
 
-  // Block task card selection and checkbox interaction inside the sidebar
+  // Block task card selection inside the sidebar, but allow interactive buttons through
   document.getElementById('tasksStack')?.addEventListener('click', e => {
     const card = e.target.closest('.task-card');
     if (!card) return;
     if (card.classList.contains('task-create')) return; // allow create-form save/cancel through
+    if (e.target.closest('.task-del')) return;          // allow task delete button
+    if (e.target.closest('.subtask-toggle')) return;    // allow subtask toggle / add
+    if (e.target.closest('.subtasks-container')) return; // allow all subtask interactions
     e.stopPropagation();
-    if (e.target.matches('input[type="checkbox"]')) e.preventDefault();
   }, true); // capture phase — runs before card's own handlers
 
   // Goals accordion — toggle expand/collapse on header click

@@ -1,5 +1,5 @@
 /**
- * Seed script — populates the Items collection.
+ * Seed script — consumable items (food, play, water, medicine).
  * Run from the project root:  node buddydoro/server/seed/seedItems.js
  * Safe to re-run: uses upsert so existing items are updated, not duplicated.
  */
@@ -8,19 +8,13 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const mongoose = require('mongoose');
 const Item     = require('../models/Items');
 
+// SKUs to remove from the DB (retired / replaced items)
+const RETIRE_SKUS = ['spring_water', 'apple'];
+
 const ITEMS = [
 
   // ── Food (restore hunger) ────────────────────────────────────────────────
-  {
-    sku: 'apple',
-    name: 'Apple',
-    category: 'food',
-    currency: 'doros',
-    price: 80,
-    emoji: '🍎',
-    description: 'A crisp apple. Restores a little hunger.',
-    effect: { stat: 'hunger', amount: 2 },
-  },
+  // Doros
   {
     sku: 'berry_bunch',
     name: 'Berry Bunch',
@@ -51,8 +45,40 @@ const ITEMS = [
     description: 'A royal meal fit for a companion. Fully restores hunger.',
     effect: { stat: 'hunger', amount: 14 },
   },
+  // Diamonds
+  {
+    sku: 'golden_apple',
+    name: 'Golden Apple',
+    category: 'food',
+    currency: 'diamonds',
+    price: 1,
+    emoji: '🥭',
+    description: 'A shimmering enchanted apple. Restores a solid amount of hunger instantly.',
+    effect: { stat: 'hunger', amount: 5 },
+  },
+  {
+    sku: 'cosmic_berry',
+    name: 'Cosmic Berry',
+    category: 'food',
+    currency: 'diamonds',
+    price: 2,
+    emoji: '🫐',
+    description: 'A berry from another realm. Restores most of your companion\'s hunger.',
+    effect: { stat: 'hunger', amount: 10 },
+  },
+  {
+    sku: 'mythic_feast',
+    name: 'Mythic Feast',
+    category: 'food',
+    currency: 'diamonds',
+    price: 4,
+    emoji: '🥘',
+    description: 'A legendary banquet. Fully restores hunger in an instant.',
+    effect: { stat: 'hunger', amount: 14 },
+  },
 
   // ── Play (restore happiness) ─────────────────────────────────────────────
+  // Doros
   {
     sku: 'bouncy_ball',
     name: 'Bouncy Ball',
@@ -83,16 +109,48 @@ const ITEMS = [
     description: 'A magical toy that brings endless delight. Fully restores happiness.',
     effect: { stat: 'happiness', amount: 14 },
   },
+  // Diamonds
+  {
+    sku: 'star_prism',
+    name: 'Star Prism',
+    category: 'play',
+    currency: 'diamonds',
+    price: 1,
+    emoji: '🔮',
+    description: 'A prismatic gem that dances with light. Boosts your companion\'s happiness.',
+    effect: { stat: 'happiness', amount: 5 },
+  },
+  {
+    sku: 'moonlight_crystal',
+    name: 'Moonlight Crystal',
+    category: 'play',
+    currency: 'diamonds',
+    price: 2,
+    emoji: '🌙',
+    description: 'A shard of crystallised moonlight. Fills your companion with joy.',
+    effect: { stat: 'happiness', amount: 10 },
+  },
+  {
+    sku: 'dream_harp',
+    name: 'Dream Harp',
+    category: 'play',
+    currency: 'diamonds',
+    price: 4,
+    emoji: '🎵',
+    description: 'A harp that plays songs from dreams. Fully restores happiness.',
+    effect: { stat: 'happiness', amount: 14 },
+  },
 
   // ── Water (restore thirst) ───────────────────────────────────────────────
+  // Doros — keeping the original 15-doro Spring Water (sku: water-bottle)
   {
-    sku: 'spring_water',
+    sku: 'water-bottle',
     name: 'Spring Water',
     category: 'water',
     currency: 'doros',
-    price: 80,
+    price: 15,
     emoji: '💧',
-    description: 'Fresh water from a mountain spring. Quenches a little thirst.',
+    description: 'Pure spring water. Quenches a little thirst.',
     effect: { stat: 'thirst', amount: 2 },
   },
   {
@@ -115,8 +173,40 @@ const ITEMS = [
     description: 'A single drop of ancient glacier. Fully restores thirst.',
     effect: { stat: 'thirst', amount: 14 },
   },
+  // Diamonds
+  {
+    sku: 'nectar_drop',
+    name: 'Nectar Drop',
+    category: 'water',
+    currency: 'diamonds',
+    price: 1,
+    emoji: '🍯',
+    description: 'A drop of pure nectar. Quenches a decent amount of thirst.',
+    effect: { stat: 'thirst', amount: 5 },
+  },
+  {
+    sku: 'starlight_brew',
+    name: 'Starlight Brew',
+    category: 'water',
+    currency: 'diamonds',
+    price: 2,
+    emoji: '🧋',
+    description: 'A luminous drink brewed from stardust. Greatly quenches thirst.',
+    effect: { stat: 'thirst', amount: 10 },
+  },
+  {
+    sku: 'ambrosia',
+    name: 'Ambrosia',
+    category: 'water',
+    currency: 'diamonds',
+    price: 4,
+    emoji: '🍹',
+    description: 'The drink of legends. Fully restores thirst in a single sip.',
+    effect: { stat: 'thirst', amount: 14 },
+  },
 
   // ── Medicine (restore health) ────────────────────────────────────────────
+  // Doros
   {
     sku: 'herb_pack',
     name: 'Herb Pack',
@@ -137,327 +227,59 @@ const ITEMS = [
     description: 'A rare blossom with potent healing. Restores a lot of health.',
     effect: { stat: 'health', amount: 7 },
   },
+  // Diamonds
+  {
+    sku: 'healing_crystal',
+    name: 'Healing Crystal',
+    category: 'medicine',
+    currency: 'diamonds',
+    price: 1,
+    emoji: '💠',
+    description: 'A crystal humming with healing energy. Restores a solid amount of health.',
+    effect: { stat: 'health', amount: 5 },
+  },
+  {
+    sku: 'phoenix_tear',
+    name: 'Phoenix Tear',
+    category: 'medicine',
+    currency: 'diamonds',
+    price: 2,
+    emoji: '🔥',
+    description: 'A tear shed by a phoenix. Greatly restores your companion\'s health.',
+    effect: { stat: 'health', amount: 10 },
+  },
   {
     sku: 'golden_elixir',
     name: 'Golden Elixir',
     category: 'medicine',
     currency: 'diamonds',
     price: 3,
-    emoji: '✨',
+    emoji: '🥃',
     description: 'A legendary elixir. Fully restores health instantly.',
     effect: { stat: 'health', amount: 14 },
-  },
-
-  // ── Skins — Doros ────────────────────────────────────────────────────────
-  {
-    sku: 'skin_axolotl',
-    name: 'Axolotl',
-    category: 'skins',
-    currency: 'doros',
-    price: 500,
-    emoji: '🦎',
-    imageUrl: 'Skins/Axolotyl.png',
-  },
-  {
-    sku: 'skin_capybara',
-    name: 'Capybara',
-    category: 'skins',
-    currency: 'doros',
-    price: 600,
-    emoji: '🦫',
-    imageUrl: 'Skins/Capybara.png',
-  },
-  {
-    sku: 'skin_dragon_alt',
-    name: 'Dragon (Alt)',
-    category: 'skins',
-    currency: 'doros',
-    price: 800,
-    emoji: '🐉',
-    imageUrl: 'Skins/DragonSkin.png',
-  },
-  {
-    sku: 'skin_frog',
-    name: 'Frog',
-    category: 'skins',
-    currency: 'doros',
-    price: 500,
-    emoji: '🐸',
-    imageUrl: 'Skins/Frog.png',
-  },
-  {
-    sku: 'skin_praying_mantis',
-    name: 'Praying Mantis',
-    category: 'skins',
-    currency: 'doros',
-    price: 650,
-    emoji: '🦗',
-    imageUrl: 'Skins/PrayingMantis.png',
-  },
-  {
-    sku: 'skin_werewolf',
-    name: 'Werewolf',
-    category: 'skins',
-    currency: 'doros',
-    price: 850,
-    emoji: '🐺',
-    imageUrl: 'Skins/Werewolf.png',
-  },
-
-  // ── Skins — Diamonds ─────────────────────────────────────────────────────
-  {
-    sku: 'skin_alien',
-    name: 'Alien',
-    category: 'skins',
-    currency: 'diamonds',
-    price: 4,
-    emoji: '👽',
-    imageUrl: 'Skins/Alien.png',
-  },
-  {
-    sku: 'skin_butterfly',
-    name: 'Butterfly',
-    category: 'skins',
-    currency: 'diamonds',
-    price: 3,
-    emoji: '🦋',
-    imageUrl: 'Skins/Butterfly.png',
-  },
-  {
-    sku: 'skin_rock_creature',
-    name: 'Rock Creature',
-    category: 'skins',
-    currency: 'diamonds',
-    price: 3,
-    emoji: '🪨',
-    imageUrl: 'Skins/RockCreature.png',
-  },
-  {
-    sku: 'skin_robot',
-    name: 'Robot',
-    category: 'skins',
-    currency: 'diamonds',
-    price: 4,
-    emoji: '🤖',
-    imageUrl: 'Skins/Robot.png',
-  },
-  {
-    sku: 'skin_bigfoot',
-    name: 'Bigfoot',
-    category: 'skins',
-    currency: 'diamonds',
-    price: 3,
-    emoji: '🦶',
-    imageUrl: 'Skins/Bigfoot.png',
-  },
-  {
-    sku: 'skin_strawberry',
-    name: 'Strawberry',
-    category: 'skins',
-    currency: 'diamonds',
-    price: 3,
-    emoji: '🍓',
-    imageUrl: 'Skins/Strawberry.png',
-  },
-  {
-    sku: 'skin_ice_cream',
-    name: 'Ice Cream',
-    category: 'skins',
-    currency: 'diamonds',
-    price: 3,
-    emoji: '🍦',
-    imageUrl: 'Skins/IceCream.png',
-  },
-  {
-    sku: 'skin_vampire',
-    name: 'Vampire',
-    category: 'skins',
-    currency: 'diamonds',
-    price: 4,
-    emoji: '🧛',
-    imageUrl: 'Skins/Vampire.png',
-  },
-
-  // ── Backgrounds — Doros ──────────────────────────────────────────────────
-  {
-    sku: 'bg_african',
-    name: 'African',
-    category: 'backgrounds',
-    currency: 'doros',
-    price: 400,
-    emoji: '🌍',
-    imageUrl: 'Backgrounds/AfricanBackgroundDay.png',
-  },
-  {
-    sku: 'bg_arctic',
-    name: 'Arctic',
-    category: 'backgrounds',
-    currency: 'doros',
-    price: 400,
-    emoji: '❄️',
-    imageUrl: 'Backgrounds/ArcticBackgroundDay.png',
-  },
-  {
-    sku: 'bg_beach',
-    name: 'Beach',
-    category: 'backgrounds',
-    currency: 'doros',
-    price: 400,
-    emoji: '🏖️',
-    imageUrl: 'Backgrounds/BeachBackgroundDay.png',
-  },
-  {
-    sku: 'bg_everglades',
-    name: 'Everglades',
-    category: 'backgrounds',
-    currency: 'doros',
-    price: 500,
-    emoji: '🌿',
-    imageUrl: 'Backgrounds/EvergladesBackgroundDay.png',
-  },
-  {
-    sku: 'bg_inca',
-    name: 'Inca',
-    category: 'backgrounds',
-    currency: 'doros',
-    price: 500,
-    emoji: '🏛️',
-    imageUrl: 'Backgrounds/IncaBackgroundDay.png',
-  },
-  {
-    sku: 'bg_jungle',
-    name: 'Jungle',
-    category: 'backgrounds',
-    currency: 'doros',
-    price: 450,
-    emoji: '🌴',
-    imageUrl: 'Backgrounds/JungleBackgroundDay.png',
-  },
-  {
-    sku: 'bg_mountain',
-    name: 'Mountain',
-    category: 'backgrounds',
-    currency: 'doros',
-    price: 400,
-    emoji: '⛰️',
-    imageUrl: 'Backgrounds/MountainBackgroundDay.png',
-  },
-  {
-    sku: 'bg_rainforest',
-    name: 'Rainforest',
-    category: 'backgrounds',
-    currency: 'doros',
-    price: 450,
-    emoji: '🌧️',
-    imageUrl: 'Backgrounds/RainforestBackgroundDay.png',
-  },
-  {
-    sku: 'bg_dessert_land',
-    name: 'Dessert Land',
-    category: 'backgrounds',
-    currency: 'doros',
-    price: 600,
-    emoji: '🍰',
-    imageUrl: 'Backgrounds/DessertLandBackground.png',
-  },
-
-  // ── Backgrounds — Diamonds ───────────────────────────────────────────────
-  {
-    sku: 'bg_desert',
-    name: 'Desert',
-    category: 'backgrounds',
-    currency: 'diamonds',
-    price: 3,
-    emoji: '🏜️',
-    imageUrl: 'Backgrounds/DesertBackgroundDay.png',
-  },
-  {
-    sku: 'bg_moon',
-    name: 'Moon',
-    category: 'backgrounds',
-    currency: 'diamonds',
-    price: 5,
-    emoji: '🌕',
-    imageUrl: 'Backgrounds/MoonBackground.png',
-  },
-  {
-    sku: 'bg_inner_earth',
-    name: 'Inner Earth',
-    category: 'backgrounds',
-    currency: 'diamonds',
-    price: 4,
-    emoji: '🌋',
-    imageUrl: 'Backgrounds/InnerEarthBackground.png',
-  },
-  {
-    sku: 'bg_mayan',
-    name: 'Mayan',
-    category: 'backgrounds',
-    currency: 'diamonds',
-    price: 3,
-    emoji: '🗿',
-    imageUrl: 'Backgrounds/MayanBackgroundDay.png',
-  },
-  {
-    sku: 'bg_japanese',
-    name: 'Japanese',
-    category: 'backgrounds',
-    currency: 'diamonds',
-    price: 4,
-    emoji: '🏯',
-    imageUrl: 'Backgrounds/JapaneseBackgroundDay.png',
-  },
-  {
-    sku: 'bg_floating_island',
-    name: 'Floating Island',
-    category: 'backgrounds',
-    currency: 'diamonds',
-    price: 5,
-    emoji: '☁️',
-    imageUrl: 'Backgrounds/FloatingIslandBackgroundDay.png',
-  },
-  {
-    sku: 'bg_cemetery',
-    name: 'Cemetery',
-    category: 'backgrounds',
-    currency: 'diamonds',
-    price: 3,
-    emoji: '🪦',
-    imageUrl: 'Backgrounds/CemeteryBackgroundDay.png',
-  },
-  {
-    sku: 'bg_mars',
-    name: 'Mars',
-    category: 'backgrounds',
-    currency: 'diamonds',
-    price: 5,
-    emoji: '🔴',
-    imageUrl: 'Backgrounds/MarsBackgroundDay.png',
   },
 ];
 
 async function seed() {
-  await mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI);
+  await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI);
   console.log('Connected to MongoDB');
 
-  let created = 0;
-  let updated = 0;
+  // Remove retired items
+  if (RETIRE_SKUS.length) {
+    await Item.deleteMany({ sku: { $in: RETIRE_SKUS } });
+    console.log(`  🗑  Retired: ${RETIRE_SKUS.join(', ')}`);
+  }
 
   for (const item of ITEMS) {
-    const result = await Item.findOneAndUpdate(
+    await Item.findOneAndUpdate(
       { sku: item.sku },
       { $set: item },
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
-    if (result.createdAt && result.updatedAt && result.createdAt.getTime() === result.updatedAt.getTime()) {
-      created++;
-    } else {
-      updated++;
-    }
     console.log(`  ✓ ${item.sku} (${item.currency === 'diamonds' ? `💎 ${item.price}` : `🪙 ${item.price}`})`);
   }
 
-  console.log(`\nDone — ${ITEMS.length} items seeded.`);
+  console.log(`\nDone — ${ITEMS.length} consumable items seeded.`);
   await mongoose.disconnect();
 }
 

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Store • BuddyDoro</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles/design-system.css" />
+  <link rel="stylesheet" href="../styles/store.css" />
+  <link rel="stylesheet" href="../styles/notifications.css" />
+</head>
+<body>
+
+  <!-- Decorative depth orbs -->
+  <div class="sp-orb sp-orb-1" aria-hidden="true"></div>
+  <div class="sp-orb sp-orb-2" aria-hidden="true"></div>
+  <div class="sp-orb sp-orb-3" aria-hidden="true"></div>
+
+  <div class="sp-wrap">
+
+    <!-- Header -->
+    <header class="sp-header">
+      <a href="index.html" class="sp-back" aria-label="Back to app">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back
+      </a>
+
+      <div class="sp-header-center">
+        <h1 class="sp-title">Companion Store</h1>
+        <p class="sp-subtitle">Spend your Doros to care for your companion</p>
+      </div>
+
+      <div class="sp-balance">
+        <div class="sp-balance-chip">
+          <img src="./assets/artwork/DoroIcon.png" alt="" class="sp-balance-icon" onerror="this.style.display='none'" aria-hidden="true" />
+          <span id="dorosAmount">—</span>
+          <span class="sp-balance-label">Doros</span>
+        </div>
+        <div class="sp-balance-chip sp-balance-chip--diamond">
+          <img src="./assets/artwork/DiamondIcon.png" alt="" class="sp-balance-icon" onerror="this.style.display='none'" aria-hidden="true" />
+          <span id="diamondsAmount">—</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Catalog panel -->
+    <div class="sp-catalog-wrap">
+      <div class="category-tabs" role="tablist" aria-label="Store categories">
+        <button class="tab is-active" role="tab" aria-selected="true"  data-cat="food">Food</button>
+        <button class="tab"           role="tab" aria-selected="false" data-cat="play">Play</button>
+        <button class="tab"           role="tab" aria-selected="false" data-cat="water">Water</button>
+        <button class="tab"           role="tab" aria-selected="false" data-cat="medicine">Medicine</button>
+        <button class="tab tab-skins" role="tab" aria-selected="false" data-cat="skins">Skins</button>
+        <button class="tab"           role="tab" aria-selected="false" data-cat="backgrounds">Backgrounds</button>
+      </div>
+
+      <div id="catalogGrid" class="catalog-grid sp-catalog-grid" aria-live="polite"></div>
+    </div>
+
+  </div>
+
+  <script type="module" src="../js/storePage.js"></script>
+</body>
+</html>

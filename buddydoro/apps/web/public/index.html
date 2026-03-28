@@ -12,6 +12,11 @@
   <link rel="preload" as="image" href="/assets/artwork/BackgroundNight.png" />
 
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
   <!-- Core styles (order matters: base → layout → components → feature CSS → themes) -->
   <link rel="stylesheet" href="../styles/base.css" />
   <link rel="stylesheet" href="../styles/layout2.css" />
@@ -37,7 +42,6 @@
   <link rel="stylesheet" href="../styles/diamond.css" />
   <link rel="stylesheet" href="../styles/timer.css" />
   <link rel="stylesheet" href="../styles/tasks.css" />
-  <link rel="stylesheet" href="../styles/ai-plan.css" />
   <link rel="stylesheet" href="../styles/store.css" />
   <link rel="stylesheet" href="../styles/inventory.css" />
   <link rel="stylesheet" href="../styles/history.css" />
@@ -60,6 +64,13 @@
 
   <!-- Theme last so it can override colors if needed -->
   <link rel="stylesheet" href="../styles/themes.css" />
+
+  <!-- Sidebar navigation -->
+  <link rel="stylesheet" href="../styles/sidebar.css" />
+  <!-- Start Session -->
+  <link rel="stylesheet" href="../styles/startSession.css" />
+  <!-- Session panel -->
+  <link rel="stylesheet" href="../styles/sessionPanel.css" />
 </head>
 
 <body>
@@ -78,173 +89,102 @@
   <!-- UI overlay -->
   <div class="ui-layer">
 
-    <!-- Logo in upper left corner -->
-    <div class="logo-container">
-      <img src="./assets/artwork/BuddyDoroName.png" alt="Buddy Doro" class="logo" />
-    </div>
 
-    <!-- Top-right header (RIGHT → LEFT: Greeting, Profile, Doros, Store) -->
+
+    <!-- Full-width topbar -->
     <header class="topbar" aria-label="User header">
-      <div class="top-chips">
 
-          <!-- Music toggle chip -->
-        <button class="chip glass-chip music-toggle-chip" id="musicToggleChip" type="button" aria-label="Pause music" title="Pause music">
-          <svg id="musicToggleIcon" class="music-toggle-icon" viewBox="0 0 32 32" aria-hidden="true">
-            <!-- Pause icon (shown while music plays) -->
-            <rect x="7" y="6" width="5" height="20" rx="2" fill="currentColor"/>
-            <rect x="20" y="6" width="5" height="20" rx="2" fill="currentColor"/>
+      <!-- Left: hamburger + store + inventory -->
+      <div class="topbar-left">
+        <button id="menuButton" class="topbar-icon-btn" type="button" aria-label="Open navigation menu">
+          <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+            <line x1="6" y1="10" x2="26" y2="10" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="6" y1="16" x2="26" y2="16" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="6" y1="22" x2="26" y2="22" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
           </svg>
-          <span class="music-toggle-label">Music</span>
         </button>
 
-          <!-- History chip -->
-        <button class="chip glass-chip history-chip" id="historyChip" type="button">
-          <svg class="history-icon" viewBox="0 0 64 64" aria-hidden="true">
-            <defs>
-              <linearGradient id="histGoldRing" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#f7d073" />
-                <stop offset="100%" stop-color="#d39b2d" />
-              </linearGradient>
-              <radialGradient id="histGoldFill" cx="35%" cy="30%" r="70%">
-                <stop offset="0%" stop-color="#fff6c3" />
-                <stop offset="55%" stop-color="#ffd36b" />
-                <stop offset="100%" stop-color="#f0b13a" />
-              </radialGradient>
-            </defs>
-            <circle cx="32" cy="32" r="29" fill="url(#histGoldRing)" />
-            <circle cx="32" cy="32" r="25" fill="url(#histGoldFill)" stroke="#b98627" stroke-width="2" />
-            <circle cx="32" cy="32" r="13" stroke="#2b2213" stroke-width="3.5" fill="none"/>
-            <path d="M32 22v10l7 5" stroke="#2b2213" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            <path d="M18 32h-5m2.5-4-2.5 4 2.5 4" stroke="#2b2213" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <!-- Store -->
+        <a href="store.html" class="topbar-icon-btn" id="storeChip" title="Store" aria-label="Open store">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
+            <path d="M3 9l1 11a1 1 0 001 1h14a1 1 0 001-1L21 9M1 9h22M8 9V6a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span class="history-label">History</span>
-        </button>
+        </a>
 
-          <!-- Store chip (opens window) -->
-        <button class="chip glass-chip store-chip" id="storeChip" type="button" aria-haspopup="dialog"
-          aria-controls="storeDialog">
-          <svg class="store-icon" viewBox="0 0 64 64" aria-hidden="true">
-            <defs>
-              <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#f7d073" />
-                <stop offset="100%" stop-color="#d39b2d" />
-              </linearGradient>
-              <radialGradient id="goldFill" cx="35%" cy="30%" r="70%">
-                <stop offset="0%" stop-color="#fff6c3" />
-                <stop offset="55%" stop-color="#ffd36b" />
-                <stop offset="100%" stop-color="#f0b13a" />
-              </radialGradient>
-            </defs>
-            <circle cx="32" cy="32" r="29" fill="url(#goldRing)" />
-            <circle cx="32" cy="32" r="25" fill="url(#goldFill)" stroke="#b98627" stroke-width="2" />
-            <path
-              d="M22 28h20l2 20a3 3 0 0 1-3 3H23a3 3 0 0 1-3-3l2-20zm4-6a6 6 0 0 1 12 0v6h-4v-6a2 2 0 0 0-4 0v6h-4v-6z"
-              fill="#2b2213" />
-          </svg>
-          <span class="store-label">Store</span>
-        </button>
-
-        <!-- Inventory chip (opens inventory window) -->
-        <button class="chip glass-chip inventory-chip" id="inventoryChip" type="button" aria-haspopup="dialog"
-          aria-expanded="false" aria-controls="inventoryDialog">
-          <svg class="inventory-icon" viewBox="0 0 64 64" aria-hidden="true">
-            <defs>
-              <linearGradient id="inventoryRing" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#f7d073" />
-                <stop offset="100%" stop-color="#d39b2d" />
-              </linearGradient>
-              <radialGradient id="inventoryFill" cx="35%" cy="30%" r="70%">
-                <stop offset="0%" stop-color="#fff6c3" />
-                <stop offset="55%" stop-color="#ffd36b" />
-                <stop offset="100%" stop-color="#f0b13a" />
-              </radialGradient>
-            </defs>
-            <circle cx="32" cy="32" r="29" fill="url(#inventoryRing)" />
-            <circle cx="32" cy="32" r="25" fill="url(#inventoryFill)" stroke="#b98627" stroke-width="2" />
-            <path d="M18 24h28v24a3 3 0 0 1-3 3H21a3 3 0 0 1-3-3V24z" fill="#2b2213" />
-            <path d="M23 24v-2a9 9 0 0 1 18 0v2h-4v-2a5 5 0 0 0-10 0v2h-4z" fill="#2b2213" />
-          </svg>
-          <span class="inventory-label">Inventory</span>
-        </button>
-
-        <!-- Diamond chip -->
-
-        <div class="doros-dropdown">
-          <button class="chip glass-chip diamond-chip" id="diamondChip" type="button" aria-label="Diamonds balance"
-            aria-haspopup="true" aria-expanded="false" aria-controls="diamondMenu">
-
-            <img src="./assets/artwork/DiamondIcon.png" alt="Diamonds" class="diamond-icon" />
-
-            <span id="diamondAmount" class="diamond-amount">0</span>
-            <span class="diamond-label">Diamonds</span>
-          </button>
-
-          <div class="doros-menu" id="diamondMenu" role="menu" hidden>
-            <button type="button" class="doros-menu-item" role="menuitem" data-menu-action="buy-diamonds">
-              Buy Diamonds
-            </button>
-          </div>
-        </div>
-
-
-
-        <!-- Doros chip -->
-        <button class="chip glass-chip doros-chip" id="dorosChip" type="button" aria-label="Doros balance">
-          <svg class="doros-icon" viewBox="0 0 64 64" aria-hidden="true">
-            <defs>
-              <radialGradient id="gemGlow" cx="35%" cy="30%" r="70%">
-                <stop offset="0%" stop-color="#fff9d1" />
-                <stop offset="45%" stop-color="#ffd979" />
-                <stop offset="100%" stop-color="#f2b942" />
-              </radialGradient>
-              <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#f7d073" />
-                <stop offset="100%" stop-color="#d39b2d" />
-              </linearGradient>
-            </defs>
-            <circle cx="32" cy="32" r="29" fill="url(#ring)" />
-            <circle cx="32" cy="32" r="25" fill="url(#gemGlow)" stroke="#b98627" stroke-width="2" />
-            <ellipse cx="26" cy="22" rx="14" ry="9" fill="#fff" opacity=".35" />
-            <text x="32" y="39" text-anchor="middle" font-family="DejaVu Sans, Arial" font-weight="700" font-size="24"
-              fill="#2b2213">D</text>
-          </svg>
-          <span id="dorosAmount" class="doros-amount">1,250</span>
-          <span class="doros-label">Doros</span>
-        </button>
-
-        <!-- Greeting chip -->
-        <div class="greet-container">
-          <button class="chip glass-chip greet-chip" id="greetChip" type="button" aria-haspopup="menu"
-            aria-expanded="false" aria-controls="greetMenu">
-            <span id="greetText">Hello, Joe</span>
-          </button>
-          <div id="greetMenu" class="greet-menu" role="menu" hidden>
-            <div class="greet-menu-section" role="none">
-              <button type="button" class="greet-menu-item" role="menuitem" data-nav="./account.html">Account
-                Settings</button>
-              <button type="button" class="greet-menu-item" role="menuitem" data-nav="./profile.html">Profile
-                Settings</button>
-            </div>
-            <hr class="greet-menu-divider" />
-            <button type="button" class="greet-menu-item" role="menuitem" id="logoutBtn">Log Out</button>
-          </div>
-        </div>
-
-        <button id="menuButton" class="chip glass-chip menu-chip" type="button" aria-label="Open navigation menu"
-          title="Menu">
-          <svg class="menu-chip-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-            <line x1="6" y1="10" x2="26" y2="10" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-            <line x1="6" y1="16" x2="26" y2="16" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-            <line x1="6" y1="22" x2="26" y2="22" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        <!-- Inventory -->
+        <button class="topbar-icon-btn" id="inventoryChip" type="button" aria-haspopup="dialog"
+          aria-expanded="false" aria-controls="inventoryDialog" title="Inventory">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none">
+            <rect x="2" y="7" width="20" height="15" rx="2" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="12" y1="12" x2="12" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="9.5" y1="14.5" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </button>
       </div>
+
+      <!-- Center: timer -->
+      <nav class="topbar-center" aria-label="Main actions">
+        <button id="timerChip" class="topbar-action-btn" type="button" title="Timer"
+          aria-haspopup="dialog" aria-controls="timerLaunchMenu">
+          <svg class="topbar-action-icon" viewBox="0 0 48 48" aria-hidden="true">
+            <circle cx="24" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="3"/>
+            <line x1="24" y1="14" x2="24" y2="24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <line x1="24" y1="24" x2="31" y2="28" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+          Timer
+        </button>
+      </nav>
+
+      <!-- Right: currency + store -->
+      <div class="topbar-right">
+        <!-- Doros -->
+        <button class="topbar-currency-pill" id="dorosChip" type="button" aria-label="Doros balance">
+          <svg class="topbar-currency-icon" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <radialGradient id="gemGlow" cx="35%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#fff9d1"/>
+                <stop offset="45%" stop-color="#ffd979"/>
+                <stop offset="100%" stop-color="#f2b942"/>
+              </radialGradient>
+              <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f7d073"/>
+                <stop offset="100%" stop-color="#d39b2d"/>
+              </linearGradient>
+            </defs>
+            <circle cx="32" cy="32" r="29" fill="url(#ring)"/>
+            <circle cx="32" cy="32" r="25" fill="url(#gemGlow)" stroke="#b98627" stroke-width="2"/>
+            <text x="32" y="39" text-anchor="middle" font-family="Arial" font-weight="700" font-size="24" fill="#2b2213">D</text>
+          </svg>
+          <span id="dorosAmount">1,250</span>
+        </button>
+
+        <!-- Diamonds -->
+        <div class="doros-dropdown">
+          <button class="topbar-currency-pill" id="diamondChip" type="button" aria-label="Diamonds balance"
+            aria-haspopup="true" aria-expanded="false" aria-controls="diamondMenu">
+            <img src="./assets/artwork/DiamondIcon.png" alt="💎" class="topbar-currency-icon"/>
+            <span id="diamondAmount">0</span>
+          </button>
+          <div class="doros-menu" id="diamondMenu" role="menu" hidden>
+            <button type="button" class="doros-menu-item" role="menuitem" data-menu-action="buy-diamonds">Buy Diamonds</button>
+          </div>
+        </div>
+
+        <!-- Hidden: kept for sidebar.js username + logout proxy -->
+        <div class="greet-container" aria-hidden="true">
+          <span id="greetText" hidden></span>
+          <div id="greetMenu" hidden>
+            <button type="button" id="logoutBtn" hidden></button>
+          </div>
+        </div>
+      </div>
+
     </header>
 
 
     <!-- Tasks stack (flow layout) — single top-level panel, no nesting >>> -->
     <section class="tasks-wrap" aria-label="Tasks section">
-      <div id="tasksStack" class="tasks-stack"></div>
 
       <template id="tasksPanelTemplate">
         <div class="tasks-panel" aria-label="Tasks">
@@ -277,148 +217,87 @@
         </div>
       </template>
 
-      <!-- "Add goal" chip must be a SIBLING of #tasksStack (not inside a .tasks-panel) -->
-      <div class="tasks-chip-row">
-        <button id="addTasksPanel" class="chip glass-chip todo-chip" type="button" aria-haspopup="dialog"
-          aria-controls="todoDialog" title="Open To Do menu">
-          <svg class="todo-chip-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-            <rect x="12" y="10" width="24" height="28" rx="6" ry="6" fill="none" stroke="currentColor"
-              stroke-width="3" />
-            <line x1="17" y1="10" x2="17" y2="38" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-            <line x1="15" y1="16" x2="17" y2="16" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-            <line x1="15" y1="22" x2="17" y2="22" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-            <polyline points="20 26 24 30 32 20" fill="none" stroke="currentColor" stroke-width="3"
-              stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          <span class="sr-only">Open To Do menu</span>
-        </button>
-        <button id="aiPlanBtn" class="chip glass-chip ai-plan-chip" type="button" aria-label="Generate plan with AI"
-          title="Generate plan with AI">
-          AI Plan
-        </button>
-        <button id="timerChip" class="chip glass-chip timer-chip" type="button" aria-label="Open timer"
-          aria-haspopup="dialog" aria-controls="timerLaunchMenu" title="Timer">
-          <svg class="timer-chip-icon" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
-            <circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="3" />
-            <line x1="24" y1="13" x2="24" y2="24" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-            <line x1="24" y1="24" x2="32" y2="28" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-          </svg>
-        </button>
-      </div>
 
       <div id="focusPanelSlot" class="focus-panel-slot" hidden></div>
 
-      <div id="timerDurationBackdrop" class="backdrop timer-duration-backdrop" hidden></div>
-      <div id="timerDurationMenu" class="timer-duration-panel" role="dialog" aria-modal="true" aria-hidden="true"
-        hidden>
-        <div id="timerDurationTitle" class="timer-duration-title">Set minutes</div>
-        <div class="timer-duration-value">
-          <input id="timerDurationValue" type="number" min="1" max="180" value="25" />
-        </div>
-        <input id="timerDurationSlider" class="timer-duration-slider" type="range" min="1" max="180" step="1" />
-        <div class="timer-duration-actions">
-          <button type="button" id="timerDurationOk" class="btn-primary">Start</button>
-        </div>
-      </div>
     </section>
     <!-- <<< REPLACEMENT END <<< -->
 
     <!-- Timer & controls (right) -->
     <div class="right-ui">
-      <div class="timer-info-panel">
-        <div id="focusTaskName" class="focus-task-name" hidden></div>
-        <div id="modeLabel" class="timer-label">Idle</div>
+      <div class="timer-panel-header">
+        <span class="timer-panel-title">Pomodoro</span>
+        <button id="timerPanelClose" class="timer-panel-close" aria-label="Close timer panel">&#x2715;</button>
+      </div>
 
-        <!-- Subtask selector — shown when a task is active -->
-        <div id="subtaskSelector" class="subtask-selector" hidden>
-          <label class="subtask-selector-label" for="subtaskSelect">Timing:</label>
-          <select id="subtaskSelect" class="subtask-select">
-            <option value="">— select subtask —</option>
-          </select>
+      <!-- Settings + Float button row -->
+      <div class="timer-action-row">
+        <button id="timerSettingsBtn" class="timer-settings-btn" type="button" aria-expanded="false" aria-controls="timerSettingsPanel">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+          Settings
+        </button>
+
+        <button id="timerFloatBtn" class="timer-settings-btn" type="button" title="Float timer">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+          Float
+        </button>
+      </div>
+
+      <!-- Settings panel (hidden by default) -->
+      <div id="timerSettingsPanel" class="timer-settings-panel" hidden>
+        <div class="timer-settings-title">Session Durations (minutes)</div>
+        <div class="timer-settings-fields">
+          <div class="timer-settings-field">
+            <span class="timer-settings-label">Focus</span>
+            <input class="timer-settings-input" type="number" id="settingFocus" min="1" max="120" value="25">
+          </div>
+          <div class="timer-settings-field">
+            <span class="timer-settings-label">Short</span>
+            <input class="timer-settings-input" type="number" id="settingShort" min="1" max="60" value="5">
+          </div>
+          <div class="timer-settings-field">
+            <span class="timer-settings-label">Long</span>
+            <input class="timer-settings-input" type="number" id="settingLong" min="1" max="60" value="15">
+          </div>
         </div>
+        <button id="timerSettingsApply" class="btn-primary" type="button">Apply</button>
+      </div>
+
+      <!-- Mode selector chips -->
+      <div class="mode-chips">
+        <button class="chip is-active" data-mode="focus" data-minutes="25" type="button">Focus</button>
+        <button class="chip" data-mode="break" data-minutes="5" type="button">Short</button>
+        <button class="chip" data-mode="longBreak" data-minutes="15" type="button">Long</button>
       </div>
 
       <div class="timer-card" aria-live="polite">
+        <svg class="timer-ring" viewBox="0 0 160 160" aria-hidden="true">
+          <circle class="timer-ring-track" cx="80" cy="80" r="76"/>
+          <circle class="timer-ring-fill" id="timerRingFill" cx="80" cy="80" r="76"/>
+        </svg>
         <div id="timerDisplay" class="timer-value">25:00</div>
-        <div id="timerSessionCount" class="timer-session-count">0 sessions done</div>
       </div>
 
       <div class="btn-row">
-        <button id="startBtn" class="btn-primary" type="button">Pause</button>
-        <button id="endBtn" class="btn-secondary" type="button">End</button>
+        <button id="resetBtn" class="btn-icon-secondary" type="button" title="Reset timer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.36"/></svg>
+        </button>
+        <button id="startBtn" class="btn-primary" type="button">Start</button>
+        <button id="nextBtn" class="btn-icon-secondary" type="button" title="Skip to next">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+        </button>
       </div>
 
     </div>
   </div>
-
-  <!-- Timer summary dialog -->
-  <div id="timerSummaryBackdrop" class="backdrop" hidden></div>
-  <section id="timerSummaryDialog" class="timer-summary-panel" role="dialog" aria-modal="true"
-    aria-labelledby="timerSummaryTitle" aria-hidden="true" hidden>
-    <div class="timer-summary-header">
-      <h2 id="timerSummaryTitle">Congratulations!</h2>
-    </div>
-    <div class="timer-summary-body">
-      <img class="timer-summary-illustration" src="assets/artwork/CelebrationDragon.png" alt="Celebration dragon" />
-      <p class="timer-summary-row">Minutes: <span id="timerSummaryMinutes">0</span></p>
-      <p class="timer-summary-row">Doros earned: <span id="timerSummaryDoros">0</span></p>
-
-      <div id="timerBreakPrompt" class="timer-break-prompt" hidden>
-      </div>
-    </div>
-    <div class="timer-summary-actions">
-      <button id="timerSummaryRestart" class="btn-primary" type="button">Restart</button>
-      <button id="timerSummaryBreak" class="btn-secondary" type="button">Break</button>
-      <button id="timerSummaryHome" class="btn-secondary" type="button">Home</button>
-    </div>
-  </section>
-
-  <div id="breakSummaryBackdrop" class="backdrop" hidden></div>
-  <section id="breakSummaryDialog" class="timer-summary-panel break-summary-panel" role="dialog" aria-modal="true"
-    aria-labelledby="breakSummaryTitle" aria-hidden="true" hidden>
-    <div class="timer-summary-header">
-      <h2 id="breakSummaryTitle">Break is over!</h2>
-    </div>
-    <div class="timer-summary-body">
-      <img class="timer-summary-illustration" src="assets/artwork/BreakDragon.png" alt="Buddy Doro ready to focus" />
-      <p class="timer-summary-row">You relaxed for <span id="breakSummaryMinutes">0</span> minutes.</p>
-      <p class="timer-summary-row">Time to jump back into focus.</p>
-    </div>
-    <div class="timer-summary-actions">
-      <button id="breakSummaryResume" class="btn-primary" type="button">Resume Focus</button>
-      <button id="breakSummaryLater" class="btn-secondary" type="button">Later</button>
-    </div>
-  </section>
-
-  <div id="pomodoroConfirmBackdrop" class="backdrop" hidden></div>
-  <section id="pomodoroConfirmDialog" class="timer-summary-panel" role="dialog" aria-modal="true"
-    aria-labelledby="pomodoroConfirmTitle" aria-hidden="true" tabindex="-1" hidden>
-    <div class="timer-summary-header">
-      <h2 id="pomodoroConfirmTitle">Confirm focus time</h2>
-    </div>
-    <div class="timer-summary-body">
-      <p id="pomodoroConfirmText" class="timer-summary-row"></p>
-    </div>
-    <div class="timer-summary-actions">
-      <button id="pomodoroConfirmCancel" class="btn-secondary" type="button">Cancel</button>
-      <button id="pomodoroConfirmOk" class="btn-primary" type="button">OK</button>
-    </div>
-  </section>
-
-  <div id="breakConfirmBackdrop" class="backdrop" hidden></div>
-  <section id="breakConfirmDialog" class="timer-summary-panel" role="dialog" aria-modal="true"
-    aria-labelledby="breakConfirmTitle" aria-hidden="true" tabindex="-1" hidden>
-    <div class="timer-summary-header">
-      <h2 id="breakConfirmTitle">Take a break?</h2>
-    </div>
-    <div class="timer-summary-body">
-      <p id="breakConfirmText" class="timer-summary-row">Do you want to take a break?</p>
-    </div>
-    <div class="timer-summary-actions">
-      <button id="breakConfirmCancel" class="btn-secondary" type="button">No</button>
-      <button id="breakConfirmOk" class="btn-primary" type="button">Yes</button>
-    </div>
-  </section>
 
   <div id="todoBackdrop" class="backdrop" hidden></div>
   <section id="todoDialog" class="timer-summary-panel todo-panel" role="dialog" aria-modal="true"
@@ -429,8 +308,6 @@
     </div>
     <div class="timer-summary-body todo-body">
       <p class="todo-description">Keep track of what you need to tackle next.</p>
-      <p id="todoNoGoalMessage" class="todo-empty" hidden>You need a goal before you can add tasks.</p>
-      <div id="todoGoalContainer" class="todo-goal-container" hidden></div>
       <ul id="todoTaskList" class="todo-task-list" aria-live="polite"></ul>
     </div>
     <div class="timer-summary-actions todo-actions">
@@ -439,69 +316,6 @@
     </div>
   </section>
 
-  <!-- AI Plan dialog -->
-  <div id="aiPlanBackdrop" class="backdrop" hidden></div>
-  <section id="aiPlanDialog" class="ai-plan-panel" role="dialog" aria-modal="true" aria-labelledby="aiPlanTitle"
-    aria-hidden="true" hidden>
-    <div class="ai-plan-header">
-      <h2 id="aiPlanTitle">Generate plan with AI</h2>
-      <button id="aiPlanClose" class="icon-btn" type="button" aria-label="Close AI planner">&times;</button>
-    </div>
-
-    <div class="ai-plan-body">
-      <label class="ai-plan-label" for="aiGoalInput">Describe your goal</label>
-      <textarea id="aiGoalInput" class="ai-plan-textarea" rows="4"
-        placeholder="Example: Learn React in 2 weeks"></textarea>
-      <div class="ai-plan-actions">
-        <button id="aiGenerateBtn" class="btn-primary" type="button">Generate</button>
-        <span class="ai-plan-hint">Edit tasks and estimates before creating the plan.</span>
-      </div>
-      <p id="aiPlanDescription" class="ai-plan-description"></p>
-      <div id="aiPlanPreview" class="ai-plan-preview" aria-live="polite"></div>
-    </div>
-
-    <div class="ai-plan-footer">
-      <button id="aiAddTaskBtn" class="btn-secondary" type="button">Add task</button>
-      <button id="aiCreatePlanBtn" class="btn-primary" type="button">Create plan</button>
-    </div>
-  </section>
-
-  <!-- Store dialog (window) -->
-  <div id="storeBackdrop" class="backdrop" hidden></div>
-
-  <section id="storeDialog" class="store-panel" role="dialog" aria-modal="true" aria-labelledby="storeTitle" hidden>
-    <div class="store-header">
-      <h2 id="storeTitle">Companion Store</h2>
-      <button id="storeClose" class="icon-btn" aria-label="Close store">&times;</button>
-    </div>
-
-    <div class="store-content">
-      <!-- Left: catalog -->
-      <div class="catalog-column">
-        <div class="category-tabs" role="tablist" aria-label="Store categories">
-          <button class="tab is-active" role="tab" aria-selected="true" data-cat="food">Food</button>
-          <button class="tab" role="tab" aria-selected="false" data-cat="play">Play</button>
-          <button class="tab" role="tab" aria-selected="false" data-cat="water">Water</button>
-          <button class="tab" role="tab" aria-selected="false" data-cat="medicine">Medicine</button>
-          <button class="tab tab-skins" role="tab" aria-selected="false" data-cat="skins">Skins</button>
-          <button class="tab tab-backgrounds" role="tab" aria-selected="false" data-cat="backgrounds">Backgrounds</button>
-        </div>
-
-        <div id="catalogGrid" class="catalog-grid" aria-live="polite"></div>
-      </div>
-
-      <!-- Right: inventory -->
-      <aside class="inventory-column" aria-label="Your Inventory">
-        <h3>Inventory</h3>
-        <ul id="inventoryList" class="inventory-list" aria-live="polite"></ul>
-      </aside>
-    </div>
-
-    <div class="store-footer">
-      <button id="useSelectedBtn" class="btn-primary" type="button">Use Selected</button>
-      <button id="storeCloseBottom" class="btn-secondary" type="button">Close</button>
-    </div>
-  </section>
 
    <!-- Inventory dialog (window) -->
    <div id="inventoryBackdrop" class="backdrop" hidden></div>
@@ -714,6 +528,309 @@
 
   <script type="module" src="../js/features/store.js"></script>
   <script type="module" src="../js/features/history.js"></script>
+
+  <!-- ===== Session Panel (fixed left, during active session) ===== -->
+  <aside id="sessionPanel" class="session-panel" aria-label="Active session">
+    <div class="session-panel-header">
+      <div class="session-panel-header-top">
+        <div class="session-panel-label">Session</div>
+        <button id="sessionCollapseBtn" class="session-collapse-btn" type="button" aria-label="Collapse session panel">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+      </div>
+      <div class="session-goal-title" id="sessionGoalTitle"></div>
+    </div>
+    <div class="session-task-list" id="sessionTaskList"></div>
+    <div class="session-panel-footer">
+      <button id="endSessionBtn" class="end-session-btn" type="button">End Session</button>
+    </div>
+  </aside>
+
+  <!-- "Pick Next Task / Goal Complete" overlay -->
+  <div id="sessionNextOverlay" class="session-next-overlay" hidden>
+    <div class="session-next-card">
+      <div class="session-next-icon" id="sessionNextIcon">🎉</div>
+      <div class="session-next-title" id="sessionNextTitle">Task Complete!</div>
+      <div class="session-next-body" id="sessionNextBody"></div>
+      <div id="sessionTaskPicker" class="session-task-picker"></div>
+      <div class="session-next-actions">
+        <button id="sessionEndFromPromptBtn" class="btn-secondary" type="button">End Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Sidebar Navigation ===== -->
+  <aside id="sidebar" class="sidebar" aria-label="Navigation menu">
+
+    <!-- Gradient profile header -->
+    <div class="sidebar-profile">
+      <div class="sidebar-user-meta">
+        <div class="sidebar-title-row">
+          <div class="sidebar-app-title">BuddyDoro</div>
+          <div class="sidebar-user-actions">
+          <a href="account.html" class="sidebar-user-action-btn" title="Account">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+            </svg>
+          </a>
+          <a href="profile.html" class="sidebar-user-action-btn" title="Profile">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </a>
+          <button id="sidebarLogoutBtn" class="sidebar-user-action-btn" title="Log Out">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
+          <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu">&#x2715;</button>
+        </div>
+        </div>
+        <div class="sidebar-name-row">
+          <span class="sidebar-greeting" id="sidebarGreeting"></span>
+          <span class="sidebar-username" id="sidebarUsername">Player</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Plan section -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Plan</div>
+      <button class="sidebar-nav-btn" id="sidebarAiPlanBtn">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        </svg>
+        AI Plan
+      </button>
+    </div>
+
+    <!-- Goals & Tasks section -->
+    <div class="sidebar-section sidebar-goals-section">
+
+      <!-- Goals header row: title + add button (mirrors Alt branch TasksStack columnHeader) -->
+      <div class="sidebar-goals-header">
+        <span class="sidebar-goals-title">Goals</span>
+        <button class="sidebar-add-goal-btn" id="sidebarTasksBtn" title="Add a new goal">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+          Add goal
+        </button>
+      </div>
+
+      <!-- Goal panels render directly here — no dialog -->
+      <div id="todoGoalContainer" class="sidebar-goals-container">
+        <div id="tasksStack" class="tasks-stack"></div>
+      </div>
+
+      <button id="startSessionBtn" class="start-session-btn" type="button">▶ Start Session</button>
+    </div>
+
+    <!-- App section -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">App</div>
+      <button class="sidebar-nav-btn" id="sidebarHistoryBtn">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/>
+          <polyline points="12,7 12,12 16,14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        History
+      </button>
+      <button class="sidebar-nav-btn" id="sidebarMusicBtn">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M9 18V6l12-2v12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="6" cy="18" r="3" stroke="currentColor" stroke-width="1.7"/>
+          <circle cx="18" cy="16" r="3" stroke="currentColor" stroke-width="1.7"/>
+        </svg>
+        Music
+      </button>
+    </div>
+
+
+  </aside>
+
+  <!-- Sidebar backdrop -->
+  <div id="sidebarBackdrop"></div>
+
+  <!-- Init sidebar -->
+  <script type="module">
+    import { initSidebar } from '../js/features/sidebar.js';
+    initSidebar();
+  </script>
+
+  <!-- Start Session picker -->
+  <script type="module">
+    import { initStartSession } from '../js/features/startSession.js';
+    initStartSession();
+  </script>
+
+  <!-- Timer panel slide-in -->
+  <script>
+    (function () {
+      const rightUi   = document.querySelector('.right-ui');
+      const timerChip = document.getElementById('timerChip');
+      const closeBtn  = document.getElementById('timerPanelClose');
+
+      function open()  { rightUi?.classList.add('is-open'); }
+      function close() { rightUi?.classList.remove('is-open'); }
+
+      timerChip?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        rightUi?.classList.contains('is-open') ? close() : open();
+      });
+
+      const CLOSE_ICON  = '&#x2715;';
+      const EXPAND_ICON = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>`;
+
+      closeBtn?.addEventListener('click', () => {
+        if (isFloating) exitFloat();
+        else close();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (isFloating) return;
+        if (e.key === 'Escape' && rightUi?.classList.contains('is-open')) close();
+      });
+
+      // ---- Settings ----
+      const settingsBtn   = document.getElementById('timerSettingsBtn');
+      const settingsPanel = document.getElementById('timerSettingsPanel');
+      const applyBtn      = document.getElementById('timerSettingsApply');
+      const timerElements = () => [
+        document.querySelector('.mode-chips'),
+        document.querySelector('.timer-card'),
+        document.querySelector('.btn-row'),
+      ];
+
+      function openSettings() {
+        settingsPanel.hidden = false;
+        settingsBtn.setAttribute('aria-expanded', 'true');
+        timerElements().forEach(el => el && (el.style.display = 'none'));
+      }
+
+      function closeSettings() {
+        settingsPanel.hidden = true;
+        settingsBtn.setAttribute('aria-expanded', 'false');
+        timerElements().forEach(el => el && (el.style.display = ''));
+      }
+
+      settingsBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        settingsPanel.hidden ? openSettings() : closeSettings();
+      });
+
+      function applyDuration(mode, rawValue) {
+        const chip = document.querySelector(`.chip[data-mode="${mode}"]`);
+        if (!chip) return;
+        const minutes = Math.max(1, Math.min(parseInt(rawValue, 10) || 1, 120));
+        chip.dataset.minutes = minutes;
+        if (chip.classList.contains('is-active')) {
+          const startBtn = document.getElementById('startBtn');
+          if (startBtn && startBtn.textContent.trim() !== 'Pause') chip.click();
+        }
+      }
+
+      applyBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const focusVal = document.getElementById('settingFocus')?.value;
+        const shortVal = document.getElementById('settingShort')?.value;
+        applyDuration('focus',     focusVal);
+        applyDuration('break',     shortVal);
+        applyDuration('longBreak', document.getElementById('settingLong')?.value);
+        closeSettings();
+        // Save to backend (fire-and-forget)
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          fetch('http://localhost:3000/api/user/settings', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({
+              focusMinutes: Math.max(1, Math.min(parseInt(focusVal, 10) || 25, 120)),
+              breakMinutes: Math.max(1, Math.min(parseInt(shortVal, 10) || 5, 60)),
+            }),
+          }).catch(err => console.warn('[Settings] API save failed:', err));
+        }
+      });
+
+      // ---- Float mode ----
+      const floatBtn = document.getElementById('timerFloatBtn');
+      let isFloating = false;
+      let dragState = null;
+
+      function enterFloat() {
+        isFloating = true;
+        const rect = rightUi.getBoundingClientRect();
+        rightUi.style.transition = 'none';
+        rightUi.style.right     = 'auto';
+        rightUi.style.top       = rect.top + 'px';
+        rightUi.style.left      = rect.left + 'px';
+        rightUi.style.transform = 'none';
+        rightUi.classList.add('is-floating');
+        // Update labels
+        if (floatBtn) floatBtn.lastChild.textContent = 'Drag';
+        if (closeBtn) closeBtn.innerHTML = EXPAND_ICON;
+      }
+
+      function exitFloat() {
+        isFloating = false;
+        rightUi.classList.remove('is-floating');
+        rightUi.style.cssText = '';
+        requestAnimationFrame(() => { rightUi.style.transition = ''; });
+        // Restore labels
+        if (floatBtn) floatBtn.lastChild.textContent = 'Float';
+        if (closeBtn) closeBtn.innerHTML = CLOSE_ICON;
+      }
+
+      floatBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!isFloating) enterFloat(); // only enters; expand btn exits
+      });
+
+      // Drag — mousedown on panel starts drag only in float mode
+      rightUi.addEventListener('mousedown', (e) => {
+        if (!isFloating) return;
+        if (e.target.closest('button, input')) return; // don't drag from controls
+        e.preventDefault();
+        const rect = rightUi.getBoundingClientRect();
+        dragState = { startX: e.clientX - rect.left, startY: e.clientY - rect.top };
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!dragState) return;
+        rightUi.style.left = (e.clientX - dragState.startX) + 'px';
+        rightUi.style.top  = (e.clientY - dragState.startY) + 'px';
+      });
+
+      document.addEventListener('mouseup', () => { dragState = null; });
+
+      // Touch support
+      rightUi.addEventListener('touchstart', (e) => {
+        if (!isFloating) return;
+        if (e.target.closest('button, input')) return;
+        const t = e.touches[0];
+        const rect = rightUi.getBoundingClientRect();
+        dragState = { startX: t.clientX - rect.left, startY: t.clientY - rect.top };
+      }, { passive: true });
+
+      document.addEventListener('touchmove', (e) => {
+        if (!dragState) return;
+        const t = e.touches[0];
+        rightUi.style.left = (t.clientX - dragState.startX) + 'px';
+        rightUi.style.top  = (t.clientY - dragState.startY) + 'px';
+      }, { passive: true });
+
+      document.addEventListener('touchend', () => { dragState = null; });
+    })();
+  </script>
+
 </body>
 
 </html>

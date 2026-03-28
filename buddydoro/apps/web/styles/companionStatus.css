@@ -71,18 +71,18 @@
 }
 
 .companion-status-fill.is-green {
-  background: linear-gradient(180deg, #75dc79, #3ea94d);
-  box-shadow: 0 0 6px rgba(84, 193, 98, 0.35);
+  background: linear-gradient(180deg, #6e8c70, #4e6650);
+  box-shadow: 0 0 6px rgba(110, 140, 112, 0.35);
 }
 
 .companion-status-fill.is-orange {
-  background: linear-gradient(180deg, #ffbe69, #ea8d2e);
-  box-shadow: 0 0 6px rgba(238, 148, 54, 0.35);
+  background: linear-gradient(180deg, #c98a2e, #a8501f);
+  box-shadow: 0 0 6px rgba(201, 138, 46, 0.35);
 }
 
 .companion-status-fill.is-red {
-  background: linear-gradient(180deg, #ff7c70, #df4338);
-  box-shadow: 0 0 6px rgba(223, 67, 56, 0.35);
+  background: linear-gradient(180deg, #f95630, #b02500);
+  box-shadow: 0 0 6px rgba(176, 37, 0, 0.35);
 }
 
 @media (max-width: 720px) {

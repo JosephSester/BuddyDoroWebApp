@@ -1,0 +1,900 @@
+/* ===== Sidebar Navigation — Alt_implementation design system ===== */
+
+/* Design tokens (mirrors Alt branch tokens.css)
+   --color-terracotta:   #c0622a
+   --color-ochre:        #c98a2e
+   --color-cream:        #faf4e8
+   --color-brown-dark:   #2b2213
+   --color-brown-medium: #5c4033
+   --color-brown-light:  #8c6b55
+   --glass-bg:           rgba(250, 244, 232, 0.72)
+   --glass-border:       rgba(232, 180, 120, 0.40)
+   --glass-blur:         blur(14px) saturate(160%)
+*/
+
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 290px;
+  height: 100vh;
+  border-radius: 0 16px 16px 0;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+
+  /* Glassmorphism — scene shows through */
+  background: rgba(250, 244, 232, 0.82);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+
+  border-right: 1px solid rgba(232, 180, 120, 0.40);
+  box-shadow:
+    6px 0 32px rgba(43, 34, 19, 0.22),
+    2px 0 12px rgba(192, 98, 42, 0.12);
+
+  transform: translateX(-100%);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(192, 98, 42, 0.35) transparent;
+}
+
+#sidebar.is-open {
+  transform: translateX(0);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- Profile header ---- */
+.sidebar-profile {
+  padding: 28px 18px 22px;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  background: rgba(250, 244, 232, 0.45);
+  border-bottom: 1px solid rgba(192, 98, 42, 0.18);
+}
+
+.sidebar-close-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(192, 98, 42, 0.10);
+  color: #5c4033;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.sidebar-close-btn:hover  { background: rgba(192, 98, 42, 0.18); }
+.sidebar-close-btn:active { background: rgba(192, 98, 42, 0.28); }
+
+/* Avatar */
+.sidebar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8b557, #c0622a);
+  border: 2px solid rgba(192, 98, 42, 0.30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(192, 98, 42, 0.25);
+}
+
+.sidebar-avatar svg { width: 18px; height: 18px; }
+
+.sidebar-user-meta {
+  flex: 1;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.sidebar-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.sidebar-app-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c0622a;
+  opacity: 0.75;
+}
+
+.sidebar-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.sidebar-greeting {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2b2213;
+  letter-spacing: -0.01em;
+}
+
+.sidebar-username {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2b2213;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sidebar-user-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #8c6b55;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.14s;
+}
+
+.sidebar-user-action-btn:hover {
+  color: #2b2213;
+}
+
+.sidebar-currencies {
+  display: flex;
+  gap: 7px;
+  margin-top: 9px;
+  flex-wrap: wrap;
+}
+
+.sidebar-currency-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(250, 244, 232, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(232, 180, 120, 0.40);
+  border-radius: 999px;
+  padding: 4px 11px 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2b2213;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(43, 34, 19, 0.08);
+}
+
+.sidebar-currency-pill img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+/* ---- Sections ---- */
+.sidebar-section {
+  padding: 14px 12px 10px;
+  border-bottom: 1px solid rgba(192, 98, 42, 0.10);
+}
+
+.sidebar-section:last-child { border-bottom: none; }
+
+.sidebar-section-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: #8c6b55;
+  padding: 0 10px 8px;
+}
+
+/* ---- Nav buttons ---- */
+.sidebar-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #2b2213;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.sidebar-nav-btn:hover {
+  background: rgba(192, 98, 42, 0.08);
+  color: #2b2213;
+}
+
+.sidebar-nav-btn:active {
+  background: rgba(192, 98, 42, 0.14);
+}
+
+.sidebar-nav-btn:focus-visible {
+  outline: 2px solid rgba(192, 98, 42, 0.40);
+  outline-offset: -2px;
+}
+
+.sidebar-nav-btn .nav-icon {
+  width: 20px;
+  height: 20px;
+  color: #c0622a;
+  opacity: 0.80;
+  flex-shrink: 0;
+}
+
+.sidebar-nav-btn:hover .nav-icon {
+  opacity: 1;
+  color: #b84f1e;
+}
+
+/* Logout */
+.sidebar-nav-btn.sidebar-logout {
+  color: #c97b7b;
+  margin-top: 2px;
+}
+
+.sidebar-nav-btn.sidebar-logout:hover {
+  background: rgba(201, 123, 123, 0.10);
+  color: #a85050;
+}
+
+.sidebar-nav-btn.sidebar-logout .nav-icon {
+  color: #c97b7b;
+  opacity: 0.85;
+}
+
+.sidebar-nav-btn.sidebar-logout:hover .nav-icon {
+  color: #a85050;
+  opacity: 1;
+}
+
+/* ---- Goals & Tasks section ---- */
+.sidebar-goals-section {
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Goals header: title left, add-goal pill right (mirrors Alt TasksStack columnHeader) */
+.sidebar-goals-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 10px;
+}
+
+.sidebar-goals-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: #8c6b55;
+}
+
+.sidebar-add-goal-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(232, 180, 120, 0.40);
+  border-radius: 999px;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #5c4033;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.sidebar-add-goal-btn:hover {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(192, 98, 42, 0.35);
+  color: #2b2213;
+}
+
+.sidebar-goals-container {
+  margin-top: 8px;
+  padding: 0 2px 4px;
+}
+
+/* ===== Goals Accordion ===== */
+
+#sidebar #tasksStack {
+  max-height: none !important;
+  overflow: visible !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  padding: 2px 0 4px !important;
+}
+
+/* Goal panel — glass accordion card */
+#sidebar .tasks-panel {
+  background: rgba(250, 244, 232, 0.60) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(232, 180, 120, 0.40) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 8px rgba(43, 34, 19, 0.08) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  transition: box-shadow 0.15s !important;
+}
+
+#sidebar .tasks-panel:hover {
+  box-shadow: 0 4px 14px rgba(43, 34, 19, 0.12) !important;
+}
+
+/* Goal header — clickable accordion trigger */
+#sidebar .tasks-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px 14px !important;
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  transition: background 0.15s !important;
+  border-radius: 14px !important;
+}
+
+#sidebar .tasks-header:hover {
+  background: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* CSS chevron — rotates when expanded */
+#sidebar .tasks-header::before {
+  content: '' !important;
+  display: inline-block !important;
+  width: 7px !important;
+  height: 7px !important;
+  border-right: 2px solid #8c6b55 !important;
+  border-bottom: 2px solid #8c6b55 !important;
+  border-radius: 1px !important;
+  transform: rotate(45deg) !important;
+  flex-shrink: 0 !important;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  margin-bottom: 2px !important;
+}
+
+#sidebar .tasks-panel.is-expanded .tasks-header::before {
+  transform: rotate(-135deg) !important;
+  margin-bottom: -2px !important;
+}
+
+/* Goal title with truncation */
+#sidebar .tasks-title {
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: #2b2213 !important;
+  letter-spacing: -0.01em !important;
+  display: block !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Edit/delete icons — hidden until goal is hovered */
+#sidebar .tasks-header-actions {
+  display: flex !important;
+  gap: 2px !important;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+#sidebar .tasks-panel:hover .tasks-header-actions {
+  opacity: 1;
+}
+
+#sidebar .task-title-edit,
+#sidebar .task-title-delete {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #8c6b55 !important;
+  padding: 0 !important;
+  transition: background 0.12s, color 0.12s !important;
+}
+
+#sidebar .task-title-edit:hover {
+  background: rgba(192, 98, 42, 0.10) !important;
+  color: #5c4033 !important;
+}
+
+#sidebar .task-title-delete:hover {
+  background: rgba(201, 123, 123, 0.12) !important;
+  color: #c97b7b !important;
+}
+
+#sidebar .task-title-edit-icon,
+#sidebar .task-title-delete-icon {
+  width: 13px !important;
+  height: 13px !important;
+}
+
+/* Task list — collapsible body */
+#sidebar .tasks-list {
+  max-height: 0 !important;
+  overflow: hidden !important;
+  transition: max-height 0.28s cubic-bezier(0.3, 0, 0.3, 1), padding 0.28s !important;
+  padding: 0 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+
+#sidebar .tasks-panel.is-expanded .tasks-list {
+  max-height: 2000px !important;
+  padding: 6px 8px 8px !important;
+}
+
+/* Task card — column layout, buttons absolutely positioned top-right */
+#sidebar .task-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  position: relative !important;
+  background: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  padding: 9px 52px 9px 12px !important;
+  gap: 0 !important;
+  transition: background 0.15s ease, border-color 0.15s, box-shadow 0.15s !important;
+  cursor: default !important;
+}
+
+#sidebar .task-card.is-hover,
+#sidebar .task-card:hover {
+  background: rgba(255, 255, 255, 0.50) !important;
+  border-color: rgba(110, 140, 112, 0.45) !important;
+  box-shadow: 0 0 0 1.5px rgba(110, 140, 112, 0.30) !important;
+  transform: none !important;
+}
+
+#sidebar .subtask-left input[type="checkbox"] {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+#sidebar .task-card.is-active {
+  background: rgba(255, 255, 255, 0.65) !important;
+  border-color: #6e8c70 !important;
+  box-shadow: 0 0 0 2px #6e8c70, 0 4px 12px rgba(110, 140, 112, 0.18) !important;
+}
+
+/* Task name row */
+#sidebar .task-main {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  gap: 0 !important;
+}
+
+#sidebar .task-main::before {
+  display: none !important;
+}
+
+/* Task name */
+#sidebar .task-name {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #2b2213 !important;
+  line-height: 1.4 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+#sidebar .task-card.is-active .task-name {
+  font-weight: 700 !important;
+  color: #6e8c70 !important;
+}
+
+#sidebar .task-card.is-active .subtasks-list {
+  border-left-color: #6e8c70 !important;
+}
+
+/* Delete button — absolute top-right, appears on hover */
+#sidebar .task-right {
+  display: flex !important;
+  align-items: center !important;
+  position: absolute !important;
+  top: 7px !important;
+  right: 6px !important;
+}
+
+/* Hide only session-bubble; keep subtask-toggle visible */
+#sidebar .session-bubble {
+  display: none !important;
+}
+
+/* Subtask "+" — minimal, always slightly visible */
+#sidebar .subtask-toggle {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 5px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #8c6b55 !important;
+  opacity: 0 !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  line-height: 1 !important;
+  transition: opacity 0.12s, background 0.12s !important;
+}
+
+#sidebar .task-card:hover .subtask-toggle,
+#sidebar .task-card.is-hover .subtask-toggle {
+  opacity: 0.65 !important;
+}
+
+#sidebar .subtask-toggle:hover {
+  opacity: 1 !important;
+  background: rgba(192, 98, 42, 0.10) !important;
+  color: #5c4033 !important;
+}
+
+#sidebar .task-del {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 5px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0 !important;
+  padding: 2px !important;
+  flex-shrink: 0 !important;
+  transition: opacity 0.12s, background 0.12s !important;
+}
+
+#sidebar .task-del svg {
+  width: 13px !important;
+  height: 13px !important;
+  stroke: #c97b7b !important;
+}
+
+#sidebar .task-card:hover .task-del,
+#sidebar .task-card.is-hover .task-del {
+  opacity: 0.65 !important;
+}
+
+#sidebar .task-del:hover {
+  opacity: 1 !important;
+  background: rgba(201, 123, 123, 0.14) !important;
+}
+
+/* Subtasks — always visible under the task name */
+#sidebar .subtasks-container {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  gap: 0 !important;
+}
+
+#sidebar .subtasks-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  padding: 4px 0 0 10px !important;
+  border-left: 2px solid rgba(192, 98, 42, 0.18) !important;
+  margin-top: 4px !important;
+  width: auto !important;
+}
+
+/* Hide the list itself when empty (no subtasks) */
+#sidebar .subtasks-list:empty {
+  display: none !important;
+}
+
+#sidebar .subtask-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  padding: 3px 4px !important;
+  border-radius: 5px !important;
+  background: transparent !important;
+  border: none !important;
+  transition: background 0.12s !important;
+}
+
+#sidebar .subtask-row:hover {
+  background: rgba(192, 98, 42, 0.05) !important;
+}
+
+#sidebar .subtask-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+}
+
+#sidebar .subtask-left input[type="checkbox"] {
+  width: 12px !important;
+  height: 12px !important;
+  flex-shrink: 0 !important;
+  accent-color: #6e8c70 !important;
+  cursor: pointer !important;
+}
+
+#sidebar .subtask-title {
+  display: block !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #5c4033 !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+}
+
+#sidebar .subtask-right {
+  display: flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+}
+
+#sidebar .subtask-meta {
+  display: none !important;
+}
+
+#sidebar .subtask-del {
+  width: 18px !important;
+  height: 18px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  color: #c97b7b !important;
+  font-size: 14px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 4px !important;
+  opacity: 0 !important;
+  transition: opacity 0.12s, background 0.12s !important;
+}
+
+#sidebar .subtask-row:hover .subtask-del {
+  opacity: 0.65 !important;
+}
+
+#sidebar .subtask-del:hover {
+  opacity: 1 !important;
+  background: rgba(201, 123, 123, 0.12) !important;
+}
+
+/* Inline subtask creator (appears inside subtasks-container when "+" clicked) */
+#sidebar .subtask-create {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding: 6px 8px !important;
+  background: rgba(250, 244, 232, 0.80) !important;
+  border: 1px solid rgba(192, 98, 42, 0.25) !important;
+  border-radius: 8px !important;
+  margin-bottom: 4px !important;
+}
+
+#sidebar .task-create-fields {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+#sidebar .task-create-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: #8c6b55 !important;
+}
+
+#sidebar .task-create-input.task-create-name {
+  font-size: 12px !important;
+  padding: 5px 8px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(192, 98, 42, 0.28) !important;
+  background: rgba(255, 255, 255, 0.90) !important;
+  color: #2b2213 !important;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
+  width: 100% !important;
+}
+
+#sidebar .task-create-actions {
+  display: flex !important;
+  gap: 5px !important;
+}
+
+#sidebar .task-create-save {
+  flex: 1 !important;
+  padding: 5px 8px !important;
+  background: linear-gradient(135deg, #c0622a, #b84f1e) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  transition: opacity 0.12s !important;
+}
+
+#sidebar .task-create-save:disabled {
+  opacity: 0.45 !important;
+  cursor: default !important;
+}
+
+#sidebar .task-create-cancel {
+  padding: 5px 8px !important;
+  background: rgba(255, 255, 255, 0.50) !important;
+  border: 1px solid rgba(192, 98, 42, 0.22) !important;
+  border-radius: 6px !important;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #5c4033 !important;
+  cursor: pointer !important;
+  transition: background 0.12s !important;
+}
+
+#sidebar .task-create-cancel:hover {
+  background: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* "Add task" — dashed button (Alt branch style) */
+#sidebar .task-add {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: 1.5px dashed rgba(192, 98, 42, 0.28) !important;
+  border-radius: 8px !important;
+  color: #8c6b55 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 8px !important;
+  gap: 4px !important;
+  width: 100% !important;
+  margin-top: 4px !important;
+  transition: border-color 0.15s, color 0.15s !important;
+  cursor: pointer !important;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
+}
+
+#sidebar .task-add:hover {
+  border-color: #c0622a !important;
+  color: #c0622a !important;
+  background: transparent !important;
+}
+
+#sidebar .task-add-icon {
+  width: 11px !important;
+  height: 11px !important;
+}
+
+/* Inline goal rename */
+#sidebar .task-title-input {
+  min-width: 0 !important;
+  width: 100% !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+  padding: 3px 8px !important;
+  background: rgba(250, 244, 232, 0.90) !important;
+  border: 1.5px solid rgba(192, 98, 42, 0.35) !important;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
+}
+
+/* Task create form */
+#sidebar .task-create-name {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+#sidebar .task-create-input {
+  font-size: 13px !important;
+  padding: 5px 8px !important;
+  border-radius: 7px !important;
+  background: rgba(250, 244, 232, 0.90) !important;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
+}
+
+/* ---- Session-completed task cards (green + checkmark) ---- */
+#sidebar .task-card.is-session-done {
+  border-color: rgba(110, 140, 112, 0.55) !important;
+  background: rgba(110, 140, 112, 0.08) !important;
+  box-shadow: 0 0 0 1.5px rgba(110, 140, 112, 0.25) !important;
+}
+
+#sidebar .task-card.is-session-done .task-name {
+  color: #6e8c70 !important;
+  font-weight: 700 !important;
+}
+
+/* Checkmark injected before the task name via pseudo-element */
+#sidebar .task-card.is-session-done .task-main::before {
+  content: '✓' !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  color: #6e8c70 !important;
+  font-weight: 800 !important;
+  font-size: 11px !important;
+  flex-shrink: 0 !important;
+  margin-right: 5px !important;
+}
+
+/* ---- Backdrop ---- */
+#sidebarBackdrop {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+#sidebarBackdrop.is-open {
+  pointer-events: none;
+}

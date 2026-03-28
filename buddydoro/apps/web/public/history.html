@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>History – BuddyDoro</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../styles/design-system.css" />
+
+  <style>
+    /* ── Page shell ── */
+    body {
+      min-height: 100vh;
+      background: var(--color-background);
+      color: var(--color-on-surface);
+      font-family: var(--font-family);
+      overflow-x: hidden;
+    }
+
+    /* Ambient orbs */
+    .hist-orb {
+      position: fixed;
+      border-radius: 9999px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hist-orb-1 {
+      width: 520px; height: 520px;
+      top: -120px; left: -160px;
+      background: radial-gradient(circle, rgba(192,98,42,0.10) 0%, transparent 70%);
+      filter: blur(60px);
+    }
+    .hist-orb-2 {
+      width: 400px; height: 400px;
+      bottom: 0; right: -100px;
+      background: radial-gradient(circle, rgba(110,140,112,0.09) 0%, transparent 70%);
+      filter: blur(70px);
+    }
+    .hist-orb-3 {
+      width: 300px; height: 300px;
+      top: 40%; left: 50%;
+      background: radial-gradient(circle, rgba(201,138,46,0.07) 0%, transparent 70%);
+      filter: blur(80px);
+    }
+
+    /* ── Layout ── */
+    .hist-page {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 28px 20px 64px;
+    }
+
+    /* ── Header ── */
+    .hist-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .hist-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--color-outline);
+      border-radius: var(--radius-full);
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-on-surface-mid);
+      cursor: pointer;
+      font-family: inherit;
+      text-decoration: none;
+      transition: background 0.15s ease, transform 0.15s ease;
+      white-space: nowrap;
+    }
+    .hist-back-btn:hover {
+      background: rgba(255,255,255,0.85);
+      transform: translateX(-2px);
+      text-decoration: none;
+    }
+    .hist-back-btn:active { transform: scale(0.97); }
+
+    .hist-title-wrap {
+      flex: 1;
+    }
+    .hist-page-title {
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: var(--color-on-surface);
+      letter-spacing: -0.03em;
+    }
+    .hist-page-sub {
+      font-size: 13px;
+      color: var(--color-on-surface-muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    /* ── Period tabs ── */
+    .history-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+      background: rgba(255,255,255,0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--color-outline);
+      border-radius: var(--radius-full);
+      padding: 5px;
+      width: fit-content;
+    }
+
+    .history-tabs .tab {
+      padding: 8px 18px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      color: var(--color-on-surface-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    }
+    .history-tabs .tab:hover { color: var(--color-primary); }
+    .history-tabs .tab:active { transform: scale(0.96); }
+    .history-tabs .tab.is-active {
+      background: var(--color-primary);
+      color: #fff0e4;
+      box-shadow: 0 4px 14px rgba(192,98,42,0.35);
+    }
+
+    /* ── History content area ── */
+    .history-content {
+      min-height: 200px;
+    }
+
+    .history-empty {
+      font-weight: 700;
+      color: var(--color-on-surface-muted);
+      text-align: center;
+      margin-top: 48px;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ── Stats row ── */
+    .hist-stats-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .hist-stat-chip {
+      flex: 1;
+      min-width: 120px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--color-outline);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-panel);
+    }
+    .hist-stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-on-surface-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+    .hist-stat-value {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--color-primary);
+      letter-spacing: -0.03em;
+    }
+
+    /* ── Two-column layout ── */
+    .hist-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* ── Chart card ── */
+    .hist-chart-card {
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--color-outline);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-panel);
+    }
+
+    .hist-chart-title {
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--color-on-surface-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 6px;
+    }
+
+    .hist-total-big {
+      font-weight: 900;
+      font-size: 2rem;
+      color: var(--color-on-surface);
+      letter-spacing: -0.04em;
+      margin-bottom: 16px;
+    }
+
+    .hist-chart {
+      display: flex;
+      gap: 6px;
+      align-items: flex-end;
+      height: 130px;
+    }
+
+    .hist-yaxis {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--color-on-surface-muted);
+      padding-bottom: 18px;
+      min-width: 26px;
+    }
+
+    .hist-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      flex: 1;
+      height: 100%;
+    }
+
+    .hbar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      height: 100%;
+    }
+
+    .hbar-bar-wrap {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .hbar-bar {
+      width: 100%;
+      min-height: 3px;
+      border-radius: 4px 4px 0 0;
+      background: linear-gradient(to top, var(--color-primary), rgba(192,98,42,0.5));
+      transition: height 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .hbar-bar--current {
+      background: linear-gradient(to top, #c98a2e, #f2d078);
+      box-shadow: 0 -4px 12px rgba(201,138,46,0.4);
+    }
+
+    .hbar-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--color-on-surface-muted);
+      text-align: center;
+      margin-top: 4px;
+      white-space: nowrap;
+    }
+
+    .hist-session-count {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-on-surface-muted);
+      margin-top: 10px;
+    }
+    .hist-session-count strong { color: var(--color-on-surface); }
+
+    /* ── Subtask list card ── */
+    .hist-list-card {
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--color-outline);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-panel);
+    }
+
+    .hist-list-title {
+      font-weight: 800;
+      font-size: 12px;
+      color: var(--color-on-surface-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 12px;
+    }
+
+    .hist-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      max-height: 180px;
+    }
+
+    .hist-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(245,239,227,0.65);
+      border: 1px solid var(--color-outline);
+      transition: background 0.12s ease;
+    }
+    .hist-row:hover { background: rgba(245,239,227,0.9); }
+
+    .hist-row-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--color-on-surface);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .hist-row-time {
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--color-primary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .hist-list-total {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-on-surface-muted);
+      padding-top: 10px;
+      margin-top: 6px;
+      border-top: 1px solid var(--color-outline);
+    }
+    .hist-list-total strong { color: var(--color-on-surface); }
+
+    /* ── Session records section ── */
+    .hist-section {
+      margin-top: 32px;
+    }
+
+    .hist-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .hist-section-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--color-on-surface-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .hist-section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--color-outline);
+    }
+
+    .session-records-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .session-record-card {
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--color-outline);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: var(--shadow-panel);
+      transition: background 0.12s ease, transform 0.12s ease;
+    }
+    .session-record-card:hover {
+      background: rgba(255,255,255,0.80);
+      transform: translateY(-1px);
+    }
+
+    .session-record-left { min-width: 0; }
+
+    .session-record-goal {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--color-on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-record-meta {
+      font-size: 12px;
+      color: var(--color-on-surface-muted);
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    .session-record-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .session-record-pomodoros {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--color-primary);
+      white-space: nowrap;
+      background: rgba(192,98,42,0.08);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .session-record-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+    }
+    .session-record-badge.complete {
+      background: var(--color-sage-glass);
+      color: var(--color-sage-dim);
+    }
+    .session-record-badge.incomplete {
+      background: rgba(192,98,42,0.10);
+      color: var(--color-primary-dim);
+    }
+
+    .hist-empty-state {
+      text-align: center;
+      color: var(--color-on-surface-muted);
+      font-size: 14px;
+      padding: 32px 0;
+      font-weight: 600;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .hist-layout { grid-template-columns: 1fr; }
+      .history-tabs { width: 100%; justify-content: center; }
+      .hist-stats-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient depth orbs -->
+  <div class="hist-orb hist-orb-1"></div>
+  <div class="hist-orb hist-orb-2"></div>
+  <div class="hist-orb hist-orb-3"></div>
+
+  <div class="hist-page">
+
+    <!-- Header -->
+    <div class="hist-header">
+      <a href="index.html" class="hist-back-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Back
+      </a>
+      <div class="hist-title-wrap">
+        <div class="hist-page-title">History</div>
+        <div class="hist-page-sub">Your focus sessions &amp; progress</div>
+      </div>
+    </div>
+
+    <!-- Period tabs -->
+    <div class="history-tabs" role="tablist" aria-label="History periods">
+      <button class="tab is-active" role="tab" aria-selected="true"  data-period="daily">Daily</button>
+      <button class="tab" role="tab" aria-selected="false" data-period="weekly">Weekly</button>
+      <button class="tab" role="tab" aria-selected="false" data-period="monthly">Monthly</button>
+      <button class="tab" role="tab" aria-selected="false" data-period="yearly">Yearly</button>
+      <button class="tab" role="tab" aria-selected="false" data-period="lifetime">Lifetime</button>
+    </div>
+
+    <!-- Focus history chart + subtask breakdown -->
+    <div id="historyContent" class="history-content" aria-live="polite">
+      <p class="history-empty">No history yet for this period.</p>
+    </div>
+
+    <!-- Session Records -->
+    <div class="hist-section">
+      <div class="hist-section-header">
+        <div class="hist-section-title">Study Sessions</div>
+        <div class="hist-section-line"></div>
+      </div>
+      <div id="sessionRecordsList" class="session-records-list" aria-live="polite">
+        <p class="hist-empty-state">No sessions completed yet.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module">
+    const authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
+    if (!authToken) {
+      window.location.href = 'login.html';
+      throw new Error('Not authenticated');
+    }
+  </script>
+
+  <script type="module">
+    import {
+      loadSessionsFromAPI,
+      loadRecordsFromAPI,
+      filterByPeriod,
+      buildBars,
+      buildSubtaskTotals,
+      fmtDuration,
+    } from '../js/features/historyStorage.js';
+
+    const content = document.getElementById('historyContent');
+    const tabs    = Array.from(document.querySelectorAll('.history-tabs .tab'));
+    let currentPeriod = 'daily';
+    let allSessions = [];
+    let allRecords  = [];
+
+    function showPeriod(period) {
+      currentPeriod = period;
+      tabs.forEach(tab => {
+        const active = tab.dataset.period === period;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-selected', String(active));
+      });
+      renderFocusHistory(period);
+    }
+
+    tabs.forEach(tab => tab.addEventListener('click', () => showPeriod(tab.dataset.period)));
+
+    function renderFocusHistory(period) {
+      const filtered      = filterByPeriod(allSessions, period);
+      const bars          = buildBars(filtered, period);
+      const subtaskTotals = buildSubtaskTotals(filtered);
+      const totalSeconds  = filtered.reduce((s, r) => s + r.seconds, 0);
+      const sessionCount  = filtered.length;
+      const periodLabel   = period.charAt(0).toUpperCase() + period.slice(1);
+
+      if (filtered.length === 0) {
+        content.innerHTML = `<p class="history-empty">No ${period} history yet.<br>Complete a timed session to see it here.</p>`;
+        return;
+      }
+
+      const maxSeconds = Math.max(...bars.map(b => b.seconds), 1);
+      const topHours   = Math.ceil(maxSeconds / 3600) || 1;
+      const midHours   = Math.ceil(topHours / 2);
+
+      const now = new Date();
+      const currentIdx = {
+        daily:   now.getHours(),
+        weekly:  (now.getDay() + 6) % 7,
+        monthly: now.getDate() - 1,
+        yearly:  now.getMonth(),
+      }[period] ?? -1;
+
+      const barsHtml = bars.map((b, i) => {
+        const pct       = Math.round((b.seconds / maxSeconds) * 100);
+        const isCurrent = i === currentIdx;
+        const tip       = b.seconds > 0 ? fmtDuration(b.seconds) : '0m';
+        return `
+          <div class="hbar-col">
+            <div class="hbar-bar-wrap">
+              <div class="hbar-bar${isCurrent ? ' hbar-bar--current' : ''}"
+                   style="height:${pct}%"
+                   title="${tip}"></div>
+            </div>
+            <div class="hbar-label">${b.label}</div>
+          </div>`;
+      }).join('');
+
+      const listHtml = subtaskTotals.map(s => `
+        <div class="hist-row">
+          <span class="hist-row-name">${esc(s.name)}</span>
+          <span class="hist-row-time">${fmtDuration(s.seconds)}</span>
+        </div>`).join('');
+
+      content.innerHTML = `
+        <div class="hist-stats-row">
+          <div class="hist-stat-chip">
+            <div class="hist-stat-label">Total Focus</div>
+            <div class="hist-stat-value">${fmtDuration(totalSeconds)}</div>
+          </div>
+          <div class="hist-stat-chip">
+            <div class="hist-stat-label">Sessions</div>
+            <div class="hist-stat-value">${sessionCount}</div>
+          </div>
+        </div>
+        <div class="hist-layout">
+          <div class="hist-chart-card">
+            <div class="hist-chart-title">Focus Time — ${periodLabel}</div>
+            <div class="hist-chart">
+              <div class="hist-yaxis">
+                <span>${topHours}h</span>
+                <span>${midHours}h</span>
+                <span>0</span>
+              </div>
+              <div class="hist-bars">${barsHtml}</div>
+            </div>
+          </div>
+          <div class="hist-list-card">
+            <div class="hist-list-title">Time by Subtask</div>
+            <div class="hist-list">${listHtml || '<p style="color:var(--color-on-surface-muted);font-size:13px;font-weight:600;">No subtask data.</p>'}</div>
+            <div class="hist-list-total">Total: <strong>${fmtDuration(totalSeconds)}</strong></div>
+          </div>
+        </div>`;
+    }
+
+    function renderSessionRecords() {
+      const listEl  = document.getElementById('sessionRecordsList');
+      const records = allRecords.slice().reverse();
+
+      if (!records.length) {
+        listEl.innerHTML = '<p class="hist-empty-state">No sessions completed yet.</p>';
+        return;
+      }
+
+      listEl.innerHTML = records.map(r => {
+        const date     = new Date(r.completedAt);
+        const dateStr  = isNaN(date) ? '' : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        const timeStr  = isNaN(date) ? '' : date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        const duration = fmtDuration(r.totalSeconds);
+        const pomos    = r.pomodorosCompleted;
+
+        return `
+          <div class="session-record-card">
+            <div class="session-record-left">
+              <div class="session-record-goal">${esc(r.goalName)}</div>
+              <div class="session-record-meta">${dateStr} at ${timeStr} &middot; ${duration}</div>
+            </div>
+            <div class="session-record-right">
+              <span class="session-record-pomodoros">${pomos} 🍅</span>
+              <span class="session-record-badge ${r.goalComplete ? 'complete' : 'incomplete'}">
+                ${r.goalComplete ? 'Complete' : 'Ended early'}
+              </span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function esc(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    async function init() {
+      [allSessions, allRecords] = await Promise.all([
+        loadSessionsFromAPI(),
+        loadRecordsFromAPI(),
+      ]);
+      showPeriod('daily');
+      renderSessionRecords();
+    }
+
+    init();
+  </script>
+</body>
+</html>

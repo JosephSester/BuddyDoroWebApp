@@ -13,6 +13,12 @@ function getAuthToken() {
     return localStorage.getItem('authToken');
 }
 
+function handleUnauthorized() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('hasSeenOnboarding');
+    window.location.href = 'login.html';
+}
+
 /**
  * GET request
  */
@@ -23,6 +29,7 @@ export async function apiGet(endpoint) {
                 'Authorization': `Bearer ${getAuthToken()}`
             }
         });
+        if (response.status === 401 || response.status === 403) { handleUnauthorized(); return; }
         if (!response.ok) throw new Error(`API error: ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -44,6 +51,7 @@ export async function apiPost(endpoint, data) {
             },
             body: JSON.stringify(data)
         });
+        if (response.status === 401 || response.status === 403) { handleUnauthorized(); return; }
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || `API error: ${response.status}`);
@@ -68,6 +76,7 @@ export async function apiPut(endpoint, data) {
             },
             body: JSON.stringify(data)
         });
+        if (response.status === 401 || response.status === 403) { handleUnauthorized(); return; }
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || `API error: ${response.status}`);
@@ -90,6 +99,7 @@ export async function apiDelete(endpoint) {
                 'Authorization': `Bearer ${getAuthToken()}`
             }
         });
+        if (response.status === 401 || response.status === 403) { handleUnauthorized(); return; }
         if (!response.ok) throw new Error(`API error: ${response.status}`);
         return await response.json();
     } catch (error) {

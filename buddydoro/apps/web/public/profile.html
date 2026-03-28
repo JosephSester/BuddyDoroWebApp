@@ -14,29 +14,21 @@
 
     body {
       font-family: "Plus Jakarta Sans", sans-serif;
-      background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDOfqY_U-9qhG1xjKVtD5R7MnQNuN-XPv6YiVYHbJyRUEjDwet2LFKIoG16Z7DkZTYnWkMk6FwvjenyHZK38AJ8cWpBMuR0Fj-HeJZbwgOqUYhxSmz_E8eF9bV6NyUxl96yMFdAmQGD3DBfIXrAnIgFG4ooZicDamNt1qDlszY7hsMMyhx8B2TZMUeqro2Yp83zPuf8faBv9QoDXP6Hqefses34lgYaVwfnW1_mDSKvYdNeHBEJ2EQifwmAJvBKiBNkcEteFL-2YSEi);
-      background-size: cover;
-      background-position: center;
+      background: linear-gradient(145deg, #faf4e8 0%, #f5efe3 50%, #eddfc8 100%);
       background-attachment: fixed;
       min-height: 100vh;
       margin: 0;
       padding: 0;
-      color: #1f331f;
-    }
-
-    .glass-panel {
-      background: rgba(228, 254, 222, 0.68);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
+      color: #2b2213;
     }
 
     .glass-card {
-      background: rgba(228, 254, 222, 0.55);
+      background: rgba(250, 244, 232, 0.72);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-radius: 2rem;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 12px 32px -8px rgba(31, 51, 31, 0.12);
+      border: 1px solid rgba(232, 180, 120, 0.30);
+      box-shadow: 0 12px 32px -8px rgba(43, 34, 19, 0.10);
     }
 
     .material-symbols-outlined {
@@ -48,26 +40,27 @@
       font-family: "Plus Jakarta Sans", sans-serif;
     }
     input:focus { outline: none; }
-    input::placeholder { color: rgba(75, 97, 73, 0.45); }
+    input::placeholder { color: rgba(92, 64, 51, 0.45); }
 
     .field-input {
       width: 100%;
       padding: 13px 20px;
       border-radius: 9999px;
-      border: none;
+      border: 1.5px solid rgba(43, 34, 19, 0.12);
       background: rgba(255, 255, 255, 0.88);
-      color: #1f331f;
+      color: #2b2213;
       font-size: 0.9375rem;
       font-family: "Plus Jakarta Sans", sans-serif;
       box-shadow: 0 0 0 0 transparent;
-      transition: box-shadow 0.2s ease;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
     }
     .field-input:focus {
-      box-shadow: 0 0 0 4px rgba(253, 157, 6, 0.22);
+      box-shadow: 0 0 0 4px rgba(192, 98, 42, 0.18);
+      border-color: rgba(192, 98, 42, 0.50);
     }
 
     .btn-primary-grove {
-      background: linear-gradient(to bottom, #fd9d06, #844f00);
+      background: linear-gradient(to bottom, #c0622a, #a8501f);
       color: #fff0e4;
       border: none;
       border-radius: 9999px;
@@ -79,7 +72,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 6px 20px -4px rgba(253, 157, 6, 0.4);
+      box-shadow: 0 6px 20px -4px rgba(192, 98, 42, 0.40);
       transition: transform 0.15s ease, filter 0.15s ease;
       text-decoration: none;
     }
@@ -87,9 +80,9 @@
     .btn-primary-grove:active { transform: scale(0.98); }
 
     .btn-ghost {
-      background: rgba(255, 255, 255, 0.5);
-      color: #4b6149;
-      border: none;
+      background: rgba(43, 34, 19, 0.06);
+      color: #5c4033;
+      border: 1.5px solid rgba(43, 34, 19, 0.12);
       border-radius: 9999px;
       padding: 13px 24px;
       font-size: 0.9375rem;
@@ -102,12 +95,12 @@
       transition: background 0.15s ease;
       text-decoration: none;
     }
-    .btn-ghost:hover { background: rgba(255, 255, 255, 0.8); }
+    .btn-ghost:hover { background: rgba(43, 34, 19, 0.10); }
 
     .btn-outline {
-      background: rgba(255, 255, 255, 0.5);
-      color: #844f00;
-      border: none;
+      background: rgba(43, 34, 19, 0.05);
+      color: #a8501f;
+      border: 1.5px solid rgba(192, 98, 42, 0.30);
       border-radius: 9999px;
       padding: 11px 20px;
       font-size: 0.875rem;
@@ -117,10 +110,10 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: background 0.15s ease;
+      transition: background 0.15s ease, border-color 0.15s ease;
       text-decoration: none;
     }
-    .btn-outline:hover { background: rgba(255, 255, 255, 0.82); }
+    .btn-outline:hover { background: rgba(192, 98, 42, 0.08); border-color: rgba(192, 98, 42, 0.50); }
 
     .orb {
       position: fixed;
@@ -135,31 +128,31 @@
       padding: 8px 16px;
       border-radius: 9999px;
     }
-    #profileMsg.success { color: #386631; background: rgba(56,102,49,0.12); }
-    #profileMsg.error   { color: #b02500; background: rgba(176,37,0,0.1); }
+    #profileMsg.success { color: #4e6650; background: rgba(110, 140, 112, 0.14); }
+    #profileMsg.error   { color: #b02500; background: rgba(176, 37, 0, 0.1); }
 
     .icon-chip {
       width: 44px;
       height: 44px;
       border-radius: 9999px;
-      background: rgba(253, 157, 6, 0.18);
+      background: rgba(192, 98, 42, 0.14);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      color: #844f00;
+      color: #a8501f;
     }
     .icon-chip.green {
-      background: rgba(56, 102, 49, 0.15);
-      color: #386631;
+      background: rgba(110, 140, 112, 0.15);
+      color: #4e6650;
     }
   </style>
 </head>
 <body>
 
   <!-- Ambient orbs -->
-  <div class="orb" style="top:40px; right:100px; width:320px; height:320px; background:rgba(56,102,49,0.12); filter:blur(90px);"></div>
-  <div class="orb" style="bottom:60px; left:80px; width:280px; height:280px; background:rgba(253,157,6,0.1); filter:blur(80px);"></div>
+  <div class="orb" style="top:40px; right:100px; width:320px; height:320px; background:rgba(110,140,112,0.10); filter:blur(90px);"></div>
+  <div class="orb" style="bottom:60px; left:80px; width:280px; height:280px; background:rgba(192,98,42,0.10); filter:blur(80px);"></div>
 
   <!-- Page wrapper -->
   <div style="max-width:640px; margin:0 auto; padding:2rem 1.25rem 4rem;">
@@ -167,15 +160,15 @@
     <!-- ── Header ── -->
     <header style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
       <a href="./index.html" aria-label="Back to app"
-         style="display:flex; align-items:center; gap:6px; color:#4b6149; text-decoration:none; font-weight:600; font-size:0.9375rem;
-                background:rgba(255,255,255,0.5); padding:10px 18px; border-radius:9999px; backdrop-filter:blur(12px); transition:background 0.15s;"
-         onmouseover="this.style.background='rgba(255,255,255,0.8)'" onmouseout="this.style.background='rgba(255,255,255,0.5)'">
+         style="display:flex; align-items:center; gap:6px; color:#5c4033; text-decoration:none; font-weight:600; font-size:0.9375rem;
+                background:rgba(192,98,42,0.10); border:1.5px solid rgba(192,98,42,0.25); padding:10px 18px; border-radius:9999px; backdrop-filter:blur(12px); transition:background 0.15s;"
+         onmouseover="this.style.background='rgba(192,98,42,0.18)'" onmouseout="this.style.background='rgba(192,98,42,0.10)'">
         <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
         Back
       </a>
       <div>
-        <h1 style="font-size:1.5rem; font-weight:800; color:#1f331f; margin:0; letter-spacing:-0.02em;">Profile Settings</h1>
-        <p style="font-size:0.8125rem; color:#4b6149; margin:0;">Update how your name appears in BuddyDoro</p>
+        <h1 style="font-size:1.5rem; font-weight:800; color:#2b2213; margin:0; letter-spacing:-0.02em;">Profile Settings</h1>
+        <p style="font-size:0.8125rem; color:#5c4033; margin:0;">Update how your name appears in BuddyDoro</p>
       </div>
     </header>
 
@@ -187,14 +180,14 @@
           <span class="material-symbols-outlined">person</span>
         </div>
         <div>
-          <h2 id="nameTitle" style="font-size:1.0625rem; font-weight:700; color:#1f331f; margin:0;">Display name</h2>
-          <p style="font-size:0.8125rem; color:#4b6149; margin:0;">Shown in your greeting chip and profile</p>
+          <h2 id="nameTitle" style="font-size:1.0625rem; font-weight:700; color:#2b2213; margin:0;">Display name</h2>
+          <p style="font-size:0.8125rem; color:#5c4033; margin:0;">Shown in your greeting chip and profile</p>
         </div>
       </div>
 
       <form id="profileForm" novalidate>
         <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:1.5rem;">
-          <label for="nameInput" style="font-size:0.75rem; font-weight:700; color:#4b6149; margin-left:16px;">Your name</label>
+          <label for="nameInput" style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">Your name</label>
           <input
             id="nameInput"
             name="name"
@@ -205,7 +198,7 @@
             class="field-input"
             aria-describedby="nameHint"
           />
-          <p id="nameHint" style="font-size:0.75rem; color:rgba(75,97,73,0.7); margin:4px 0 0 16px;">Keep it short — it appears on the top-right greeting chip.</p>
+          <p id="nameHint" style="font-size:0.75rem; color:rgba(92,64,51,0.70); margin:4px 0 0 16px;">Keep it short — it appears on the top-right greeting chip.</p>
         </div>
 
         <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
@@ -226,8 +219,8 @@
           <span class="material-symbols-outlined">lock</span>
         </div>
         <div style="flex:1;">
-          <p style="font-size:1rem; font-weight:700; color:#1f331f; margin:0;">Account Settings</p>
-          <p style="font-size:0.8125rem; color:#4b6149; margin:0;">Change your email or password</p>
+          <p style="font-size:1rem; font-weight:700; color:#2b2213; margin:0;">Account Settings</p>
+          <p style="font-size:0.8125rem; color:#5c4033; margin:0;">Change your email or password</p>
         </div>
         <a href="./account.html" class="btn-outline" aria-label="Go to account settings">
           Open

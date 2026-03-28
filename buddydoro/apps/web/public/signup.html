@@ -16,14 +16,14 @@
       theme: {
         extend: {
           colors: {
-            "primary":                   "#844f00",
-            "primary-container":         "#fd9d06",
+            "primary":                   "#a8501f",
+            "primary-container":         "#c0622a",
             "on-primary":                "#fff0e4",
-            "secondary":                 "#386631",
-            "surface":                   "#e4fede",
+            "secondary":                 "#6e8c70",
+            "surface":                   "#faf4e8",
             "surface-container-lowest":  "#ffffff",
-            "on-surface":                "#1f331f",
-            "on-surface-variant":        "#4b6149",
+            "on-surface":                "#2b2213",
+            "on-surface-variant":        "#5c4033",
             "error":                     "#b02500",
           },
           fontFamily: {
@@ -44,15 +44,13 @@
     *, *::before, *::after { box-sizing: border-box; }
     body {
       font-family: "Plus Jakarta Sans", sans-serif;
-      background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDOfqY_U-9qhG1xjKVtD5R7MnQNuN-XPv6YiVYHbJyRUEjDwet2LFKIoG16Z7DkZTYnWkMk6FwvjenyHZK38AJ8cWpBMuR0Fj-HeJZbwgOqUYhxSmz_E8eF9bV6NyUxl96yMFdAmQGD3DBfIXrAnIgFG4ooZicDamNt1qDlszY7hsMMyhx8B2TZMUeqro2Yp83zPuf8faBv9QoDXP6Hqefses34lgYaVwfnW1_mDSKvYdNeHBEJ2EQifwmAJvBKiBNkcEteFL-2YSEi);
-      background-size: cover;
-      background-position: center;
+      background: linear-gradient(145deg, #faf4e8 0%, #f5efe3 50%, #eddfc8 100%);
       background-attachment: fixed;
       min-height: 100vh;
       margin: 0;
     }
     .glass-panel {
-      background: rgba(228, 254, 222, 0.68);
+      background: rgba(250, 244, 232, 0.72);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
     }
@@ -62,35 +60,36 @@
     }
     input { font-family: "Plus Jakarta Sans", sans-serif; }
     input:focus { outline: none; }
-    input::placeholder { color: rgba(75, 97, 73, 0.45); }
+    input::placeholder { color: rgba(92, 64, 51, 0.45); }
 
     .field-input {
       width: 100%;
       padding: 13px 20px 13px 44px;
       border-radius: 9999px;
-      border: none;
+      border: 1.5px solid rgba(43, 34, 19, 0.12);
       background: rgba(255, 255, 255, 0.92);
-      color: #1f331f;
+      color: #2b2213;
       font-size: 0.9375rem;
       font-family: "Plus Jakarta Sans", sans-serif;
       box-shadow: 0 0 0 0 transparent;
-      transition: box-shadow 0.2s ease;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
     }
     .field-input:focus {
-      box-shadow: 0 0 0 4px rgba(253, 157, 6, 0.22);
+      box-shadow: 0 0 0 4px rgba(192, 98, 42, 0.18);
+      border-color: rgba(192, 98, 42, 0.50);
     }
     .field-input-icon {
       position: absolute;
       left: 16px;
       top: 50%;
       transform: translateY(-50%);
-      color: rgba(75, 97, 73, 0.55);
+      color: rgba(92, 64, 51, 0.55);
       font-size: 18px;
       pointer-events: none;
     }
 
     .btn-primary-grove {
-      background: linear-gradient(to bottom, #fd9d06, #844f00);
+      background: linear-gradient(to bottom, #c0622a, #a8501f);
       color: #fff0e4;
       border: none;
       border-radius: 9999px;
@@ -104,7 +103,7 @@
       justify-content: center;
       gap: 8px;
       width: 100%;
-      box-shadow: 0 8px 24px -4px rgba(253, 157, 6, 0.4);
+      box-shadow: 0 8px 24px -4px rgba(192, 98, 42, 0.40);
       transition: transform 0.15s ease, filter 0.15s ease;
     }
     .btn-primary-grove:hover  { filter: brightness(1.06); transform: scale(1.01); }
@@ -134,7 +133,7 @@
     .strength-dot {
       width: 8px; height: 8px;
       border-radius: 9999px;
-      background: rgba(75, 97, 73, 0.2);
+      background: rgba(43, 34, 19, 0.15);
       transition: background 0.2s ease;
     }
   </style>
@@ -142,8 +141,8 @@
 <body class="flex items-center justify-center p-4 md:p-8">
 
   <!-- Ambient glow orbs -->
-  <div class="orb" style="top:60px; right:80px; width:300px; height:300px; background:rgba(56,102,49,0.12); filter:blur(90px);"></div>
-  <div class="orb" style="bottom:40px; left:60px; width:360px; height:360px; background:rgba(253,157,6,0.1); filter:blur(100px);"></div>
+  <div class="orb" style="top:60px; right:80px; width:300px; height:300px; background:rgba(110,140,112,0.10); filter:blur(90px);"></div>
+  <div class="orb" style="bottom:40px; left:60px; width:360px; height:360px; background:rgba(192,98,42,0.10); filter:blur(100px);"></div>
 
   <!-- Layout -->
   <div style="width:100%; max-width:960px;">
@@ -156,84 +155,84 @@
         <img src="./assets/artwork/BuddyDoroName.png" alt="BuddyDoro" style="height:40px; width:auto; object-fit:contain; object-position:left;" />
 
         <!-- Headline -->
-        <h2 style="font-size:2.8rem; font-weight:900; line-height:1.15; letter-spacing:-0.03em; color:#1f331f; margin:0;">
+        <h2 style="font-size:2.8rem; font-weight:900; line-height:1.15; letter-spacing:-0.03em; color:#2b2213; margin:0;">
           Begin your<br/>
-          <span style="color:#844f00;">productive</span><br/>
+          <span style="color:#c0622a;">productive</span><br/>
           adventure.
         </h2>
 
-        <p style="font-size:1.0625rem; color:#4b6149; line-height:1.7; max-width:340px; margin:0;">
+        <p style="font-size:1.0625rem; color:#5c4033; line-height:1.7; max-width:340px; margin:0;">
           Create your account, pick a companion, and start turning study sessions into an adventure.
         </p>
 
         <!-- Steps -->
         <div style="display:flex; flex-direction:column; gap:14px; margin-top:4px;">
           <div style="display:flex; align-items:center; gap:14px;">
-            <div style="width:36px; height:36px; border-radius:9999px; background:rgba(253,157,6,0.2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <div style="width:36px; height:36px; border-radius:9999px; background:rgba(192,98,42,0.16); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
               <span style="font-size:1rem;">🐉</span>
             </div>
             <div>
-              <p style="font-size:0.875rem; font-weight:700; color:#1f331f; margin:0;">Choose your companion</p>
-              <p style="font-size:0.75rem; color:#4b6149; margin:0;">Dragon, Axolotl, Frog & more</p>
+              <p style="font-size:0.875rem; font-weight:700; color:#2b2213; margin:0;">Choose your companion</p>
+              <p style="font-size:0.75rem; color:#5c4033; margin:0;">Dragon, Axolotl, Frog & more</p>
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:14px;">
-            <div style="width:36px; height:36px; border-radius:9999px; background:rgba(56,102,49,0.18); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <div style="width:36px; height:36px; border-radius:9999px; background:rgba(110,140,112,0.16); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
               <span style="font-size:1rem;">🍅</span>
             </div>
             <div>
-              <p style="font-size:0.875rem; font-weight:700; color:#1f331f; margin:0;">Focus with Pomodoro</p>
-              <p style="font-size:0.75rem; color:#4b6149; margin:0;">Earn Doros for every session</p>
+              <p style="font-size:0.875rem; font-weight:700; color:#2b2213; margin:0;">Focus with Pomodoro</p>
+              <p style="font-size:0.75rem; color:#5c4033; margin:0;">Earn Doros for every session</p>
             </div>
           </div>
           <div style="display:flex; align-items:center; gap:14px;">
-            <div style="width:36px; height:36px; border-radius:9999px; background:rgba(253,157,6,0.2); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <div style="width:36px; height:36px; border-radius:9999px; background:rgba(192,98,42,0.16); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
               <span style="font-size:1rem;">✨</span>
             </div>
             <div>
-              <p style="font-size:0.875rem; font-weight:700; color:#1f331f; margin:0;">AI-powered study plans</p>
-              <p style="font-size:0.75rem; color:#4b6149; margin:0;">Break goals into focused tasks</p>
+              <p style="font-size:0.875rem; font-weight:700; color:#2b2213; margin:0;">AI-powered study plans</p>
+              <p style="font-size:0.75rem; color:#5c4033; margin:0;">Break goals into focused tasks</p>
             </div>
           </div>
         </div>
 
         <!-- Companion preview -->
         <div style="display:flex; align-items:center; gap:10px; margin-top:4px;">
-          <div style="width:44px; height:44px; border-radius:9999px; overflow:hidden; border:2px solid rgba(255,255,255,0.8); flex-shrink:0; background:rgba(255,255,255,0.4);">
+          <div style="width:44px; height:44px; border-radius:9999px; overflow:hidden; border:2px solid rgba(232,180,120,0.50); flex-shrink:0; background:rgba(250,244,232,0.60);">
             <img src="./assets/artwork/Dragon.png" class="dragon-avatar" style="width:100%; height:100%; object-fit:cover; object-position:top; transform:scale(1.3);" alt="Dragon" />
           </div>
-          <div style="width:44px; height:44px; border-radius:9999px; overflow:hidden; border:2px solid rgba(255,255,255,0.8); flex-shrink:0; background:rgba(255,255,255,0.4);">
+          <div style="width:44px; height:44px; border-radius:9999px; overflow:hidden; border:2px solid rgba(232,180,120,0.50); flex-shrink:0; background:rgba(250,244,232,0.60);">
             <img src="./assets/artwork/Skins/Axolotyl.png" class="dragon-avatar" style="width:100%; height:100%; object-fit:cover; object-position:top;" alt="Axolotl" />
           </div>
-          <div style="width:44px; height:44px; border-radius:9999px; overflow:hidden; border:2px solid rgba(255,255,255,0.8); flex-shrink:0; background:rgba(255,255,255,0.4);">
+          <div style="width:44px; height:44px; border-radius:9999px; overflow:hidden; border:2px solid rgba(232,180,120,0.50); flex-shrink:0; background:rgba(250,244,232,0.60);">
             <img src="./assets/artwork/Skins/Frog.png" class="dragon-avatar" style="width:100%; height:100%; object-fit:cover; object-position:top;" alt="Frog" />
           </div>
-          <span style="font-size:0.8125rem; color:#4b6149; font-weight:600; margin-left:4px;">+11 more companions</span>
+          <span style="font-size:0.8125rem; color:#5c4033; font-weight:600; margin-left:4px;">+11 more companions</span>
         </div>
       </div>
 
       <!-- ── RIGHT: Glass signup card ── -->
-      <div class="glass-panel" style="border-radius:3rem; padding:2.5rem; box-shadow:0 24px 48px -12px rgba(31,51,31,0.18); border:1px solid rgba(255,255,255,0.28);">
+      <div class="glass-panel" style="border-radius:3rem; padding:2.5rem; box-shadow:0 24px 48px -12px rgba(43,34,19,0.14); border:1px solid rgba(232,180,120,0.30);">
 
         <!-- Tabs -->
-        <div style="display:flex; gap:2rem; margin-bottom:1.75rem; border-bottom:1px solid rgba(75,97,73,0.12);">
-          <button type="button" onclick="window.location.href='login.html'" style="padding-bottom:1rem; font-size:1.0625rem; font-weight:500; color:#4b6149; background:none; border:none; cursor:pointer; font-family:inherit; transition:color 0.15s;">
+        <div style="display:flex; gap:2rem; margin-bottom:1.75rem; border-bottom:1px solid rgba(43,34,19,0.10);">
+          <button type="button" onclick="window.location.href='login.html'" style="padding-bottom:1rem; font-size:1.0625rem; font-weight:500; color:#5c4033; background:none; border:none; cursor:pointer; font-family:inherit; transition:color 0.15s;">
             Log In
           </button>
-          <button type="button" style="padding-bottom:1rem; font-size:1.0625rem; font-weight:700; color:#844f00; border-bottom:3px solid #fd9d06; background:none; border-top:none; border-left:none; border-right:none; cursor:pointer; font-family:inherit;">
+          <button type="button" style="padding-bottom:1rem; font-size:1.0625rem; font-weight:700; color:#a8501f; border-bottom:3px solid #c0622a; background:none; border-top:none; border-left:none; border-right:none; cursor:pointer; font-family:inherit;">
             Sign Up
           </button>
         </div>
 
         <div>
-          <h3 style="font-size:1.4rem; font-weight:700; color:#1f331f; margin:0 0 4px 0;">Join the Grove</h3>
-          <p style="font-size:0.875rem; color:#4b6149; margin:0 0 1.25rem 0;">Your companion is ready to meet you.</p>
+          <h3 style="font-size:1.4rem; font-weight:700; color:#2b2213; margin:0 0 4px 0;">Join BuddyDoro</h3>
+          <p style="font-size:0.875rem; color:#5c4033; margin:0 0 1.25rem 0;">Your companion is ready to meet you.</p>
 
           <form id="signupForm" novalidate style="display:flex; flex-direction:column; gap:0.875rem;">
 
             <!-- Name -->
             <div style="display:flex; flex-direction:column; gap:5px;">
-              <label style="font-size:0.75rem; font-weight:700; color:#4b6149; margin-left:16px;">Display Name</label>
+              <label style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">Display Name</label>
               <div style="position:relative;">
                 <span class="material-symbols-outlined field-input-icon">person</span>
                 <input id="nameInput" type="text" required placeholder="What should we call you?" class="field-input" />
@@ -242,7 +241,7 @@
 
             <!-- Email -->
             <div style="display:flex; flex-direction:column; gap:5px;">
-              <label style="font-size:0.75rem; font-weight:700; color:#4b6149; margin-left:16px;">Email Address</label>
+              <label style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">Email Address</label>
               <div style="position:relative;">
                 <span class="material-symbols-outlined field-input-icon">mail</span>
                 <input id="emailInput" type="email" required placeholder="your@email.com" class="field-input" />
@@ -251,11 +250,11 @@
 
             <!-- Password -->
             <div style="display:flex; flex-direction:column; gap:5px;">
-              <label style="font-size:0.75rem; font-weight:700; color:#4b6149; margin-left:16px;">Password</label>
+              <label style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">Password</label>
               <div style="position:relative;">
                 <span class="material-symbols-outlined field-input-icon">lock</span>
                 <input id="passwordInput" type="password" required placeholder="Min. 6 characters" class="field-input" style="padding-right:48px;" />
-                <span id="passwordToggle" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); cursor:pointer; color:rgba(75,97,73,0.6);">
+                <span id="passwordToggle" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); cursor:pointer; color:rgba(92,64,51,0.6);">
                   <i class="fas fa-eye"></i>
                 </span>
               </div>
@@ -263,11 +262,11 @@
 
             <!-- Confirm password -->
             <div style="display:flex; flex-direction:column; gap:5px;">
-              <label style="font-size:0.75rem; font-weight:700; color:#4b6149; margin-left:16px;">Confirm Password</label>
+              <label style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">Confirm Password</label>
               <div style="position:relative;">
                 <span class="material-symbols-outlined field-input-icon">lock_reset</span>
                 <input id="confirmPasswordInput" type="password" required placeholder="Repeat your password" class="field-input" style="padding-right:48px;" />
-                <span id="confirmPasswordToggle" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); cursor:pointer; color:rgba(75,97,73,0.6);">
+                <span id="confirmPasswordToggle" style="position:absolute; right:16px; top:50%; transform:translateY(-50%); cursor:pointer; color:rgba(92,64,51,0.6);">
                   <i class="fas fa-eye"></i>
                 </span>
               </div>
@@ -285,16 +284,16 @@
           </form>
 
           <!-- Terms -->
-          <p style="text-align:center; font-size:0.75rem; color:rgba(75,97,73,0.7); margin-top:1rem; line-height:1.6;">
+          <p style="text-align:center; font-size:0.75rem; color:rgba(92,64,51,0.70); margin-top:1rem; line-height:1.6;">
             By creating an account, you agree to our
-            <a href="#" style="color:#844f00; font-weight:600; text-decoration:none;">Privacy Policy</a>
+            <a href="#" style="color:#a8501f; font-weight:600; text-decoration:none;">Privacy Policy</a>
             and
-            <a href="#" style="color:#844f00; font-weight:600; text-decoration:none;">Terms of Service</a>.
+            <a href="#" style="color:#a8501f; font-weight:600; text-decoration:none;">Terms of Service</a>.
           </p>
 
-          <p style="text-align:center; font-size:0.875rem; color:#4b6149; margin-top:0.75rem;">
+          <p style="text-align:center; font-size:0.875rem; color:#5c4033; margin-top:0.75rem;">
             Already have an account?
-            <a href="login.html" style="color:#844f00; font-weight:700; text-decoration:none;">Log in</a>
+            <a href="login.html" style="color:#a8501f; font-weight:700; text-decoration:none;">Log in</a>
           </p>
         </div>
 

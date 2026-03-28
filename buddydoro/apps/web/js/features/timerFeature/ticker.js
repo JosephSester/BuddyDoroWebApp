@@ -1,7 +1,7 @@
 // apps/web/js/features/timerFeature/ticker.js
 // Interval tick handling and completion.
 
-export const createTicker = ({ state, emit, showSummary, breakSummary, updateUI }) => {
+export const createTicker = ({ state, emit, updateUI }) => {
     let accumMs = 0;
 
     const tick = (now = performance.now()) => {
@@ -37,15 +37,9 @@ export const createTicker = ({ state, emit, showSummary, breakSummary, updateUI 
                 clearInterval(state.intervalId);
                 state.intervalId = null;
             }
+            // Reset before emitting so UI updates show full duration, not 00:00
+            state.remaining = state.duration;
             emit('onComplete', { mode: state.mode, duration: state.duration });
-            if (state.mode === 'focus') {
-                const elapsedSeconds = state.duration - state.remaining;
-                showSummary(elapsedSeconds);
-            } else if (state.mode === 'break') {
-                const elapsedSeconds = state.duration - state.remaining;
-                const minutes = Math.max(0, Math.ceil(elapsedSeconds / 60));
-                if (state.showBreakSummary) breakSummary.open({ minutes });
-            }
         }
 
         updateUI();

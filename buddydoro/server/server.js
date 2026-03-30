@@ -12,6 +12,8 @@ const ItemsRoutes = require('./routes/items');
 const aiRoutes = require('./routes/ai');
 const userRoutes = require('./routes/user');
 const historyRoutes = require('./routes/history');
+const resourceRoutes = require('./routes/resources');
+const pathwayRoutes  = require('./routes/pathway');
 
 const app = express();
 app.use(express.json());
@@ -41,6 +43,8 @@ app.use('/api/items', ItemsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/history', historyRoutes);
+app.use('/api/resources', resourceRoutes);
+app.use('/api/pathway',  pathwayRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/buddydoro')

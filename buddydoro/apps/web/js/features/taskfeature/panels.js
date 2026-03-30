@@ -1,7 +1,7 @@
 // apps/web/js/features/taskfeature/panels.js
 // Panel DOM helpers and panel CRUD UI handlers.
 
-import { state, makeDomId } from './state.js';
+import { state } from './state.js';
 import { MAX_PANELS } from './constants.js';
 import { savePanelsToStorage } from './storage.js';
 import { setTasksBusy } from './notifications.js';
@@ -261,6 +261,7 @@ export async function createPanelWithTitle({ title = 'Goal', onAddTaskClick = ()
         onAddTaskClick,
         updateActiveTaskVisuals,
         notifyActiveChange,
+        addTask,
     });
     if (!clone) throw new Error('Unable to create goal panel.');
     console.log(`[Tasks] Created new panel with ID: ${serverPanel.id}`);

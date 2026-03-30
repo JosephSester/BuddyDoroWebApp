@@ -39,9 +39,11 @@ initScene({
   preloadExtra: ['Dragon.png'],
 });
 
-// Apply background saved from the store page
-const savedBackground = localStorage.getItem('buddydoro.background');
-if (savedBackground) setBackground(savedBackground);
+// Seed the default background so the store shows it as equipped on first visit.
+// backgroundnight.js owns the actual display — it reads this key and applies day/night.
+if (!localStorage.getItem('buddydoro.background')) {
+  localStorage.setItem('buddydoro.background', 'Backgrounds/BackgroundDay.jpg');
+}
 
 initDragon?.();
 
@@ -209,3 +211,4 @@ initCompanionThoughts({
 
 // ---- First-visit app tour ---------------------------------------
 initAppTour();
+

@@ -10,6 +10,17 @@ const Item     = require('../models/Items');
 
 const BACKGROUNDS = [
 
+  // ── Default (free) ────────────────────────────────────────────────────────
+  {
+    sku: 'bg_default',
+    name: 'Forest',
+    category: 'backgrounds',
+    currency: 'doros',
+    price: 0,
+    emoji: '🌲',
+    imageUrl: 'Backgrounds/BackgroundDay.jpg',
+  },
+
   // ── Doros ────────────────────────────────────────────────────────────────
   {
     sku: 'bg_african',

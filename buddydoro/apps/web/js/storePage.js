@@ -1,6 +1,6 @@
 // Store — standalone page script
 import { apiGet } from './api/apiClient.js';
-import { fetchInventory, purchaseItem, useItem, inventoryToMap } from './api/inventoryService.js';
+import { fetchInventory, purchaseItem, inventoryToMap } from './api/inventoryService.js';
 import { fetchCatalog } from './api/storeService.js';
 import { showNotification } from './utils/notifications.js';
 
@@ -124,7 +124,6 @@ function renderCatalog(items) {
       ${priceTag(it)}
       <div class="item-actions">
         <button class="buy-btn ${it.currency === 'diamonds' ? 'buy-btn--diamond' : ''}" type="button">Buy</button>
-        <button class="use-btn" type="button" ${owned ? '' : 'disabled'}>Use${owned ? ` ×${inventory.get(it.sku)}` : ''}</button>
       </div>
     `;
 
@@ -140,25 +139,6 @@ function renderCatalog(items) {
         renderCatalog(itemsByCategory[currentCat] || []);
       } catch (err) {
         showNotification(`Failed to buy ${it.name}`, 'error');
-      }
-    });
-
-    card.querySelector('.use-btn').addEventListener('click', async () => {
-      if ((inventory.get(it.sku) || 0) <= 0) {
-        showNotification("You don't own this item", 'error');
-        return;
-      }
-      try {
-        const response = await useItem(it.sku);
-        updateBalances(response);
-        if (response.companionStatuses) {
-          showNotification(`${it.name} used! Your companion feels better ✨`, 'success');
-        } else {
-          showNotification(`${it.name} used!`, 'success');
-        }
-        renderCatalog(itemsByCategory[currentCat] || []);
-      } catch (err) {
-        showNotification(`Failed to use ${it.name}`, 'error');
       }
     });
 

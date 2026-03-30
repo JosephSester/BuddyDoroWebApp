@@ -1,45 +1,64 @@
 /* apps/web/js/features/backgroundnight.js
-   Automatically switches between BackgroundDay.jpg and BackgroundNight.png
-   based on local browser time (8pm–6:59am = night, 7am–7:59pm = day).
+   Switches to the night version of whatever background the user has equipped.
+   Night hours: 8pm–6:59am. Checks every 5 minutes and on storage changes.
 */
 
 (function () {
-  const ASSET_BASE = './assets/artwork/';      // works with current project structure
-  const DAY_BG     = 'BackgroundDay.jpg';
-  const NIGHT_BG   = 'BackgroundNight.png';
-
-  // Lightweight preloader so first swap is instant
-  function preload(srcs = []) {
-    srcs.forEach(src => { const img = new Image(); img.src = src; });
-  }
-  preload([ASSET_BASE + DAY_BG, ASSET_BASE + NIGHT_BG]);
+  const ASSET_BASE = './assets/artwork/';
+  const BG_KEY     = 'buddydoro.background';
 
   function setBackground(filename) {
     const el = document.getElementById('scene');
     if (!el) return;
-    el.style.backgroundImage = `url("${ASSET_BASE}${filename}")`;
-
+    el.style.background = `url("${ASSET_BASE}${filename}") center bottom / cover no-repeat`;
   }
 
-  // Decide which background should be active right now
-  function pickBackgroundFor(now = new Date()) {
-    const hour = now.getHours(); // local time
-    // Night from 20:00 (inclusive) to 06:59 (hour < 7)
-    const isNight = (hour >= 20 || hour < 7);
-    return isNight ? NIGHT_BG : DAY_BG;
+  function preload(filename) {
+    const img = new Image();
+    img.src = ASSET_BASE + filename;
   }
 
-  // Apply immediately — but skip if the user has a custom background selected from the store
+  // Given a day path, return the matching night path (or null if none exists).
+  // Handles: BackgroundDay.jpg → BackgroundNight.png  and  XxxDay.png → XxxNight.png
+  function getNightPath(dayPath) {
+    if (dayPath.includes('BackgroundDay.jpg')) {
+      return dayPath.replace('BackgroundDay.jpg', 'BackgroundNight.png');
+    }
+    if (dayPath.includes('Day.png')) {
+      return dayPath.replace('Day.png', 'Night.png');
+    }
+    return null; // No night variant (Moon, InnerEarth, DessertLand, etc.)
+  }
+
+  function isNight(now = new Date()) {
+    const h = now.getHours();
+    return h >= 20 || h < 7;
+  }
+
   function apply() {
-    if (localStorage.getItem('buddydoro:selectedBackground')) return;
-    setBackground(pickBackgroundFor());
+    const stored = localStorage.getItem(BG_KEY);
+    const night  = isNight();
+
+    if (stored) {
+      if (night) {
+        const nightPath = getNightPath(stored);
+        if (nightPath) {
+          preload(nightPath);
+          setBackground(nightPath);
+          return;
+        }
+      }
+      setBackground(stored);
+      return;
+    }
+
+    // No background in storage — use the hardcoded default pair
+    setBackground(night ? 'BackgroundNight.png' : 'BackgroundDay.jpg');
   }
 
-  // Keep it fresh; check every 5 minutes (cheap)
   function start() {
     apply();
-    // Re-apply at the next minute boundary, then every 5 minutes
-    const now = new Date();
+    const now            = new Date();
     const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
     setTimeout(() => {
       apply();
@@ -47,9 +66,11 @@
     }, Math.max(0, msToNextMinute));
   }
 
-  // Expose tiny API if you want to force a refresh from console: BackgroundNight.apply()
-  window.BackgroundNight = { apply, start, pickBackgroundFor };
+  // Re-apply immediately when the user equips a different background in the store
+  window.addEventListener('storage', (e) => {
+    if (e.key === BG_KEY) apply();
+  });
 
-  // Kick off after DOM is ready
+  window.BackgroundNight = { apply, start, isNight };
   window.addEventListener('DOMContentLoaded', start);
 })();

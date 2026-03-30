@@ -1,6 +1,8 @@
-import { fetchInventory, inventoryToMap } from '../api/inventoryService.js';
+import { fetchInventory, useItem, inventoryToMap } from '../api/inventoryService.js';
 import { fetchCatalog } from '../api/storeService.js';
 import { showNotification, setBusy } from '../utils/notifications.js';
+
+const CONSUMABLE_CATEGORIES = new Set(['food', 'play', 'water', 'medicine']);
 
 // Normalizes category labels like "pet_skins" -> "Pet Skins"
 function titleCase(value) {
@@ -34,16 +36,20 @@ export function initInventory() {
   let inventoryMap = new Map();
   let activeCategory = 'all';
 
+  const EXCLUDED_CATEGORIES = new Set(['skins', 'backgrounds']);
+
   // Join inventory counts with catalog metadata.
   // This keeps inventory endpoint small while still showing names/emojis/categories.
   function resolveInventoryRows() {
     const rows = [];
     for (const [sku, count] of inventoryMap.entries()) {
       const item = allItems.find((catalogItem) => catalogItem.sku === sku);
+      const category = item?.category || 'other';
+      if (EXCLUDED_CATEGORIES.has(category)) continue;
       rows.push({
         sku,
         count,
-        category: item?.category || 'other',
+        category,
         name: item?.name || sku,
         emoji: item?.emoji || '🎁',
       });
@@ -51,8 +57,10 @@ export function initInventory() {
     return rows.sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  const FIXED_CATEGORIES = ['all', 'food', 'play', 'water', 'medicine'];
+
   function getCategories(rows) {
-    const categories = new Set(['all']);
+    const categories = new Set(FIXED_CATEGORIES);
     rows.forEach((row) => categories.add(row.category || 'other'));
     return Array.from(categories);
   }
@@ -108,6 +116,7 @@ export function initInventory() {
     }
 
     visibleRows.forEach((row) => {
+      const isConsumable = CONSUMABLE_CATEGORIES.has(row.category);
       const card = document.createElement('div');
       card.className = 'inventory-card';
       card.innerHTML = `
@@ -116,8 +125,29 @@ export function initInventory() {
           <div class="inventory-card-name">${row.name}</div>
           <div class="inventory-card-meta">${titleCase(row.category)}</div>
         </div>
-        <div class="inventory-card-count">x${row.count}</div>
+        <div class="inventory-card-right">
+          <div class="inventory-card-count">×${row.count}</div>
+          ${isConsumable ? `<button class="inventory-use-btn" type="button" data-sku="${row.sku}">Use</button>` : ''}
+        </div>
       `;
+
+      if (isConsumable) {
+        card.querySelector('.inventory-use-btn').addEventListener('click', async () => {
+          try {
+            const response = await useItem(row.sku);
+            if (response.inventory) {
+              inventoryMap = inventoryToMap(response.inventory);
+            }
+            window.dispatchEvent(new CustomEvent('store:itemUsed', { detail: { sku: row.sku, category: row.category } }));
+            showNotification(`${row.name} used! Your companion feels better ✨`, 'success');
+            const updatedRows = resolveInventoryRows();
+            render(updatedRows);
+          } catch (err) {
+            showNotification(`Failed to use ${row.name}`, 'error');
+          }
+        });
+      }
+
       inventoryGrid.appendChild(card);
     });
   }

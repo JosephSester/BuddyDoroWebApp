@@ -1,8 +1,9 @@
-const API_BASE = 'http://localhost:3000/api/auth';
+import { API_BASE } from '../api/apiClient.js';
+const AUTH_API_BASE = `${API_BASE}/auth`;
 
 function requireToken() {
-  const token = localStorage.getItem('authToken');
-  if (!token) {
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');  
+    if (!token) {
     window.location.href = 'login.html';
     throw new Error('Not authenticated');
   }
@@ -15,17 +16,7 @@ function requireToken() {
 function setMsg(el, text, type = 'info') {
   if (!el) return;
   el.textContent = text || '';
-
-  el.classList.remove('is-info', 'is-success', 'is-error');
-  if (type === 'success') el.classList.add('is-success');
-  else if (type === 'error') el.classList.add('is-error');
-  else el.classList.add('is-info');
-
-  // fallback colors (so feedback is always visible)
-  el.style.color =
-    type === 'success' ? 'green' :
-    type === 'error' ? 'crimson' :
-    '#2b2213';
+  el.className = `pr-msg${type === 'success' ? ' is-success' : type === 'error' ? ' is-error' : ''}`;
 }
 
 async function readJsonSafe(res) {
@@ -39,7 +30,7 @@ async function readJsonSafe(res) {
 }
 
 async function fetchMe(token) {
-  const res = await fetch(`${API_BASE}/me`, {
+  const res = await fetch(`${AUTH_API_BASE}/me`, {
     headers: { Authorization: 'Bearer ' + token },
   });
   const data = await readJsonSafe(res);
@@ -48,7 +39,7 @@ async function fetchMe(token) {
 }
 
 async function updateProfile(token, payload) {
-  const res = await fetch(`${API_BASE}/profile`, {
+  const res = await fetch(`${AUTH_API_BASE}/profile`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

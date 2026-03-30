@@ -1,7 +1,8 @@
-const API_BASE = 'http://localhost:3000/api/auth';
+import { API_BASE } from '../api/apiClient.js';
+const AUTH_API_BASE = `${API_BASE}/auth`;
 
 function requireToken() {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('authToken') || localStorage.getItem('token');  
   if (!token) {
     window.location.href = 'login.html';
     throw new Error('Not authenticated');
@@ -13,11 +14,11 @@ function requireToken() {
 function setMsg(el, text, ok = true) {
   if (!el) return;
   el.textContent = text || '';
-  el.style.color = ok ? 'green' : 'crimson';
+  el.className = `ac-msg ${ok ? 'is-success' : 'is-error'}`;
 }
 
 async function fetchMe(token) {
-  const res = await fetch(`${API_BASE}/me`, {
+  const res = await fetch(`${AUTH_API_BASE}/me`, {
     headers: { Authorization: 'Bearer ' + token },
   });
   const data = await res.json();
@@ -26,7 +27,7 @@ async function fetchMe(token) {
 }
 
 async function updateAccount(token, payload) {
-  const res = await fetch(`${API_BASE}/account`, {
+  const res = await fetch(`${AUTH_API_BASE}/account`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -39,7 +40,23 @@ async function updateAccount(token, payload) {
   return data;
 }
 
+// ── Replay helpers ─────────────────────────────────────
+function setupFaqButtons() {
+  document.getElementById('redoOnboardingBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('hasSeenOnboarding');
+    localStorage.removeItem('hasTakenTour');
+    window.location.href = 'onboarding.html';
+  });
+
+  document.getElementById('redoTourBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('hasTakenTour');
+    window.location.href = 'index.html';
+  });
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
+  setupFaqButtons();
+
   const token = requireToken();
 
   const form = document.getElementById('accountForm');

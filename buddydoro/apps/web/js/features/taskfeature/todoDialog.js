@@ -127,13 +127,13 @@ export function setupTodoDialog({ createPanelWithTitle } = {}) {
     if (state.todoDialogSetupDone) return;
     const { dialog, backdrop, createBtn, cancelBtn, closeBtn, goalContainer } = getTodoDialogElements();
     const openBtn = document.getElementById('addTasksPanel');
-    if (!dialog || !backdrop || !openBtn) return;
+    if (!dialog || !backdrop) return;
 
     state.todoDialogSetupDone = true;
 
     ensureStackInTodo(goalContainer);
 
-    openBtn.addEventListener('click', evt => {
+    openBtn?.addEventListener('click', evt => {
         evt.preventDefault();
         openTodoDialog();
     });

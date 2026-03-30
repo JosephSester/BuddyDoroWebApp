@@ -3,81 +3,234 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <title>Profile Settings • BuddyDoro</title>
 
-  <!-- Core styles -->
-  <link rel="stylesheet" href="../styles/base.css" />
-  <link rel="stylesheet" href="../styles/layout2.css" />
-  <link rel="stylesheet" href="../styles/components.css" />
-  <link rel="stylesheet" href="../styles/topbar.css" />
-  <link rel="stylesheet" href="../styles/themes.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles/design-system.css" />
 
-  <!-- Page styles (new) -->
-  <link rel="stylesheet" href="../styles/profileSettings.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
 
-  <!-- Background Image -->
-  <link rel="preload" as="image" href="./assets/artwork/BackgroundDay.jpg" />
+    body {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      background: linear-gradient(145deg, #faf4e8 0%, #f5efe3 50%, #eddfc8 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      color: #2b2213;
+    }
 
+    .glass-card {
+      background: rgba(250, 244, 232, 0.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 2rem;
+      border: 1px solid rgba(232, 180, 120, 0.30);
+      box-shadow: 0 12px 32px -8px rgba(43, 34, 19, 0.10);
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      vertical-align: middle;
+    }
+
+    input, textarea {
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+    input:focus { outline: none; }
+    input::placeholder { color: rgba(92, 64, 51, 0.45); }
+
+    .field-input {
+      width: 100%;
+      padding: 13px 20px;
+      border-radius: 9999px;
+      border: 1.5px solid rgba(43, 34, 19, 0.12);
+      background: rgba(255, 255, 255, 0.88);
+      color: #2b2213;
+      font-size: 0.9375rem;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      box-shadow: 0 0 0 0 transparent;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .field-input:focus {
+      box-shadow: 0 0 0 4px rgba(192, 98, 42, 0.18);
+      border-color: rgba(192, 98, 42, 0.50);
+    }
+
+    .btn-primary-grove {
+      background: linear-gradient(to bottom, #c0622a, #a8501f);
+      color: #fff0e4;
+      border: none;
+      border-radius: 9999px;
+      padding: 13px 28px;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px -4px rgba(192, 98, 42, 0.40);
+      transition: transform 0.15s ease, filter 0.15s ease;
+      text-decoration: none;
+    }
+    .btn-primary-grove:hover  { filter: brightness(1.06); transform: scale(1.01); }
+    .btn-primary-grove:active { transform: scale(0.98); }
+
+    .btn-ghost {
+      background: rgba(43, 34, 19, 0.06);
+      color: #5c4033;
+      border: 1.5px solid rgba(43, 34, 19, 0.12);
+      border-radius: 9999px;
+      padding: 13px 24px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s ease;
+      text-decoration: none;
+    }
+    .btn-ghost:hover { background: rgba(43, 34, 19, 0.10); }
+
+    .btn-outline {
+      background: rgba(43, 34, 19, 0.05);
+      color: #a8501f;
+      border: 1.5px solid rgba(192, 98, 42, 0.30);
+      border-radius: 9999px;
+      padding: 11px 20px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      text-decoration: none;
+    }
+    .btn-outline:hover { background: rgba(192, 98, 42, 0.08); border-color: rgba(192, 98, 42, 0.50); }
+
+    .orb {
+      position: fixed;
+      border-radius: 9999px;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    #profileMsg:not(:empty) {
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 9999px;
+    }
+    #profileMsg.success { color: #4e6650; background: rgba(110, 140, 112, 0.14); }
+    #profileMsg.error   { color: #b02500; background: rgba(176, 37, 0, 0.1); }
+
+    .icon-chip {
+      width: 44px;
+      height: 44px;
+      border-radius: 9999px;
+      background: rgba(192, 98, 42, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #a8501f;
+    }
+    .icon-chip.green {
+      background: rgba(110, 140, 112, 0.15);
+      color: #4e6650;
+    }
+  </style>
 </head>
+<body>
 
-<body class="bd-page">
-  <!-- Top bar (optional if you want it on settings pages too)
-       If you don't want the topbar here, delete this header.
-  -->
+  <!-- Ambient orbs -->
+  <div class="orb" style="top:40px; right:100px; width:320px; height:320px; background:rgba(110,140,112,0.10); filter:blur(90px);"></div>
+  <div class="orb" style="bottom:60px; left:80px; width:280px; height:280px; background:rgba(192,98,42,0.10); filter:blur(80px);"></div>
 
-  <header class="bd-settings-top">
-    <a href="./index.html" class="bd-back-link" aria-label="Back to home">← Back</a>
-    <div class="bd-settings-header">
-      <h1 class="bd-settings-title">Profile Settings</h1>
-      <p class="bd-settings-subtitle">Update how your name appears in BuddyDoro.</p>
-    </div>
-  </header>
+  <!-- Page wrapper -->
+  <div style="max-width:640px; margin:0 auto; padding:2rem 1.25rem 4rem;">
 
-  <main class="bd-settings-shell">
-    <section class="bd-card" aria-labelledby="profileCardTitle">
-      <h2 id="profileCardTitle" class="bd-card-title">Display name</h2>
+    <!-- ── Header ── -->
+    <header style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
+      <a href="./index.html" aria-label="Back to app"
+         style="display:flex; align-items:center; gap:6px; color:#5c4033; text-decoration:none; font-weight:600; font-size:0.9375rem;
+                background:rgba(192,98,42,0.10); border:1.5px solid rgba(192,98,42,0.25); padding:10px 18px; border-radius:9999px; backdrop-filter:blur(12px); transition:background 0.15s;"
+         onmouseover="this.style.background='rgba(192,98,42,0.18)'" onmouseout="this.style.background='rgba(192,98,42,0.10)'">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+        Back
+      </a>
+      <div>
+        <h1 style="font-size:1.5rem; font-weight:800; color:#2b2213; margin:0; letter-spacing:-0.02em;">Profile Settings</h1>
+        <p style="font-size:0.8125rem; color:#5c4033; margin:0;">Update how your name appears in BuddyDoro</p>
+      </div>
+    </header>
 
-      <form id="profileForm" class="bd-form" novalidate>
-        <div class="bd-field">
-          <label for="nameInput" class="bd-label">Name</label>
+    <!-- ── Display name card ── -->
+    <section class="glass-card" style="padding:2rem; margin-bottom:1.25rem;" aria-labelledby="nameTitle">
+
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:1.75rem;">
+        <div class="icon-chip">
+          <span class="material-symbols-outlined">person</span>
+        </div>
+        <div>
+          <h2 id="nameTitle" style="font-size:1.0625rem; font-weight:700; color:#2b2213; margin:0;">Display name</h2>
+          <p style="font-size:0.8125rem; color:#5c4033; margin:0;">Shown in your greeting chip and profile</p>
+        </div>
+      </div>
+
+      <form id="profileForm" novalidate>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:1.5rem;">
+          <label for="nameInput" style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">Your name</label>
           <input
             id="nameInput"
             name="name"
             type="text"
             autocomplete="name"
             maxlength="32"
-            placeholder="e.g., Melanie"
-            class="bd-input"
+            placeholder="e.g. Alex"
+            class="field-input"
             aria-describedby="nameHint"
           />
-          <div id="nameHint" class="bd-hint">
-            This is shown in your greeting and profile.
-          </div>
+          <p id="nameHint" style="font-size:0.75rem; color:rgba(92,64,51,0.70); margin:4px 0 0 16px;">Keep it short — it appears on the top-right greeting chip.</p>
         </div>
 
-        <div class="bd-actions">
-          <button type="submit" class="bd-btn bd-btn-primary" id="saveBtn">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <button type="submit" class="btn-primary-grove" id="saveBtn">
+            <span class="material-symbols-outlined" style="font-size:18px;">check</span>
             Save changes
           </button>
-
-          <a href="./index.html" class="bd-btn bd-btn-secondary">
-            Cancel
-          </a>
+          <a href="./index.html" class="btn-ghost">Cancel</a>
+          <p id="profileMsg" class="pr-msg" role="status" aria-live="polite" style="margin:0;"></p>
         </div>
-
-        <!-- Status message area -->
-        <p id="profileMsg" class="bd-msg is-info" role="status" aria-live="polite"></p>
       </form>
     </section>
 
-    <!-- Optional: small helper card for UX clarity -->
-    <section class="bd-card bd-card-muted" aria-label="Tip">
-      <p class="bd-tip">
-        Tip: Keep it short—this name appears on the top-right greeting chip.
-      </p>
+    <!-- ── Account settings shortcut ── -->
+    <section class="glass-card" style="padding:1.5rem;" aria-label="Account settings shortcut">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div class="icon-chip green">
+          <span class="material-symbols-outlined">lock</span>
+        </div>
+        <div style="flex:1;">
+          <p style="font-size:1rem; font-weight:700; color:#2b2213; margin:0;">Account Settings</p>
+          <p style="font-size:0.8125rem; color:#5c4033; margin:0;">Change your email or password</p>
+        </div>
+        <a href="./account.html" class="btn-outline" aria-label="Go to account settings">
+          Open
+          <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+        </a>
+      </div>
     </section>
-  </main>
+
+  </div>
+
   <script type="module" src="../js/pages/profileSettings.js"></script>
 </body>
 </html>

@@ -188,7 +188,7 @@ export function initRender({ editors, deleteTask, renderTodoList }) {
 
             const stopPropagation = evt => evt.stopPropagation();
             [editor, nameInput, saveBtn, cancelBtn].forEach(el => {
-                ['click', 'mousedown', 'mouseup', 'dblclick'].forEach(evtName => el.addEventListener(evtName, stopPropagation));
+                ['click', 'mousedown', 'mouseup', 'dblclick', 'keydown'].forEach(evtName => el.addEventListener(evtName, stopPropagation));
             });
 
             const showError = (message) => {
@@ -317,6 +317,7 @@ export function initRender({ editors, deleteTask, renderTodoList }) {
         updateActiveTaskVisuals();
         notifyActiveChange();
         renderTodoList?.();
+        state.handlers.onAfterRender?.();
     };
 
     return {

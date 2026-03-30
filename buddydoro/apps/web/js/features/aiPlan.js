@@ -97,39 +97,18 @@ function buildTaskRow(task, taskIndex, onChange, onAddSubtask, onDeleteTask, onD
     return wrapper;
 }
 
-export function initAiPlan() {
-    const openBtn = document.getElementById('aiPlanBtn');
-    const backdrop = document.getElementById('aiPlanBackdrop');
-    const dialog = document.getElementById('aiPlanDialog');
-    const closeBtn = document.getElementById('aiPlanClose');
-    const goalInput = document.getElementById('aiGoalInput');
+
+export function initAiPlanPage() {
+    const goalInput   = document.getElementById('aiGoalInput');
     const generateBtn = document.getElementById('aiGenerateBtn');
-    const preview = document.getElementById('aiPlanPreview');
-    const addTaskBtn = document.getElementById('aiAddTaskBtn');
-    const createBtn = document.getElementById('aiCreatePlanBtn');
+    const preview     = document.getElementById('aiPlanPreview');
+    const addTaskBtn  = document.getElementById('aiAddTaskBtn');
+    const createBtn   = document.getElementById('aiCreatePlanBtn');
     const descriptionEl = document.getElementById('aiPlanDescription');
 
-    if (!openBtn || !backdrop || !dialog || !closeBtn || !goalInput || !generateBtn || !preview || !addTaskBtn || !createBtn) {
-        return;
-    }
+    if (!goalInput || !generateBtn || !preview || !addTaskBtn || !createBtn) return;
 
     let draft = null;
-
-    const openDialog = () => {
-        backdrop.hidden = false;
-        dialog.hidden = false;
-        dialog.setAttribute('aria-hidden', 'false');
-        goalInput.focus();
-    };
-
-    const closeDialog = () => {
-        backdrop.hidden = true;
-        dialog.hidden = true;
-        dialog.setAttribute('aria-hidden', 'true');
-        preview.innerHTML = '';
-        if (descriptionEl) descriptionEl.textContent = '';
-        draft = null;
-    };
 
     const renderPreview = () => {
         preview.innerHTML = '';
@@ -140,15 +119,12 @@ export function initAiPlan() {
             preview.appendChild(empty);
             return;
         }
-
         if (descriptionEl) {
             descriptionEl.textContent = draft.description ? `Overview: ${draft.description}` : '';
         }
-
         draft.tasks.forEach((task, taskIndex) => {
             const row = buildTaskRow(
-                task,
-                taskIndex,
+                task, taskIndex,
                 (idx, field, value) => {
                     if (!draft || !draft.tasks[idx]) return;
                     if (field === 'title') {
@@ -165,11 +141,7 @@ export function initAiPlan() {
                     draft.tasks[idx].subtasks.push({ title: 'New subtask', estimate: null });
                     renderPreview();
                 },
-                (idx) => {
-                    if (!draft) return;
-                    draft.tasks.splice(idx, 1);
-                    renderPreview();
-                },
+                (idx) => { if (draft) { draft.tasks.splice(idx, 1); renderPreview(); } },
                 (idx, subIdx) => {
                     if (!draft || !draft.tasks[idx]) return;
                     draft.tasks[idx].subtasks.splice(subIdx, 1);
@@ -180,24 +152,11 @@ export function initAiPlan() {
         });
     };
 
-    openBtn.addEventListener('click', () => {
-        openDialog();
-        renderPreview();
-    });
-
-    closeBtn.addEventListener('click', closeDialog);
-    backdrop.addEventListener('click', closeDialog);
-    document.addEventListener('keydown', (evt) => {
-        if (!dialog.hidden && evt.key === 'Escape') closeDialog();
-    });
+    renderPreview();
 
     generateBtn.addEventListener('click', async () => {
         const goal = sanitizeText(goalInput.value, '').slice(0, MAX_GOAL_LENGTH);
-        if (!goal) {
-            showNotification('Please describe your goal first.', 'error');
-            return;
-        }
-
+        if (!goal) { showNotification('Please describe your goal first.', 'error'); return; }
         setBusy(true, 'Generating plan...');
         try {
             const plan = await generatePlan(goal);
@@ -213,9 +172,7 @@ export function initAiPlan() {
     });
 
     addTaskBtn.addEventListener('click', () => {
-        if (!draft) {
-            draft = { title: sanitizeText(goalInput.value, 'Goal') || 'Goal', description: '', tasks: [] };
-        }
+        if (!draft) draft = { title: sanitizeText(goalInput.value, 'Goal') || 'Goal', description: '', tasks: [] };
         draft.tasks.push({ title: 'New task', subtasks: [] });
         renderPreview();
     });
@@ -225,18 +182,13 @@ export function initAiPlan() {
             showNotification('Generate or add tasks before creating a plan.', 'error');
             return;
         }
-
         const hasEmpty = draft.tasks.some(task => !sanitizeText(task.title, ''));
-        if (hasEmpty) {
-            showNotification('Please fill in all task titles.', 'error');
-            return;
-        }
-
+        if (hasEmpty) { showNotification('Please fill in all task titles.', 'error'); return; }
         setBusy(true, 'Creating plan...');
         try {
             await createPlanFromAI(draft);
             showNotification('Plan created!', 'success');
-            closeDialog();
+            window.location.href = 'index.html';
         } catch (err) {
             console.error('Failed to create plan:', err);
             showNotification(err?.message || 'Failed to create plan.', 'error');

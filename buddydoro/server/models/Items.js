@@ -16,12 +16,17 @@ const itemSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['food', 'play', 'water', 'medicine', 'accessory', 'special'], // expand as needed
+    enum: ['food', 'play', 'water', 'medicine', 'skins', 'backgrounds', 'accessory', 'special'],
+  },
+  currency: {
+    type: String,
+    enum: ['doros', 'diamonds'],
+    default: 'doros',
   },
   price: {
     type: Number,
     required: true,
-    min: 1,
+    min: 0,
   },
   emoji: {
     type: String,
@@ -31,10 +36,17 @@ const itemSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  imageUrl: String,           // optional — for nicer UI later
-  isLimited: { type: Boolean, default: false },
-  stockLeft: { type: Number, default: -1 }, // -1 = unlimited
-  availableFrom: Date,        // optional scheduling
+  // For skins/backgrounds: path relative to assets/artwork/ (e.g. 'Skins/Alien.png')
+  // Used for both the preview thumbnail and the equip path saved to localStorage
+  imageUrl: String,
+  // Companion stat effect when consumed
+  effect: {
+    stat:   { type: String, enum: ['hunger', 'thirst', 'happiness', 'health'] },
+    amount: { type: Number, min: 1 },
+  },
+  isLimited:      { type: Boolean, default: false },
+  stockLeft:      { type: Number,  default: -1 },
+  availableFrom:  Date,
   availableUntil: Date,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

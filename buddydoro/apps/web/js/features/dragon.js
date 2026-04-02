@@ -20,55 +20,6 @@ let tombstoneImg = null;
 let blinkTimer = null;
 let autoBlinkMs = 3500;
 
-const happyMelody  = new Audio('./assets/soundeffects/HappyMelody/HappyMelody.mp3');
-happyMelody.loop   = true;
-happyMelody.volume = 0.3;
-
-const mourningSong = new Audio('./assets/soundeffects/CompanionDeathSFX/MourningSong.mp3');
-mourningSong.loop   = true;
-mourningSong.volume = 0.3;
-
-// Whichever song is currently "on stage" — toggled by the music button
-let activeSong = happyMelody;
-
-// Pending autoplay-resume handler (cancelled when switching songs)
-let pendingResumeHandler = null;
-
-function cancelPendingResume() {
-  if (!pendingResumeHandler) return;
-  document.removeEventListener('click',      pendingResumeHandler);
-  document.removeEventListener('keydown',    pendingResumeHandler);
-  document.removeEventListener('touchstart', pendingResumeHandler);
-  pendingResumeHandler = null;
-}
-
-/**
- * Switch to `song`, stop the other one, and start playing.
- * Handles browser autoplay policy with a deferred resume on first interaction.
- */
-function switchToSong(song) {
-  cancelPendingResume();
-
-  // Silence whichever song is not the new one
-  const other = song === happyMelody ? mourningSong : happyMelody;
-  other.pause();
-  other.currentTime = 0;
-
-  activeSong = song;
-  song.currentTime = 0;
-  song.play().catch(() => {
-    // Autoplay blocked — resume on first user interaction
-    pendingResumeHandler = () => {
-      if (!song.paused) return;
-      song.play().catch(() => {});
-      pendingResumeHandler = null;
-    };
-    document.addEventListener('click',      pendingResumeHandler, { once: true });
-    document.addEventListener('keydown',    pendingResumeHandler, { once: true });
-    document.addEventListener('touchstart', pendingResumeHandler, { once: true });
-  });
-}
-
 /**
  * Initialize the dragon sprite.
  * @param {{ enableAutoBlink?: boolean, blinkMs?: number }} opts
@@ -77,39 +28,6 @@ export function initDragon({ enableAutoBlink = true, blinkMs = 3500 } = {}) {
   dragonEl = document.getElementById('dragon') || null;
   dragonImg = dragonEl?.querySelector('.dragon-img') || null;
   tombstoneImg = dragonEl?.querySelector('.tombstone-img') || null;
-  const musicToggleChip = document.getElementById('musicToggleChip') || null;
-  const musicToggleIcon = document.getElementById('musicToggleIcon') || null;
-
-  const PAUSE_ICON = `<rect x="7" y="6" width="5" height="20" rx="2" fill="currentColor"/>
-            <rect x="20" y="6" width="5" height="20" rx="2" fill="currentColor"/>`;
-  const PLAY_ICON  = `<polygon points="6,4 28,16 6,28" fill="currentColor"/>`;
-
-  function updateMusicToggleIcon() {
-    if (!musicToggleIcon) return;
-    const isPaused = activeSong.paused;
-    musicToggleIcon.innerHTML = isPaused ? PLAY_ICON : PAUSE_ICON;
-    if (musicToggleChip) {
-      musicToggleChip.setAttribute('aria-label', isPaused ? 'Play music' : 'Pause music');
-      musicToggleChip.title = isPaused ? 'Play music' : 'Pause music';
-    }
-  }
-
-  if (musicToggleChip) {
-    musicToggleChip.addEventListener('click', () => {
-      if (activeSong.paused) {
-        activeSong.play().catch(() => {});
-      } else {
-        activeSong.pause();
-      }
-      updateMusicToggleIcon();
-    });
-  }
-
-  happyMelody.addEventListener('play',   updateMusicToggleIcon);
-  happyMelody.addEventListener('pause',  updateMusicToggleIcon);
-  mourningSong.addEventListener('play',  updateMusicToggleIcon);
-  mourningSong.addEventListener('pause', updateMusicToggleIcon);
-
   const deadBtn = document.getElementById('companionDeadBtn') || null;
   const deadDialog = document.getElementById('deadCompanionDialog') || null;
   const deadBackdrop = document.getElementById('deadCompanionBackdrop') || null;
@@ -208,11 +126,9 @@ export function initDragon({ enableAutoBlink = true, blinkMs = 3500 } = {}) {
     if (deadBtn) deadBtn.hidden = false;
     const deathSfx = new Audio('./assets/soundeffects/CompanionDeathSFX/CompanionDeath.mp3');
     deathSfx.play().catch(() => {});
-    switchToSong(mourningSong);
   });
 
   document.addEventListener('companion:revived', () => {
-    switchToSong(happyMelody);
     if (dragonImg) dragonImg.style.visibility = '';
     if (tombstoneImg) tombstoneImg.hidden = true;
     if (deadBtn) deadBtn.hidden = true;
@@ -229,9 +145,6 @@ export function initDragon({ enableAutoBlink = true, blinkMs = 3500 } = {}) {
     dragonImg.style.visibility = 'hidden';
     if (tombstoneImg) tombstoneImg.hidden = false;
     if (deadBtn) deadBtn.hidden = false;
-    switchToSong(mourningSong);
-  } else {
-    switchToSong(happyMelody);
   }
 
   // Load saved skin if it exists

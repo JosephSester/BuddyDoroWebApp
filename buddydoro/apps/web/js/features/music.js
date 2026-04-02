@@ -511,15 +511,17 @@ export function initMusic() {
   }
 
   // Toggle mini-player panel from floating music button.
-  chip.addEventListener('click', () => {
+  chip.addEventListener('click', (e) => {
+    e.stopPropagation();
     state.panelOpen = !state.panelOpen;
     render();
   });
 
-  // Close panel when clicking outside of music button/panel.
+  // Close panel when clicking outside (use closest() so clicks on chip children still count as chip).
   document.addEventListener('pointerdown', (event) => {
     if (!state.panelOpen) return;
-    if (panel.contains(event.target) || chip.contains(event.target)) return;
+    const t = event.target;
+    if (t.closest?.('#musicChip') || t.closest?.('#musicMiniPanel')) return;
     state.panelOpen = false;
     render();
   }, true);

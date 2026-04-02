@@ -761,8 +761,19 @@
   <script type="module" src="../js/features/store.js"></script>
   <script type="module" src="../js/features/history.js"></script>
 
-  <!-- Spotify Web Playback SDK — must load before music.js so window.Spotify is available.
-       The SDK calls window.onSpotifyWebPlaybackSDKReady when ready; music.js sets that callback. -->
+  <!--
+    Spotify Web Playback SDK (https://developer.spotify.com/documentation/web-playback-sdk)
+
+    The CDN script invokes window.onSpotifyWebPlaybackSDKReady as soon as the SDK is ready.
+    If that global is missing, the SDK throws: AnthemError: onSpotifyWebPlaybackSDKReady is not defined.
+
+    We define a no-op stub here (synchronous, before the SDK tag) so the SDK never throws.
+    music.js later replaces this with the real implementation when the user has connected Spotify;
+    see buddydoro/apps/web/js/features/music.js (initMusic, Spotify boot block).
+  -->
+  <script>
+    window.onSpotifyWebPlaybackSDKReady = window.onSpotifyWebPlaybackSDKReady || function () {};
+  </script>
   <script src="https://sdk.scdn.co/spotify-player.js"></script>
 
 </body>

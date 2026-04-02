@@ -55,6 +55,9 @@ export function initMusic() {
   let spotifyDeviceId = null;  // Device ID assigned by Spotify after SDK ready
   let spotifyToken = null;     // Current Spotify access token
 
+  /** Prevents renderSpotifyPlaylists() from re-fetching on every render(); reset on disconnect / OAuth. */
+  let _playlistsRendered = false;
+
   // Day/night detection used by forest ambience to pick correct variant.
   function isNightNow() {
     const scene = document.getElementById('scene');
@@ -280,11 +283,6 @@ export function initMusic() {
       cleanupSpotifyPlayer();
     });
 
-    spotifyPlayer.addListener('account_error', () => {
-      showNotification('Spotify Premium is required for in-app playback.', 'error');
-      cleanupSpotifyPlayer();
-    });
-
     const connected = await spotifyPlayer.connect();
     if (!connected) {
       showNotification('Could not connect to Spotify. Try again.', 'error');
@@ -325,9 +323,8 @@ export function initMusic() {
   /**
    * Fetches the user's Spotify playlists and renders them in the
    * track-list area when source is set to Spotify.
-   * Uses a simple flag to avoid re-fetching on every render() cycle.
+   * Uses _playlistsRendered to avoid re-fetching on every render() cycle.
    */
-  let _playlistsRendered = false;
   async function renderSpotifyPlaylists() {
     if (_playlistsRendered) return;
     _playlistsRendered = true;
@@ -563,6 +560,7 @@ export function initMusic() {
   // Source selector: Spotify — switches audio source and boots SDK if connected.
   sourceSpotify.addEventListener('change', async () => {
     if (!sourceSpotify.checked) return;
+    _playlistsRendered = false;
     state.source = 'spotify';
     await applySourceBehavior();
     render();
@@ -642,13 +640,16 @@ export function initMusic() {
 
   // --- Initialization ---
 
-  // Detect Spotify OAuth redirect results in the URL query string.
+  // Restore persisted music UI (source, spotifyConnected, etc.) before reading OAuth query params,
+  // otherwise loadState() would overwrite a fresh ?spotifyConnected=true redirect from the backend.
+  loadState();
+
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('spotifyConnected') === 'true') {
     state.spotifyConnected = true;
     state.source = 'spotify';
+    _playlistsRendered = false;
     showNotification('Spotify account connected!', 'success');
-    // Clean the URL so the flag doesn't persist on refresh.
     window.history.replaceState({}, '', window.location.pathname);
   }
   if (urlParams.get('spotifyError')) {
@@ -656,17 +657,19 @@ export function initMusic() {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
-  loadState();
   setTrack(state.currentTrackIndex);
   syncAmbientPlayback();
   render();
   saveState();
 
-  // If Spotify was previously connected, boot the SDK player automatically
-  // so playback is available as soon as the user opens the panel.
+  /**
+   * Spotify Web Playback SDK global callback (see index.html stub before sdk.scdn.co script).
+   * index.html sets a no-op so the SDK never throws AnthemError on load.
+   * Here we replace it with bootSpotifyPlayer when the user has an active Spotify link.
+   * If the CDN script finished before this module ran, window.Spotify already exists — boot immediately.
+   */
   if (state.spotifyConnected) {
     window.onSpotifyWebPlaybackSDKReady = () => bootSpotifyPlayer();
-    // If the SDK script already loaded before this code ran, boot now.
     if (typeof window.Spotify !== 'undefined') bootSpotifyPlayer();
   }
 

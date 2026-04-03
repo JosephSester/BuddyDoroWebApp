@@ -22,17 +22,17 @@
 }
 
 .notification--success {
-    background-color: #4caf50;
+    background-color: #6e8c70;
     color: #fff;
 }
 
 .notification--error {
-    background-color: #f44336;
+    background-color: #b02500;
     color: #fff;
 }
 
 .notification--info {
-    background-color: #2196f3;
+    background-color: #c0622a;
     color: #fff;
 }
 
@@ -52,7 +52,7 @@
     left: 50%;
     transform: translateX(-50%);
     padding: 8px 14px;
-    background: rgba(33, 33, 33, 0.9);
+    background: rgba(43, 34, 19, 0.92);
     color: #fff;
     border-radius: 999px;
     font-size: 13px;

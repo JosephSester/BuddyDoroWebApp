@@ -273,11 +273,39 @@ document.addEventListener('DOMContentLoaded', async () => {
   const totalSlides = slides.length;
 
   let selectedSkin = 'DragonSkin.png';
+
+  const petRevealEmpty = document.getElementById('petRevealEmpty');
+  const petRevealInner = document.getElementById('petRevealInner');
+  const petRevealImg   = document.getElementById('petRevealImg');
+  const petRevealName  = document.getElementById('petRevealName');
+
   document.querySelectorAll('.ob-char-card').forEach(card => {
     card.addEventListener('click', () => {
       document.querySelectorAll('.ob-char-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       selectedSkin = card.dataset.skin;
+
+      // ── Hatch the egg: reveal the companion ──────────────
+      const petSrc   = card.dataset.pet;
+      const petLabel = card.dataset.petname;
+
+      if (petRevealImg && petSrc) {
+        petRevealImg.src = petSrc;
+        petRevealImg.alt = petLabel || '';
+        if (petRevealEmpty) petRevealEmpty.hidden = true;
+        if (petRevealInner) petRevealInner.hidden = false;
+        if (petRevealName)  petRevealName.textContent = petLabel || '';
+
+        if (animate) {
+          animate('#petRevealImg', {
+            scale:   [0.3, 1],
+            opacity: [0, 1],
+            rotate:  ['-8deg', '0deg'],
+            duration: 750,
+            ease: spring ? spring({ stiffness: 260, damping: 11 }) : 'outExpo',
+          });
+        }
+      }
     });
   });
 

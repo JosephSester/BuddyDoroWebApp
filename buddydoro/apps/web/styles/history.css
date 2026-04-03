@@ -196,7 +196,7 @@
   width: 100%;
   min-height: 3px;
   border-radius: 4px 4px 0 0;
-  background: linear-gradient(to top, #4caf50, #81c784);
+  background: linear-gradient(to top, #4e6650, #6e8c70);
   transition: height .3s ease;
 }
 

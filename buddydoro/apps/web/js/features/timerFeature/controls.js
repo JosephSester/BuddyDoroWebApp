@@ -1,7 +1,7 @@
 // apps/web/js/features/timerFeature/controls.js
 // Start/pause/stop and duration setters.
 
-export const createTimerControls = ({ state, emit, updateUI, showTimer, hideTimer, ensureTick, stopTick, limits } = {}) => {
+export const createTimerControls = ({ state, emit, updateUI, showTimer, ensureTick, stopTick, limits } = {}) => {
     const start = () => {
         if (state.isRunning) return;
         if (!state.mode) return;
@@ -39,19 +39,22 @@ export const createTimerControls = ({ state, emit, updateUI, showTimer, hideTime
 
     const stop = () => {
         pause();
-        setMode(null);
-        hideTimer();
+        state.mode = 'focus';
+        state.duration = state.plannedFocusSeconds ?? state.focusDefault * 60;
+        state.remaining = state.duration;
+        state.labelOverride = null;
         emit('onStop');
         updateUI();
     };
 
     const setMode = (nextMode) => {
-        if (nextMode === 'break' && !state.breakEnabled) return;
         pause();
         state.mode = nextMode;
 
         if (state.mode === 'break') {
             state.labelOverride = 'On a Break';
+        } else if (state.mode === 'longBreak') {
+            state.labelOverride = null;
         } else if (state.labelOverride === 'On a Break') {
             state.labelOverride = null;
         }
@@ -60,8 +63,10 @@ export const createTimerControls = ({ state, emit, updateUI, showTimer, hideTime
             state.duration = state.plannedFocusSeconds ?? state.focusDefault * 60;
         } else if (state.mode === 'break') {
             state.duration = state.breakDefault * 60;
+        } else if (state.mode === 'longBreak') {
+            state.duration = (state.longBreakDefault ?? 15) * 60;
         } else {
-            state.duration = state.plannedFocusSeconds ?? state.focusDefault * 60;
+            state.duration = state.focusDefault * 60;
         }
 
         state.remaining = state.duration;

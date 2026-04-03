@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resources &amp; Notes • BuddyDoro</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles/design-system.css" />
+  <link rel="stylesheet" href="../styles/store.css" />
+  <link rel="stylesheet" href="../styles/resources.css" />
+  <link rel="stylesheet" href="../styles/notifications.css" />
+</head>
+<body>
+
+  <!-- Decorative depth orbs -->
+  <div class="sp-orb sp-orb-1" aria-hidden="true"></div>
+  <div class="sp-orb sp-orb-2" aria-hidden="true"></div>
+  <div class="sp-orb sp-orb-3" aria-hidden="true"></div>
+
+  <div class="sp-wrap">
+
+    <!-- Header -->
+    <header class="sp-header rp-header">
+      <a href="index.html" class="sp-back" aria-label="Back to app">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back
+      </a>
+
+      <div class="sp-header-center">
+        <h1 class="sp-title">Resources &amp; Notes</h1>
+        <p class="sp-subtitle">Find videos, books, and websites — and keep your notes in one place</p>
+      </div>
+
+      <!-- Goal selector -->
+      <div class="rp-goal-wrap">
+        <span class="rp-goal-label" id="rpGoalLabel">Explore resources for</span>
+        <div class="rp-goal-dropdown" id="rpGoalDropdown">
+          <button class="rp-goal-trigger" id="rpGoalTrigger" type="button"
+            aria-haspopup="listbox" aria-expanded="false" aria-labelledby="rpGoalLabel rpGoalTrigger">
+            <svg class="rp-goal-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span class="rp-goal-value" id="rpGoalValue">Select a goal…</span>
+            <svg class="rp-goal-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <ul class="rp-goal-list" id="rpGoalList" role="listbox" aria-label="Goals" hidden></ul>
+        </div>
+      </div>
+    </header>
+
+    <!-- Tabs + content -->
+    <div class="sp-catalog-wrap rp-content-wrap">
+
+      <div class="category-tabs rp-tabs" role="tablist" aria-label="Resources tabs">
+        <button class="tab is-active" role="tab" aria-selected="true"  data-rp-tab="discover">🔍 Discover</button>
+        <button class="tab"           role="tab" aria-selected="false" data-rp-tab="saved">🔖 Saved</button>
+        <button class="tab"           role="tab" aria-selected="false" data-rp-tab="notes">📝 Notes</button>
+      </div>
+
+      <!-- Discover panel -->
+      <div id="rpTabDiscover" class="rp-tab-panel" role="tabpanel"></div>
+
+      <!-- Saved panel -->
+      <div id="rpTabSaved" class="rp-tab-panel" role="tabpanel" hidden></div>
+
+      <!-- Notes panel -->
+      <div id="rpTabNotes" class="rp-tab-panel" role="tabpanel" hidden></div>
+
+    </div>
+  </div>
+
+  <script type="module" src="../js/resourcesPage.js"></script>
+</body>
+</html>

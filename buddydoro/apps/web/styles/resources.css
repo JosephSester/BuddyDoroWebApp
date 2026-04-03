@@ -1,0 +1,766 @@
+/* ─── Standalone page layout ──────────────────────────────────────────────── */
+
+/* ─── Goal dropdown (custom, app-styled) ──────────────────────────────────── */
+
+.rp-goal-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+  width: min(280px, 100%);
+}
+
+.rp-goal-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(43, 34, 19, 0.50);
+  padding-left: 4px;
+}
+
+/* Wrapper holds trigger + floating list */
+.rp-goal-dropdown {
+  position: relative;
+}
+
+/* Trigger pill — mirrors sp-balance-chip / sp-back aesthetic */
+.rp-goal-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(201, 138, 46, 0.38);
+  background:
+    radial-gradient(ellipse 80% 60% at 30% 0%, rgba(255, 248, 220, 0.60), transparent 70%),
+    rgba(252, 247, 238, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 2px 10px rgba(43, 34, 19, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #2b2213;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.rp-goal-trigger:hover {
+  border-color: rgba(192, 98, 42, 0.55);
+  box-shadow:
+    0 4px 14px rgba(43, 34, 19, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.rp-goal-trigger:focus-visible {
+  outline: none;
+  border-color: rgba(192, 98, 42, 0.65);
+  box-shadow:
+    0 0 0 3px rgba(192, 98, 42, 0.14),
+    0 2px 10px rgba(43, 34, 19, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.rp-goal-trigger[aria-expanded="true"] {
+  border-color: rgba(192, 98, 42, 0.60);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.rp-goal-trigger[aria-expanded="true"] .rp-goal-chevron {
+  transform: rotate(180deg);
+}
+
+.rp-goal-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #c0622a;
+  opacity: 0.75;
+}
+
+.rp-goal-value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(43, 34, 19, 0.42);
+  font-weight: 600;
+}
+
+.rp-goal-value.is-selected {
+  color: #2b2213;
+  font-weight: 700;
+}
+
+.rp-goal-chevron {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: #c0622a;
+  transition: transform 0.2s ease;
+}
+
+/* Floating list panel */
+.rp-goal-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(201, 138, 46, 0.38);
+  background:
+    radial-gradient(ellipse 80% 40% at 30% 0%, rgba(255, 248, 220, 0.55), transparent 60%),
+    rgba(252, 247, 238, 0.96);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    0 8px 28px rgba(43, 34, 19, 0.14),
+    0 2px 8px rgba(43, 34, 19, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.60);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.rp-goal-list::-webkit-scrollbar { width: 4px; }
+.rp-goal-list::-webkit-scrollbar-track { background: transparent; }
+.rp-goal-list::-webkit-scrollbar-thumb {
+  background: rgba(192, 98, 42, 0.25);
+  border-radius: 999px;
+}
+
+/* Each option */
+.rp-goal-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2b2213;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+  user-select: none;
+}
+
+.rp-goal-option:hover {
+  background: rgba(201, 138, 46, 0.12);
+  color: #c0622a;
+}
+
+.rp-goal-option.is-selected {
+  background: rgba(192, 98, 42, 0.12);
+  color: #c0622a;
+  font-weight: 700;
+}
+
+.rp-goal-option-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: rgba(201, 138, 46, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  color: #c0622a;
+}
+
+/* Empty / disabled states */
+.rp-goal-empty {
+  padding: 12px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: rgba(43, 34, 19, 0.45);
+  font-style: italic;
+}
+
+/* ─── Button styles (btn-primary/secondary not available from timer.css here) */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(180deg, #d4753a 0%, #c0622a 60%, #a8501f 100%);
+  color: #fff0e4;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.14s ease, transform 0.12s ease, box-shadow 0.14s ease;
+  box-shadow: 0 3px 10px rgba(192, 98, 42, 0.30), inset 0 1px 0 rgba(255,255,255,0.22);
+  white-space: nowrap;
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(192, 98, 42, 0.38);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.96);
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid rgba(192, 98, 42, 0.55);
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(201, 138, 46, 0.45);
+  background: rgba(255, 255, 255, 0.60);
+  color: #5c4033;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(201, 138, 46, 0.12);
+  color: #c0622a;
+}
+
+.btn-secondary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* Override sp-header to allow wrapping on small screens */
+.rp-header {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Tab panel inside the sp-catalog-wrap */
+.rp-content-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.rp-tabs {
+  flex-shrink: 0;
+}
+
+.rp-tab-panel {
+  flex: 1;
+  min-height: 300px;
+}
+
+/* ─── Resources & Notes panel (modal, kept for reference) ─────────────────── */
+.resources-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(860px, 94vw);
+  max-height: 84vh;
+  overflow-y: auto;
+  border-radius: 24px;
+  z-index: 31;
+  border: 2px solid rgba(201, 138, 46, 0.55);
+  background:
+    radial-gradient(ellipse 55% 30% at 30% 0%, rgba(255, 248, 220, 0.55), transparent 60%),
+    linear-gradient(160deg, rgba(252, 244, 228, 0.97) 0%, rgba(244, 233, 210, 0.97) 100%);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow:
+    0 24px 60px rgba(43, 34, 19, 0.30),
+    0 8px 24px rgba(43, 34, 19, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.60);
+  color: #2b2213;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.resources-panel::-webkit-scrollbar { width: 5px; }
+.resources-panel::-webkit-scrollbar-track { background: transparent; }
+.resources-panel::-webkit-scrollbar-thumb {
+  background: rgba(192, 98, 42, 0.30);
+  border-radius: 999px;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+.resources-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1.5px solid rgba(201, 138, 46, 0.22);
+  flex-shrink: 0;
+}
+
+.resources-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #2b2213;
+}
+
+/* ─── Search row ──────────────────────────────────────────────────────────── */
+.resources-search-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px 0;
+  flex-shrink: 0;
+}
+
+.resources-search-bar {
+  flex: 1;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(201, 138, 46, 0.38);
+  background: rgba(255, 255, 255, 0.70);
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #2b2213;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.resources-search-bar:focus {
+  border-color: rgba(201, 138, 46, 0.7);
+  box-shadow: 0 0 0 3px rgba(201, 138, 46, 0.12);
+}
+
+.resources-search-bar::placeholder { color: rgba(43, 34, 19, 0.40); }
+
+/* ─── Tabs ────────────────────────────────────────────────────────────────── */
+.resources-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 12px 20px 0;
+  flex-shrink: 0;
+}
+
+/* ─── Tab panels ──────────────────────────────────────────────────────────── */
+.resources-tab-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 20px;
+  min-height: 280px;
+}
+
+/* ─── Section labels ──────────────────────────────────────────────────────── */
+.resources-section {
+  margin-bottom: 20px;
+}
+
+.resources-section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(43, 34, 19, 0.50);
+  margin: 0 0 8px;
+}
+
+.resources-section-empty {
+  font-size: 0.85rem;
+  color: rgba(43, 34, 19, 0.45);
+  margin: 0;
+  padding: 8px 0;
+}
+
+/* ─── Resource card ───────────────────────────────────────────────────────── */
+.resource-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(201, 138, 46, 0.22);
+  background: rgba(255, 255, 255, 0.65);
+  margin-bottom: 8px;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.2s ease;
+}
+
+.resource-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(43, 34, 19, 0.10);
+}
+
+.resource-card.is-removing {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+.resource-thumb {
+  width: 80px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: rgba(201, 138, 46, 0.10);
+}
+
+.resource-thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: rgba(43, 34, 19, 0.35);
+  border: 1.5px solid rgba(201, 138, 46, 0.20);
+}
+
+.resource-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.resource-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #2b2213;
+  text-decoration: none;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.12s;
+}
+
+.resource-title:hover { color: #c0622a; text-decoration: underline; }
+
+.resource-author {
+  font-size: 0.77rem;
+  color: rgba(43, 34, 19, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resource-desc {
+  font-size: 0.8rem;
+  color: rgba(43, 34, 19, 0.50);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ─── Save button ─────────────────────────────────────────────────────────── */
+.resource-save-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(201, 138, 46, 0.32);
+  background: rgba(255, 255, 255, 0.55);
+  color: rgba(43, 34, 19, 0.55);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.14s, color 0.14s, border-color 0.14s;
+  padding: 0;
+}
+
+.resource-save-btn svg { width: 15px; height: 15px; }
+
+.resource-save-btn:hover {
+  background: rgba(192, 98, 42, 0.12);
+  color: #c0622a;
+  border-color: rgba(192, 98, 42, 0.40);
+}
+
+.resource-save-btn.is-saved {
+  background: rgba(192, 98, 42, 0.18);
+  color: #c0622a;
+  border-color: rgba(192, 98, 42, 0.50);
+}
+
+.resource-save-btn:focus-visible {
+  outline: 2px solid rgba(192, 98, 42, 0.50);
+  outline-offset: 2px;
+}
+
+/* ─── Delete button (shared by resource + note cards) ─────────────────────── */
+.resource-delete-btn,
+.note-delete-btn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(201, 138, 46, 0.22);
+  background: transparent;
+  color: rgba(43, 34, 19, 0.40);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.14s, color 0.14s;
+  padding: 0;
+}
+
+.resource-delete-btn svg,
+.note-delete-btn svg { width: 14px; height: 14px; }
+
+.resource-delete-btn:hover,
+.note-delete-btn:hover {
+  background: rgba(200, 50, 50, 0.10);
+  color: #b83232;
+  border-color: rgba(200, 50, 50, 0.30);
+}
+
+.resource-delete-btn:focus-visible,
+.note-delete-btn:focus-visible {
+  outline: 2px solid rgba(200, 50, 50, 0.40);
+  outline-offset: 2px;
+}
+
+/* ─── Saved resource note input ───────────────────────────────────────────── */
+.resource-note-input {
+  width: 100%;
+  font-size: 0.82rem;
+  font-family: inherit;
+  color: #2b2213;
+  background: rgba(255, 255, 255, 0.50);
+  border: 1px solid rgba(201, 138, 46, 0.22);
+  border-radius: 6px;
+  padding: 5px 8px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.14s;
+  margin-top: 4px;
+}
+
+.resource-note-input:focus {
+  border-color: rgba(201, 138, 46, 0.55);
+}
+
+.resource-note-input::placeholder { color: rgba(43, 34, 19, 0.35); }
+
+/* ─── Web search links ────────────────────────────────────────────────────── */
+.resources-web-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resources-web-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(201, 138, 46, 0.38);
+  background: rgba(255, 255, 255, 0.60);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2b2213;
+  text-decoration: none;
+  transition: background 0.14s, transform 0.12s;
+}
+
+.resources-web-link:hover {
+  background: rgba(201, 138, 46, 0.14);
+  transform: translateY(-1px);
+}
+
+.resources-web-link:focus-visible {
+  outline: 2px solid rgba(201, 138, 46, 0.55);
+  outline-offset: 2px;
+}
+
+.resources-web-icon { font-size: 1rem; }
+
+/* ─── Notes tab ───────────────────────────────────────────────────────────── */
+.notes-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.notes-new-btn {
+  padding: 7px 16px;
+  font-size: 0.85rem;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ─── Note card ───────────────────────────────────────────────────────────── */
+.note-card {
+  border-radius: 12px;
+  border: 1.5px solid rgba(201, 138, 46, 0.28);
+  background: rgba(255, 255, 255, 0.65);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.note-card.is-removing {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+.note-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.note-task-select {
+  flex: 1;
+  font-size: 0.82rem;
+  font-family: inherit;
+  color: rgba(43, 34, 19, 0.70);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(201, 138, 46, 0.25);
+  border-radius: 6px;
+  padding: 4px 8px;
+  outline: none;
+  cursor: pointer;
+  max-width: 260px;
+}
+
+.note-task-select:focus { border-color: rgba(201, 138, 46, 0.55); }
+
+.note-body {
+  width: 100%;
+  font-size: 0.88rem;
+  font-family: inherit;
+  color: #2b2213;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(201, 138, 46, 0.22);
+  border-radius: 8px;
+  padding: 8px 10px;
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+  transition: border-color 0.14s;
+  min-height: 80px;
+}
+
+.note-body:focus { border-color: rgba(201, 138, 46, 0.55); }
+.note-body::placeholder { color: rgba(43, 34, 19, 0.35); }
+
+.note-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.note-date {
+  font-size: 0.75rem;
+  color: rgba(43, 34, 19, 0.40);
+}
+
+.note-save-btn {
+  padding: 5px 14px;
+  font-size: 0.82rem;
+}
+
+/* ─── Empty state ─────────────────────────────────────────────────────────── */
+.resources-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(43, 34, 19, 0.50);
+  gap: 10px;
+}
+
+.resources-empty-icon {
+  font-size: 2.2rem;
+  opacity: 0.6;
+}
+
+.resources-empty p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ─── Spinner ─────────────────────────────────────────────────────────────── */
+.resources-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.resources-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(201, 138, 46, 0.20);
+  border-top-color: rgba(192, 98, 42, 0.80);
+  border-radius: 50%;
+  animation: resources-spin 0.7s linear infinite;
+}
+
+@keyframes resources-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Error state ─────────────────────────────────────────────────────────── */
+.resources-error {
+  text-align: center;
+  padding: 24px;
+  color: rgba(180, 50, 50, 0.75);
+  font-size: 0.88rem;
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────────── */
+.resources-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 20px 16px;
+  border-top: 1.5px solid rgba(201, 138, 46, 0.18);
+  flex-shrink: 0;
+}
+
+/* ─── Tab flash (briefly highlight tab after save) ────────────────────────── */
+@keyframes tab-flash {
+  0%, 100% { background: transparent; }
+  40%       { background: rgba(192, 98, 42, 0.18); color: #c0622a; }
+}
+
+.tab-flash {
+  animation: tab-flash 0.6s ease;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 540px) {
+  .resource-thumb { width: 56px; height: 40px; }
+  .resource-card  { gap: 8px; padding: 8px; }
+  .resources-web-row { gap: 6px; }
+  .resources-web-link { padding: 6px 10px; font-size: 0.8rem; }
+}

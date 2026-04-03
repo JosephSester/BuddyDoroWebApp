@@ -6,36 +6,34 @@
   <title>Welcome to BuddyDoro</title>
 
   <link rel="preload" as="image" href="./assets/onboardingAssets/welcoming screen.png" />
-  <link rel="preload" as="image" href="./assets/onboardingAssets/BuddyDoroName.png" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <link rel="stylesheet" href="../styles/onboarding.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet" href="../styles/design-system.css" />
+  <link rel="stylesheet" href="../styles/onboarding.css" />
 </head>
 
 <body>
 <div class="ob-wrap">
 
-  <!-- Fantasy atmosphere -->
+  <!-- Forest atmosphere orbs -->
   <div class="ob-orb ob-orb--1" aria-hidden="true"></div>
   <div class="ob-orb ob-orb--2" aria-hidden="true"></div>
   <div class="ob-orb ob-orb--3" aria-hidden="true"></div>
   <div class="ob-orb ob-orb--4" aria-hidden="true"></div>
 
-  <!-- Floating magic sparks -->
-  <div class="ob-spark" style="left:6%;--dur:6s;--delay:0s;--dx:18px;--col:rgba(246,191,81,0.9)" aria-hidden="true"></div>
-  <div class="ob-spark" style="left:14%;--dur:8s;--delay:1.5s;--dx:-12px;--col:rgba(13,214,200,0.8)" aria-hidden="true"></div>
-  <div class="ob-spark" style="left:28%;--dur:5.5s;--delay:0.7s;--dx:22px;--col:rgba(246,191,81,0.7)" aria-hidden="true"></div>
-  <div class="ob-spark" style="left:45%;--dur:7s;--delay:2.1s;--dx:-8px;--col:rgba(212,228,255,0.6)" aria-hidden="true"></div>
-  <div class="ob-spark" style="left:60%;--dur:6.5s;--delay:0.3s;--dx:14px;--col:rgba(13,214,200,0.7)" aria-hidden="true"></div>
-  <div class="ob-spark" style="left:72%;--dur:9s;--delay:1s;--dx:-20px;--col:rgba(246,191,81,0.8)" aria-hidden="true"></div>
-  <div class="ob-spark" style="left:85%;--dur:5s;--delay:2.8s;--dx:10px;--col:rgba(212,228,255,0.5)" aria-hidden="true"></div>
-  <div class="ob-spark" style="left:93%;--dur:7.5s;--delay:0.9s;--dx:-15px;--col:rgba(246,191,81,0.6)" aria-hidden="true"></div>
+  <!-- Floating magic sparks — terracotta + sage palette -->
+  <div class="ob-spark" style="left:6%;--dur:6s;--delay:0s;--dx:18px;--col:rgba(192,98,42,0.85)"    aria-hidden="true"></div>
+  <div class="ob-spark" style="left:14%;--dur:8s;--delay:1.5s;--dx:-12px;--col:rgba(110,140,112,0.70)" aria-hidden="true"></div>
+  <div class="ob-spark" style="left:28%;--dur:5.5s;--delay:0.7s;--dx:22px;--col:rgba(192,98,42,0.70)"  aria-hidden="true"></div>
+  <div class="ob-spark" style="left:45%;--dur:7s;--delay:2.1s;--dx:-8px;--col:rgba(201,138,46,0.65)"   aria-hidden="true"></div>
+  <div class="ob-spark" style="left:60%;--dur:6.5s;--delay:0.3s;--dx:14px;--col:rgba(110,140,112,0.65)" aria-hidden="true"></div>
+  <div class="ob-spark" style="left:72%;--dur:9s;--delay:1s;--dx:-20px;--col:rgba(192,98,42,0.75)"     aria-hidden="true"></div>
+  <div class="ob-spark" style="left:85%;--dur:5s;--delay:2.8s;--dx:10px;--col:rgba(201,138,46,0.55)"   aria-hidden="true"></div>
+  <div class="ob-spark" style="left:93%;--dur:7.5s;--delay:0.9s;--dx:-15px;--col:rgba(192,98,42,0.60)" aria-hidden="true"></div>
 
 
   <!-- ══ SLIDE 0 — Welcome ═══════════════════════════════════════ -->
@@ -89,38 +87,66 @@
   <!-- ══ SLIDE 2 — Choose Your Buddy ═══════════════════════════ -->
   <div class="slide slide-characters" data-slide="2">
     <div class="ob-char-inner">
+
       <div class="ob-char-heading">
         <span class="ob-slide-num">02</span>
         <h2 class="ob-char-title">CHOOSE YOUR BUDDY.</h2>
-        <p class="ob-char-sub">Your companion through every focus session.</p>
+        <p class="ob-char-sub">Tap an egg to hatch your companion.</p>
       </div>
+
+      <!-- ── Pet reveal zone ──────────────────────────────── -->
+      <div class="ob-pet-reveal" id="petReveal">
+        <div class="ob-pet-reveal-empty" id="petRevealEmpty">
+          <span>?</span>
+          <p>Select an egg to reveal your companion</p>
+        </div>
+        <div class="ob-pet-reveal-inner" id="petRevealInner" hidden>
+          <img id="petRevealImg" src="" alt="" class="ob-pet-reveal-img" draggable="false" />
+        </div>
+        <p class="ob-pet-reveal-name" id="petRevealName"></p>
+      </div>
+
+      <!-- ── Egg grid ─────────────────────────────────────── -->
       <div class="ob-char-grid">
-        <button class="ob-char-card" data-skin="DragonSkin.png" type="button">
+        <button class="ob-char-card"
+          data-skin="DragonSkin.png"
+          data-pet="./assets/artwork/Skins/DragonSkin.png"
+          data-petname="Dragon"
+          type="button">
           <div class="ob-char-img-wrap">
-            <img src="./assets/artwork/Skins/DragonSkin.png" alt="Dragon" draggable="false" />
+            <img src="./assets/artwork/Eggs/DragonEgg.png" alt="Dragon Egg" draggable="false" />
           </div>
           <span class="ob-char-name">Dragon</span>
           <span class="ob-char-check"><i class="fas fa-check"></i></span>
         </button>
-        <button class="ob-char-card" data-skin="Axolotyl.png" type="button">
+        <button class="ob-char-card"
+          data-skin="Axolotyl.png"
+          data-pet="./assets/artwork/Skins/Axolotyl.png"
+          data-petname="Axolotl"
+          type="button">
           <div class="ob-char-img-wrap">
-            <img src="./assets/artwork/Skins/Axolotyl.png" alt="Axolotl" draggable="false" />
+            <img src="./assets/artwork/Eggs/AxolotlEgg.png" alt="Axolotl Egg" draggable="false" />
           </div>
           <span class="ob-char-name">Axolotl</span>
           <span class="ob-char-check"><i class="fas fa-check"></i></span>
         </button>
-        <button class="ob-char-card" data-skin="Frog.png" type="button">
+        <button class="ob-char-card"
+          data-skin="Frog.png"
+          data-pet="./assets/artwork/Skins/Frog.png"
+          data-petname="Frog"
+          type="button">
           <div class="ob-char-img-wrap">
-            <img src="./assets/artwork/Skins/Frog.png" alt="Frog" draggable="false" />
+            <img src="./assets/artwork/Eggs/FrogEgg.png" alt="Frog Egg" draggable="false" />
           </div>
           <span class="ob-char-name">Frog</span>
           <span class="ob-char-check"><i class="fas fa-check"></i></span>
         </button>
       </div>
+
     </div>
   </div>
 
-  <!-- Hidden nav buttons — JS references them -->
+  <!-- Hidden nav hooks — JS references these -->
   <div hidden aria-hidden="true">
     <button class="prev-btn"></button>
     <button class="next-btn"></button>

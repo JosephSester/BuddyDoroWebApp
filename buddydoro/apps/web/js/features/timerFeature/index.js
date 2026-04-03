@@ -1,10 +1,8 @@
 // apps/web/js/features/timerFeature/index.js
-// Timer composition root.
+// Simplified classic Pomodoro timer — Focus / Short Break / Long Break.
 import { DEFAULT_MINUTES, LIMITS, STORAGE_KEYS } from './constants.js';
-import { readStored, writeStored, saveTimerSession, loadTimerSession, clearTimerSession } from './storage.js';
+import { saveTimerSession, loadTimerSession, clearTimerSession } from './storage.js';
 import { formatSeconds } from './format.js';
-import { initTimerSummaries } from './summary.js';
-import { initTimerMenus } from './menu.js';
 import { createEventBus } from './events.js';
 import { getTimerDom } from './dom.js';
 import { createTimerState } from './state.js';
@@ -14,179 +12,111 @@ import { createTimerControls } from './controls.js';
 import { createTimerSettings } from './settings.js';
 
 export function initTimer(hooks = {}) {
-    const focusDefault = readStored(STORAGE_KEYS.focus, DEFAULT_MINUTES.focus, LIMITS);
-    const breakDefault = readStored(STORAGE_KEYS.break, DEFAULT_MINUTES.break, LIMITS);
+    const focusDefault     = DEFAULT_MINUTES.focus;
+    const breakDefault     = DEFAULT_MINUTES.break;
+    const longBreakDefault = DEFAULT_MINUTES.longBreak;
 
-    const bus = createEventBus(hooks);
-    const dom = getTimerDom();
-    const state = createTimerState({ focusDefault, breakDefault });
-    const ui = createTimerUI({ dom, formatSeconds, state });
+    const bus  = createEventBus(hooks);
+    const dom  = getTimerDom();
+    const state = createTimerState({ focusDefault, breakDefault, longBreakDefault });
+    const ui   = createTimerUI({ dom, formatSeconds, state });
 
-    const { breakSummary, showSummary } = initTimerSummaries({
-        onRestart: () => {
-            if (!state.sessionOriginalSeconds || !state.sessionMode) return;
-            controls.setMode(state.sessionMode);
-            controls.setDuration(state.sessionOriginalSeconds);
-            controls.start();
-            bus.emit('onSummaryRestart');
-        },
-        onBreak: () => {
-            state.showBreakSummary = true;
-            controls.setMode('break');
-            controls.setDuration(DEFAULT_MINUTES.break * 60);
-            controls.start();
-            bus.emit('onSummaryBreak', { minutes: DEFAULT_MINUTES.break });
-        },
-        onHome: () => {
-            controls.stop();
-            bus.emit('onSummaryHome');
-        },
-        onResume: () => {
-            const nextFocusSeconds = state.plannedFocusSeconds ?? state.focusDefault * 60;
-            controls.setMode('focus');
-            controls.setDuration(nextFocusSeconds);
-            controls.start();
-            bus.emit('onBreakResume');
-        },
-        onLater: () => {
-            controls.stop();
-            bus.emit('onBreakLater');
-        },
-        getDefaultBreakMinutes: () => state.breakDefault,
-        onSummary: (payload) => bus.emit('onSummary', payload),
-    });
-
-    const ticker = createTicker({
-        state,
-        emit: bus.emit,
-        showSummary,
-        breakSummary,
-        updateUI: ui.updateUI,
-    });
+    const ticker = createTicker({ state, emit: bus.emit, updateUI: ui.updateUI });
 
     const controls = createTimerControls({
         state,
         emit: bus.emit,
         updateUI: ui.updateUI,
         showTimer: ui.showTimer,
-        hideTimer: ui.hideTimer,
         ensureTick: ticker.ensureTick,
         stopTick: ticker.stopTick,
         limits: LIMITS,
     });
 
-    const menus = initTimerMenus({
-        elements: dom.elements,
-        limits: LIMITS,
-        getFocusDefaultMinutes: () => state.focusDefault,
-        getBreakDefaultMinutes: () => state.breakDefault,
-        onStartWithDuration: (nextMode, durationSeconds) => {
-            controls.setMode(nextMode);
-            if (durationSeconds != null) {
-                controls.setDuration(durationSeconds);
-            }
-            controls.start();
-        },
-    });
-
-    const settings = createTimerSettings({
+    const timerSettings = createTimerSettings({
         state,
         limits: LIMITS,
         updateUI: ui.updateUI,
-        writeStored,
+        writeStored: (key, val) => { try { localStorage.setItem(key, String(val)); } catch {} },
         storageKeys: STORAGE_KEYS,
-        setBreakEnabledUI: () => { },
+        setBreakEnabledUI: () => {},
     });
 
+    // ── Mode chips (Focus / Short Break / Long Break) ──────────────────────
+    const modeChipEls = document.querySelectorAll('.mode-chips .chip[data-mode]');
+
+    function activateChip(mode) {
+        modeChipEls.forEach(chip =>
+            chip.classList.toggle('is-active', chip.dataset.mode === mode)
+        );
+    }
+
+    modeChipEls.forEach(chip => {
+        chip.addEventListener('click', () => {
+            const mode    = chip.dataset.mode;
+            const minutes = parseInt(chip.dataset.minutes, 10);
+            controls.setMode(mode);
+            controls.setDuration(minutes * 60);
+            activateChip(mode);
+        });
+    });
+
+    // ── Start / Pause button ───────────────────────────────────────────────
+    dom.startBtn?.addEventListener('click', () => {
+        state.isRunning ? controls.pause() : controls.start();
+    });
+
+    // ── Session restore ────────────────────────────────────────────────────
+    const savedSession = loadTimerSession();
+    if (savedSession?.mode) {
+        state.mode      = savedSession.mode;
+        state.duration  = savedSession.duration;
+        state.remaining = savedSession.remaining;
+        state.labelOverride = savedSession.labelOverride;
+        activateChip(savedSession.mode);
+    } else {
+        activateChip('focus');
+    }
+
+    ui.showTimer();
+    ui.updateUI();
+
+    bus.on('onPause',    () => { if (state.mode && state.remaining > 60) saveTimerSession(state); });
+    bus.on('onStop',     () => clearTimerSession());
+    bus.on('onComplete', () => {
+        clearTimerSession();
+        activateChip(state.mode); // keep same chip highlighted after reset
+        ui.updateUI();
+    });
+
+    window.addEventListener('beforeunload', () => {
+        if (state.mode && state.remaining > 60) saveTimerSession(state);
+    });
+
+    // ── Public API ─────────────────────────────────────────────────────────
     const setModeLabel = (text) => {
         state.labelOverride = text ? String(text) : null;
         ui.updateUI();
     };
 
-    dom.startBtn?.addEventListener('click', () => {
-        state.isRunning ? controls.pause() : controls.start();
-    });
-
-    dom.endBtn?.addEventListener('click', () => {
-        if (state.mode === 'focus') {
-            const elapsedSeconds = Math.max(0, state.duration - state.remaining);
-            controls.pause();
-            showSummary(elapsedSeconds);
-            return;
-        }
-        if (state.mode === 'break') {
-            const elapsedSeconds = Math.max(0, state.duration - state.remaining);
-            controls.pause();
-            const minutes = Math.max(0, Math.ceil(elapsedSeconds / 60));
-            if (state.showBreakSummary) {
-                breakSummary.open({ minutes });
-                return;
-            }
-            controls.stop();
-            return;
-        }
-        controls.stop();
-    });
-
-    menus.wireMenu();
-    ui.showTimer();
-    ui.updateUI();
-
-    // ── Session restore ──────────────────────────────────────────────────────
-    const savedSession = loadTimerSession();
-    if (savedSession) {
-        state.mode = savedSession.mode;
-        state.duration = savedSession.duration;
-        state.remaining = savedSession.remaining;
-        state.labelOverride = savedSession.labelOverride;
-        ui.showTimer();
-        ui.updateUI();
-        const mins = Math.ceil(savedSession.remaining / 60);
-        console.info(`[Timer] Restored ${savedSession.mode} session — ${mins}m remaining (paused)`);
-    }
-
-    // Save to localStorage whenever the timer pauses or the page is about to unload.
-    // Clear it when the session ends cleanly (stop or natural completion).
-    bus.on('onPause', () => {
-        if (state.mode && state.remaining > 60) saveTimerSession(state);
-    });
-    bus.on('onStop',     () => clearTimerSession());
-    bus.on('onComplete', () => clearTimerSession());
-
-    window.addEventListener('beforeunload', () => {
-        if (state.mode && state.remaining > 60) saveTimerSession(state);
-    });
-    // ────────────────────────────────────────────────────────────────────────
-
     return {
-        start: controls.start,
-        pause: controls.pause,
-        reset: controls.reset,
-        stop: controls.stop,
-        setMode: controls.setMode,
-        setDuration: controls.setDuration,
+        start:                  controls.start,
+        pause:                  controls.pause,
+        stop:                   controls.stop,
+        reset:                  controls.reset,
+        setMode:                controls.setMode,
+        setDuration:            controls.setDuration,
         setPlannedFocusDuration: controls.setPlannedFocusDuration,
-        applyDefaults: settings.applyDefaults,
-        resetTimerToDefault: controls.resetTimerToDefault,
-        setBreakEnabled: settings.setBreakEnabled,
-        getFocusDefaultMinutes: settings.getFocusDefaultMinutes,
-        setRemaining: controls.setRemaining,
-        setBreakSummaryEnabled: settings.setBreakSummaryEnabled,
+        resetTimerToDefault:    controls.resetTimerToDefault,
+        setRemaining:           controls.setRemaining,
+        applyDefaults:          timerSettings.applyDefaults,
+        getMode:                () => state.mode,
         setModeLabel,
-        onTick: (fn) => bus.on('onTick', fn),
-        onStart: (fn) => bus.on('onStart', fn),
-        onPause: (fn) => bus.on('onPause', fn),
-        onStop: (fn) => bus.on('onStop', fn),
-        onReset: (fn) => bus.on('onReset', fn),
+        activateChip,
+        onTick:     (fn) => bus.on('onTick', fn),
+        onStart:    (fn) => bus.on('onStart', fn),
+        onPause:    (fn) => bus.on('onPause', fn),
+        onStop:     (fn) => bus.on('onStop', fn),
         onComplete: (fn) => bus.on('onComplete', fn),
-        onSummary: (fn) => bus.on('onSummary', fn),
-        onSummaryRestart: (fn) => bus.on('onSummaryRestart', fn),
-        onSummaryBreak: (fn) => bus.on('onSummaryBreak', fn),
-        onSummaryHome: (fn) => bus.on('onSummaryHome', fn),
-        onBreakResume: (fn) => bus.on('onBreakResume', fn),
-        onBreakLater: (fn) => bus.on('onBreakLater', fn),
-        openDurationMenu: menus.openDurationMenu,
-        openBreakDurationMenu: menus.openBreakDurationMenu,
-        setLaunchHandler: menus.setLaunchHandler,
     };
 }

@@ -5,7 +5,8 @@ import { API_BASE } from '../api/apiClient.js';
 // Persisted UI/player settings for the music mini-player.
 const STORAGE_KEY = 'buddydoro:musicState:v1';
 
-export function initMusic() {
+export function initMusic(options = {}) {
+  const { timer } = options;
   const chip = document.getElementById('musicChip');
   const panel = document.getElementById('musicMiniPanel');
   const enableToggle = document.getElementById('musicEnabledToggle');
@@ -659,10 +660,41 @@ export function initMusic() {
     window.history.replaceState({}, '', window.location.pathname);
   }
 
+  // Default / BuddyDoro tracks: never auto-play on page load — they start with the focus timer (see below).
+  // Nature ambience: start as soon as possible after login (may require a user gesture per browser autoplay policy).
+  state.isPlaying = false;
+  trackAudio.pause();
+
   setTrack(state.currentTrackIndex);
   syncAmbientPlayback();
   render();
   saveState();
+
+  function bindTimerMusic() {
+    if (!timer?.onStart) return;
+
+    const pauseDefaultFocusMusic = () => {
+      if (state.source !== 'default') return;
+      pauseTrackAudio();
+      render();
+      saveState();
+    };
+
+    timer.onStart(({ mode }) => {
+      if (mode !== 'focus' || state.source !== 'default' || !state.enabled) return;
+      state.isPlaying = true;
+      playCurrentDefaultTrack().then(() => {
+        render();
+        saveState();
+      });
+    });
+
+    timer.onPause(pauseDefaultFocusMusic);
+    timer.onStop(pauseDefaultFocusMusic);
+    timer.onComplete(pauseDefaultFocusMusic);
+  }
+
+  bindTimerMusic();
 
   /**
    * Spotify Web Playback SDK global callback (see index.html stub before sdk.scdn.co script).
@@ -675,11 +707,14 @@ export function initMusic() {
     if (typeof window.Spotify !== 'undefined') bootSpotifyPlayer();
   }
 
-  // Retry ambient playback after first user interaction
-  // in case initial autoplay was blocked by browser policy.
+  // Retry ambient playback after first user interaction if autoplay was blocked.
   const resumeAmbient = () => syncAmbientPlayback();
   window.addEventListener('pointerdown', resumeAmbient, { once: true });
   window.addEventListener('keydown', resumeAmbient, { once: true });
+
+  // Extra attempts so nature sounds start as early as possible after load / bfcache restore.
+  window.addEventListener('load', () => { syncAmbientPlayback(); });
+  window.addEventListener('pageshow', () => { syncAmbientPlayback(); });
 
   // Keep forest ambience synced when day/night context changes over time.
   setInterval(() => {

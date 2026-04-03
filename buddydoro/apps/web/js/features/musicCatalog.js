@@ -1,8 +1,8 @@
 // Phase 1 default BuddyDoro tracks (local files).
 export const BUDDYDORO_TRACKS = [
-  { id: 'focus-forest', title: 'Forest Focus', src: './assets/audio/default/forest-focus.mp3' },
-  { id: 'focus-lofi', title: 'Lofi Study', src: './assets/audio/default/lofi-study.mp3' },
-  { id: 'focus-night', title: 'Night Calm', src: './assets/audio/default/night-calm.mp3' },
+  { id: 'focus-forest', title: 'Poetri', src: './assets/audio/ambient/bloom-and-decay-poetri-main-version-25597-02-30.mp3' },
+  { id: 'focus-lofi', title: 'Tranquilium', src: './assets/audio/ambient/cloudette-tranquilium-main-version-36014-03-14.mp3' },
+  { id: 'focus-night', title: 'Patterns', src: './assets/audio/ambient/walpapr-claude-patterns-main-version-25742-03-18.mp3' },
 ];
 
 // Ambient mode options shown as icon-style radio cards in the mini player.
@@ -21,8 +21,8 @@ export const AMBIENT_AUDIO = {
     night: './assets/audio/ambient/night.wav',
   },
   river: {
-    day: './assets/audio/ambient/river.mp3',
-    night: './assets/audio/ambient/river.mp3',
+    day: './assets/audio/ambient/rain.wav',
+    night: './assets/audio/ambient/rain.wav',
   },
   rain: {
     day: './assets/audio/ambient/rain.wav',

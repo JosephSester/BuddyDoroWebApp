@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Degree Pathway • BuddyDoro</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../styles/design-system.css" />
+  <link rel="stylesheet" href="../styles/store.css" />
+  <link rel="stylesheet" href="../styles/pathway.css" />
+  <link rel="stylesheet" href="../styles/notifications.css" />
+</head>
+<body>
+
+  <div class="sp-orb sp-orb-1" aria-hidden="true"></div>
+  <div class="sp-orb sp-orb-2" aria-hidden="true"></div>
+  <div class="sp-orb sp-orb-3" aria-hidden="true"></div>
+
+  <div class="sp-wrap">
+
+    <!-- Header -->
+    <header class="sp-header">
+      <a href="index.html" class="sp-back" aria-label="Back to app">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back
+      </a>
+      <div class="sp-header-center">
+        <h1 class="sp-title">🎓 Degree Pathway</h1>
+        <p class="sp-subtitle">Upload your degree plan — we'll build your study goals automatically</p>
+      </div>
+    </header>
+
+    <!-- ── STATE 1: Upload ─────────────────────────────────────────────────── -->
+    <div id="stateUpload" class="sp-catalog-wrap pw-state">
+
+      <!-- Drop zone -->
+      <div id="uploadZone" class="pw-dropzone" role="button" tabindex="0"
+        aria-label="Upload degree plan file">
+        <div class="pw-dropzone-icon" aria-hidden="true">📄</div>
+        <p class="pw-dropzone-title">Drag &amp; drop your degree plan</p>
+        <p class="pw-dropzone-sub">PDF or text file · max 5 MB</p>
+        <span class="pw-dropzone-btn">Browse file</span>
+        <input id="fileInput" type="file" accept=".pdf,.txt,.text" hidden />
+      </div>
+
+      <div class="pw-divider"><span>or paste the text below</span></div>
+
+      <textarea id="pasteArea" class="pw-paste-area"
+        placeholder="Copy and paste your degree plan here — course lists, curriculum sheets, advising guides, etc."
+        rows="10" aria-label="Paste degree plan text"></textarea>
+
+      <p id="uploadError" class="pw-error" hidden></p>
+
+      <div class="pw-parse-row">
+        <button id="parseBtn" class="btn-primary pw-parse-btn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2a10 10 0 110 20A10 10 0 0112 2z" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 8v4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Parse My Degree Plan
+        </button>
+        <p class="pw-parse-hint">Uses AI to extract your courses. Nothing is saved until you confirm.</p>
+      </div>
+
+    </div>
+
+    <!-- ── STATE 2: Review ────────────────────────────────────────────────── -->
+    <div id="stateReview" class="sp-catalog-wrap pw-state" hidden>
+
+      <div class="pw-review-header">
+        <div class="pw-review-info">
+          <h2 id="degreeTitle" class="pw-review-degree">Your Degree Plan</h2>
+          <span id="courseCount" class="pw-review-count">0 courses found</span>
+        </div>
+        <div class="pw-review-actions">
+          <button id="selectAllBtn"   class="btn-secondary pw-select-btn" type="button">Select all</button>
+          <button id="deselectAllBtn" class="btn-secondary pw-select-btn" type="button">Deselect all</button>
+        </div>
+      </div>
+
+      <div id="semesterGroups" class="pw-semester-list"></div>
+
+      <div class="pw-import-bar">
+        <p class="pw-import-hint">Each selected course becomes a <strong>Goal</strong> with 5 starter tasks on your main page.</p>
+        <button id="importBtn" class="btn-primary pw-import-btn" type="button" disabled>
+          Import <span id="importCount">0</span> Goals to BuddyDoro
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ── STATE 3: Success ───────────────────────────────────────────────── -->
+    <div id="stateSuccess" class="sp-catalog-wrap pw-state pw-success" hidden>
+      <div class="pw-success-icon" aria-hidden="true">🎉</div>
+      <h2 class="pw-success-title">You're all set!</h2>
+      <p class="pw-success-body">
+        Created <strong id="successPanels">0</strong> goals and
+        <strong id="successTasks">0</strong> starter tasks on your main page.
+      </p>
+      <div class="pw-success-actions">
+        <button id="goToAppBtn"       class="btn-primary"    type="button">Go to Main App</button>
+        <button id="importAnotherBtn" class="btn-secondary"  type="button">Import Another Plan</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="../js/pathwayPage.js"></script>
+</body>
+</html>

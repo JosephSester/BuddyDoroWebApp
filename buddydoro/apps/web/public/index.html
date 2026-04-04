@@ -512,14 +512,35 @@
           Spotify
         </label>
       </div>
-      <p id="musicNowPlaying" class="music-now-playing">Loading…</p>
+
+      <div class="music-player-card" aria-live="polite">
+        <div class="music-player-art" id="musicPlayerArt" aria-hidden="true">
+          <span class="music-player-art-icon">♫</span>
+        </div>
+        <div class="music-player-info">
+          <div id="musicPlayerTitle" class="music-player-title">—</div>
+          <div id="musicPlayerSubtitle" class="music-player-subtitle"></div>
+        </div>
+      </div>
+
+      <div id="musicProgressSection" class="music-progress-section">
+        <div class="music-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+          aria-label="Track progress" id="musicProgressTrack">
+          <div id="musicProgressFill" class="music-progress-fill"></div>
+        </div>
+        <div class="music-progress-times">
+          <span id="musicTimeElapsed">0:00</span>
+          <span id="musicTimeDuration">0:00</span>
+        </div>
+      </div>
+
       <p id="musicSpotifyHint" class="music-spotify-hint" hidden>
         Connect Spotify Premium to play in the browser.
       </p>
       <div class="music-controls">
-        <button type="button" id="musicPrevBtn" class="music-control-btn">Prev</button>
-        <button type="button" id="musicPlayPauseBtn" class="music-control-btn is-primary">Play</button>
-        <button type="button" id="musicNextBtn" class="music-control-btn">Next</button>
+        <button type="button" id="musicPrevBtn" class="music-control-btn music-control-round" aria-label="Previous track">⏮</button>
+        <button type="button" id="musicPlayPauseBtn" class="music-control-btn is-primary music-control-main" aria-label="Play or pause">Play</button>
+        <button type="button" id="musicNextBtn" class="music-control-btn music-control-round" aria-label="Next track">⏭</button>
       </div>
       <button type="button" id="musicSpotifyConnectBtn" class="music-spotify-btn" hidden>Connect Spotify</button>
       <div id="musicTrackList" class="music-track-list" aria-label="Tracks or playlists"></div>

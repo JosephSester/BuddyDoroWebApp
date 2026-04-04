@@ -14,7 +14,13 @@ export function initMusic(options = {}) {
   const prevBtn = document.getElementById('musicPrevBtn');
   const playPauseBtn = document.getElementById('musicPlayPauseBtn');
   const nextBtn = document.getElementById('musicNextBtn');
-  const statusEl = document.getElementById('musicNowPlaying');
+  const playerTitleEl = document.getElementById('musicPlayerTitle');
+  const playerSubtitleEl = document.getElementById('musicPlayerSubtitle');
+  const progressSectionEl = document.getElementById('musicProgressSection');
+  const progressTrackEl = document.getElementById('musicProgressTrack');
+  const progressFillEl = document.getElementById('musicProgressFill');
+  const timeElapsedEl = document.getElementById('musicTimeElapsed');
+  const timeDurationEl = document.getElementById('musicTimeDuration');
   const tracksRoot = document.getElementById('musicTrackList');
   const sourceDefault = document.getElementById('musicSourceDefault');
   const sourceSpotify = document.getElementById('musicSourceSpotify');
@@ -24,10 +30,30 @@ export function initMusic(options = {}) {
 
   if (
     !chip || !panel || !enableToggle || !prevBtn || !playPauseBtn || !nextBtn
-    || !statusEl || !tracksRoot || !sourceDefault || !sourceSpotify
+    || !playerTitleEl || !playerSubtitleEl || !progressSectionEl || !progressTrackEl
+    || !progressFillEl || !timeElapsedEl || !timeDurationEl
+    || !tracksRoot || !sourceDefault || !sourceSpotify
     || !spotifyConnectBtn || !spotifyHint || !ambientRoot
   ) {
     return;
+  }
+
+  function formatTime(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  function updateProgressUI() {
+    if (state.source !== 'default') return;
+    const cur = trackAudio.currentTime || 0;
+    const dur = trackAudio.duration;
+    const pct = Number.isFinite(dur) && dur > 0 ? Math.min(100, (cur / dur) * 100) : 0;
+    progressFillEl.style.width = `${pct}%`;
+    timeElapsedEl.textContent = formatTime(cur);
+    timeDurationEl.textContent = Number.isFinite(dur) && dur > 0 ? formatTime(dur) : '--:--';
+    progressTrackEl.setAttribute('aria-valuenow', String(Math.round(pct)));
   }
 
   // Primary music track audio instance (default source).
@@ -329,6 +355,7 @@ export function initMusic(options = {}) {
   async function renderSpotifyPlaylists() {
     if (_playlistsRendered) return;
     _playlistsRendered = true;
+    tracksRoot.className = 'music-playlist-browse';
     tracksRoot.innerHTML = '<div class="music-empty">Loading playlists…</div>';
     try {
       const token = await fetchSpotifyToken();
@@ -347,7 +374,7 @@ export function initMusic(options = {}) {
       data.items.forEach((pl) => {
         const row = document.createElement('button');
         row.type = 'button';
-        row.className = 'music-track-row';
+        row.className = 'music-playlist-row';
         row.textContent = pl.name;
         row.addEventListener('click', () => playSpotifyContext(pl.uri));
         tracksRoot.appendChild(row);
@@ -397,20 +424,29 @@ export function initMusic(options = {}) {
     showNotification('Spotify disconnected.', 'success');
   }
 
-  // Renders clickable default-track list and active row state.
+  // Compact track picker (horizontal) — main “now playing” is the player card above.
   function renderTrackList() {
+    tracksRoot.className = 'music-track-strip';
     tracksRoot.innerHTML = '';
     if (!BUDDYDORO_TRACKS.length) {
       tracksRoot.innerHTML = '<div class="music-empty">No default tracks yet.</div>';
       return;
     }
 
+    const stripLabel = document.createElement('div');
+    stripLabel.className = 'music-track-strip-label';
+    stripLabel.textContent = 'Playlist';
+    tracksRoot.appendChild(stripLabel);
+
+    const row = document.createElement('div');
+    row.className = 'music-track-strip-tracks';
     BUDDYDORO_TRACKS.forEach((track, idx) => {
-      const row = document.createElement('button');
-      row.type = 'button';
-      row.className = `music-track-row${idx === state.currentTrackIndex ? ' is-active' : ''}`;
-      row.textContent = track.title;
-      row.addEventListener('click', async () => {
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = `music-track-pill${idx === state.currentTrackIndex ? ' is-active' : ''}`;
+      pill.textContent = track.title;
+      pill.title = track.title;
+      pill.addEventListener('click', async () => {
         state.currentTrackIndex = idx;
         setTrack(idx);
         state.isPlaying = true;
@@ -420,8 +456,9 @@ export function initMusic(options = {}) {
         render();
         saveState();
       });
-      tracksRoot.appendChild(row);
+      row.appendChild(pill);
     });
+    tracksRoot.appendChild(row);
   }
 
   // Renders ambient mode controls (forest, river, rain, cricket).
@@ -461,20 +498,31 @@ export function initMusic(options = {}) {
     const defaultActive = state.source === 'default';
     const spotifyReady = state.spotifyConnected && spotifyDeviceId;
 
-    // Status line reflects current source and playback state.
+    // MP3-style “now playing” title + subtitle
     if (state.source === 'spotify') {
+      playerTitleEl.textContent = 'Spotify';
       if (spotifyReady) {
-        statusEl.textContent = state.isPlaying ? 'Playing from Spotify' : 'Spotify ready';
+        playerSubtitleEl.textContent = state.isPlaying ? 'Playing' : 'Ready — pick a playlist below';
       } else if (state.spotifyConnected) {
-        statusEl.textContent = 'Connecting to Spotify…';
+        playerSubtitleEl.textContent = 'Connecting…';
       } else {
-        statusEl.textContent = 'Spotify not connected';
+        playerSubtitleEl.textContent = 'Not connected';
       }
     } else {
       const currentTrack = getCurrentTrack();
-      statusEl.textContent = currentTrack
-        ? `${state.isPlaying ? 'Playing' : 'Paused'}: ${currentTrack.title}`
-        : 'No default tracks';
+      if (!currentTrack) {
+        playerTitleEl.textContent = 'No tracks';
+        playerSubtitleEl.textContent = 'Add audio in music catalog';
+      } else {
+        playerTitleEl.textContent = currentTrack.title;
+        const stateLabel = !state.enabled ? 'Music off' : state.isPlaying ? 'Playing' : 'Paused';
+        playerSubtitleEl.textContent = `BuddyDoro · ${stateLabel}`;
+      }
+    }
+
+    progressSectionEl.hidden = state.source !== 'default';
+    if (state.source === 'default') {
+      updateProgressUI();
     }
 
     // Transport controls: enabled for default tracks OR a connected Spotify device.
@@ -487,7 +535,7 @@ export function initMusic(options = {}) {
       playPauseBtn.disabled = !spotifyReady;
       nextBtn.disabled = !spotifyReady;
     }
-    playPauseBtn.textContent = state.isPlaying ? 'Pause' : 'Play';
+    playPauseBtn.textContent = state.isPlaying ? '⏸' : '▶';
 
     // Show default track list or Spotify playlists depending on source.
     tracksRoot.hidden = false;
@@ -506,6 +554,7 @@ export function initMusic(options = {}) {
     } else if (state.spotifyConnected) {
       renderSpotifyPlaylists();
     } else {
+      tracksRoot.className = 'music-playlist-browse';
       tracksRoot.innerHTML = '<div class="music-empty">Connect Spotify to see your playlists.</div>';
     }
     renderAmbientOptions();
@@ -555,6 +604,7 @@ export function initMusic(options = {}) {
   sourceDefault.addEventListener('change', async () => {
     if (!sourceDefault.checked) return;
     state.source = 'default';
+    _playlistsRendered = false;
     await applySourceBehavior();
     render();
     saveState();
@@ -612,6 +662,8 @@ export function initMusic(options = {}) {
   playPauseBtn.addEventListener('click', async () => {
     if (state.source === 'spotify' && spotifyPlayer) {
       await spotifyPlayer.togglePlay();
+      render();
+      saveState();
       return;
     }
     if (state.source !== 'default') return;
@@ -639,6 +691,20 @@ export function initMusic(options = {}) {
       render();
       saveState();
     }
+  });
+
+  trackAudio.addEventListener('timeupdate', () => {
+    if (state.source === 'default') updateProgressUI();
+  });
+  trackAudio.addEventListener('loadedmetadata', updateProgressUI);
+  trackAudio.addEventListener('durationchange', updateProgressUI);
+
+  progressTrackEl.addEventListener('click', (e) => {
+    if (state.source !== 'default' || !Number.isFinite(trackAudio.duration) || trackAudio.duration <= 0) return;
+    const rect = progressTrackEl.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    trackAudio.currentTime = ratio * trackAudio.duration;
+    updateProgressUI();
   });
 
   // --- Initialization ---

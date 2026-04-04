@@ -513,13 +513,25 @@
         </label>
       </div>
 
-      <div class="music-player-card" aria-live="polite">
-        <div class="music-player-art" id="musicPlayerArt" aria-hidden="true">
-          <span class="music-player-art-icon">♫</span>
-        </div>
-        <div class="music-player-info">
-          <div id="musicPlayerTitle" class="music-player-title">—</div>
-          <div id="musicPlayerSubtitle" class="music-player-subtitle"></div>
+      <div id="musicPlayerCard" class="music-player-card music-cassette" aria-live="polite">
+        <div class="music-cassette-screw music-cassette-screw--tl" aria-hidden="true"></div>
+        <div class="music-cassette-screw music-cassette-screw--tr" aria-hidden="true"></div>
+        <div class="music-cassette-screw music-cassette-screw--bl" aria-hidden="true"></div>
+        <div class="music-cassette-screw music-cassette-screw--br" aria-hidden="true"></div>
+        <div class="music-cassette-inner">
+          <div class="music-cassette-window">
+            <div class="music-cassette-reel-wrap" aria-hidden="true">
+              <span class="music-cassette-reel"></span>
+            </div>
+            <div class="music-cassette-label">
+              <div id="musicPlayerTitle" class="music-player-title">—</div>
+              <div id="musicPlayerSubtitle" class="music-player-subtitle"></div>
+            </div>
+            <div class="music-cassette-reel-wrap" aria-hidden="true">
+              <span class="music-cassette-reel"></span>
+            </div>
+          </div>
+          <div class="music-cassette-teeth" aria-hidden="true"></div>
         </div>
       </div>
 

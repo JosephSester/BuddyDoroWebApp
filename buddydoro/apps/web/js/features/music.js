@@ -21,6 +21,7 @@ export function initMusic(options = {}) {
   const progressFillEl = document.getElementById('musicProgressFill');
   const timeElapsedEl = document.getElementById('musicTimeElapsed');
   const timeDurationEl = document.getElementById('musicTimeDuration');
+  const playerCardEl = document.getElementById('musicPlayerCard');
   const tracksRoot = document.getElementById('musicTrackList');
   const sourceDefault = document.getElementById('musicSourceDefault');
   const sourceSpotify = document.getElementById('musicSourceSpotify');
@@ -523,6 +524,10 @@ export function initMusic(options = {}) {
     progressSectionEl.hidden = state.source !== 'default';
     if (state.source === 'default') {
       updateProgressUI();
+    }
+
+    if (playerCardEl) {
+      playerCardEl.dataset.playing = state.isPlaying ? 'true' : 'false';
     }
 
     // Transport controls: enabled for default tracks OR a connected Spotify device.

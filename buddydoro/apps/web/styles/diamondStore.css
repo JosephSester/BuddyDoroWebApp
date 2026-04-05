@@ -696,8 +696,30 @@
   border: 1.5px solid rgba(43, 34, 19, 0.25);
   border-radius: 8px;
   padding: 10px 12px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  cursor: text;
   margin-bottom: 6px;
   transition: border-color 0.2s;
+}
+
+.stripe-card-element-wrap iframe {
+  width: 100% !important;
+}
+
+.stripe-fallback-input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #2b2213;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.stripe-fallback-input::placeholder {
+  color: #aaa;
 }
 
 .stripe-card-element-wrap.StripeElement--focus {

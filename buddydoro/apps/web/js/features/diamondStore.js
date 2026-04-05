@@ -1,5 +1,87 @@
 // Diamonds Store modal (Buy Diamonds)
-const STRIPE_CONFIG_URL = 'http://localhost:3000/api/stripe/config';
+const STRIPE_CONFIG_PATH = '/api/stripe/config';
+const STRIPE_CREATE_INTENT_PATH = '/api/stripe/create-payment-intent';
+const STRIPE_JS_URL = 'https://js.stripe.com/v3/';
+
+let stripeJsLoadPromise = null;
+
+function getApiBaseCandidates() {
+  const candidates = [];
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    candidates.push(window.location.origin);
+  }
+  candidates.push('http://localhost:3000', 'http://127.0.0.1:3000');
+  return [...new Set(candidates)];
+}
+
+async function fetchFromApiWithFallback(path, options = {}) {
+  let lastError = null;
+
+  for (const base of getApiBaseCandidates()) {
+    const url = `${base}${path}`;
+
+    try {
+      const response = await fetch(url, options);
+
+      // If frontend static server is on current origin, /api may 404 there. Try next base.
+      if (response.status === 404 && typeof window !== 'undefined' && base === window.location.origin) {
+        continue;
+      }
+
+      const text = await response.text();
+      let data = null;
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { message: text };
+        }
+      }
+
+      return { response, data, url };
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('Failed to fetch API endpoint.');
+}
+
+function ensureStripeJsLoaded() {
+  if (typeof window.Stripe === 'function') return Promise.resolve();
+  if (stripeJsLoadPromise) return stripeJsLoadPromise;
+
+  stripeJsLoadPromise = new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[src="${STRIPE_JS_URL}"]`) ||
+      document.querySelector('script[src="https://js.stripe.com/v3"]');
+
+    if (existing) {
+      existing.addEventListener('load', () => {
+        if (typeof window.Stripe === 'function') resolve();
+        else reject(new Error('Stripe.js loaded but Stripe is unavailable.'));
+      }, { once: true });
+      existing.addEventListener('error', () => {
+        reject(new Error('Stripe.js failed to load.'));
+      }, { once: true });
+
+      // If already loaded before listeners were attached, resolve immediately.
+      if (typeof window.Stripe === 'function') resolve();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = STRIPE_JS_URL;
+    script.async = true;
+    script.onload = () => {
+      if (typeof window.Stripe === 'function') resolve();
+      else reject(new Error('Stripe.js loaded but Stripe is unavailable.'));
+    };
+    script.onerror = () => reject(new Error('Stripe.js failed to load.'));
+    document.head.appendChild(script);
+  });
+
+  return stripeJsLoadPromise;
+}
 
 const DIAMOND_PACKS = [
   { amount: 1, price: 1.99, image: './assets/artwork/diamond-pack-1.png' },
@@ -27,13 +109,40 @@ export function initDiamondStore() {
   let currentView = 'packs'; // 'packs', 'methods', 'secure', or 'success'
   let stripePublishableKey = null;
 
+  function mountManualCardFallback(message) {
+    const errorEl = list.querySelector('#stripe-card-errors');
+    if (errorEl) {
+      errorEl.textContent = message || 'Could not reach Stripe. Card fields are in manual mode.';
+    }
+
+    const hosts = [
+      { id: '#stripe-card-number', placeholder: '1234 1234 1234 1234', inputMode: 'numeric', maxLength: 19 },
+      { id: '#stripe-card-expiry', placeholder: 'MM / YY', inputMode: 'numeric', maxLength: 7 },
+      { id: '#stripe-card-cvc', placeholder: 'CVC', inputMode: 'numeric', maxLength: 4 },
+    ];
+
+    hosts.forEach(({ id, placeholder, inputMode, maxLength }) => {
+      const host = list.querySelector(id);
+      if (!host) return;
+      host.innerHTML = `
+        <input
+          class="stripe-fallback-input"
+          type="text"
+          inputmode="${inputMode}"
+          placeholder="${placeholder}"
+          maxlength="${maxLength}"
+          autocomplete="off"
+        />
+      `;
+    });
+  }
+
   async function getStripePublishableKey() {
     if (stripePublishableKey) return stripePublishableKey;
 
-    const res = await fetch(STRIPE_CONFIG_URL);
-    const data = await res.json();
-    if (!res.ok || !data.publishableKey) {
-      throw new Error(data.error || 'Stripe config missing.');
+    const { response, data } = await fetchFromApiWithFallback(STRIPE_CONFIG_PATH);
+    if (!response.ok || !data?.publishableKey) {
+      throw new Error(data?.error || data?.message || 'Stripe config missing.');
     }
 
     stripePublishableKey = data.publishableKey;
@@ -341,8 +450,34 @@ export function initDiamondStore() {
         try {
           publishableKey = await getStripePublishableKey();
         } catch (err) {
-          const errorEl = list.querySelector('#stripe-card-errors');
-          if (errorEl) errorEl.textContent = err.message || 'Stripe is not configured.';
+          mountManualCardFallback(err.message || 'Stripe config is unavailable.');
+          secureForm.onsubmit = (e) => {
+            e.preventDefault();
+            const errorEl = list.querySelector('#stripe-card-errors');
+            if (errorEl) errorEl.textContent = 'Cannot process payment while API is offline. Start backend server on port 3000.';
+          };
+          return;
+        }
+
+        try {
+          await ensureStripeJsLoaded();
+        } catch (err) {
+          mountManualCardFallback(err.message || 'Stripe failed to load.');
+          secureForm.onsubmit = (e) => {
+            e.preventDefault();
+            const errorEl = list.querySelector('#stripe-card-errors');
+            if (errorEl) errorEl.textContent = 'Cannot process payment while Stripe.js is unavailable.';
+          };
+          return;
+        }
+
+        if (typeof window.Stripe !== 'function') {
+          mountManualCardFallback('Stripe is unavailable. Please refresh and try again.');
+          secureForm.onsubmit = (e) => {
+            e.preventDefault();
+            const errorEl = list.querySelector('#stripe-card-errors');
+            if (errorEl) errorEl.textContent = 'Cannot process payment while Stripe.js is unavailable.';
+          };
           return;
         }
 
@@ -418,7 +553,7 @@ export function initDiamondStore() {
               throw new Error('Your session expired. Please log in again, then retry payment.');
             }
             const amountCents = Math.round(parseFloat(selectedPack.totalPrice) * 100);
-            const res = await fetch('http://localhost:3000/api/stripe/create-payment-intent', {
+            const { response: res, data } = await fetchFromApiWithFallback(STRIPE_CREATE_INTENT_PATH, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -426,13 +561,10 @@ export function initDiamondStore() {
               },
               body: JSON.stringify({ amount: amountCents }),
             });
-            const text = await res.text();
-            let data;
-            try { data = JSON.parse(text); } catch { throw new Error(`Server error (${res.status})`); }
             if (res.status === 401 || res.status === 403) {
               throw new Error('Your session expired. Please log in again, then retry payment.');
             }
-            if (!res.ok || data.error) throw new Error(data.error || data.message || `Server error (${res.status})`);
+            if (!res.ok || data?.error) throw new Error(data?.error || data?.message || `Server error (${res.status})`);
 
             const { paymentIntent, error } = await stripeInstance.confirmCardPayment(data.clientSecret, {
               payment_method: {

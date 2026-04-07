@@ -136,29 +136,18 @@
 }
 
 
-<<<<<<< HEAD
 .catalog-column {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 
-/* Keep catalog usable with large item counts. */
-.catalog-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 12px;
-  max-height: 50vh;
-  overflow-y: auto;
-  padding-right: 4px;
-=======
 /* ---------- Catalog grid ---------- */
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
   gap: 10px;
   align-content: start;
->>>>>>> 131a65d4c252f62a39fc37b2f9321586e09d856e
 }
 
 
@@ -320,12 +309,11 @@
   color: #3a87cc;
 }
 
-<<<<<<< HEAD
 /* Balance cards replace inventory list in store right column. */
 .store-balance-cards {
   display: grid;
   gap: 10px;
-=======
+}
 
 /* ---------- Inventory list (used in modal dialogs) ---------- */
 .inventory-list {
@@ -335,7 +323,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
->>>>>>> 131a65d4c252f62a39fc37b2f9321586e09d856e
 }
 
 .store-balance-card {
@@ -343,7 +330,6 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-<<<<<<< HEAD
   padding: 10px 12px;
   border-radius: 12px;
   border: 2px solid #e0a233;
@@ -360,7 +346,7 @@
   font-size: 18px;
 }
 
-=======
+.inventory-item {
   padding: 7px 10px;
   border-radius: 10px;
   border: 1.5px solid rgba(201, 138, 46, 0.35);
@@ -375,7 +361,6 @@
 
 
 /* ---------- Store footer (modal) ---------- */
->>>>>>> 131a65d4c252f62a39fc37b2f9321586e09d856e
 .store-footer {
   display: flex;
   justify-content: flex-end;

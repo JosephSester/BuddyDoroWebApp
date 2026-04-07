@@ -114,9 +114,6 @@
 .inventory-card-count {
   font-size: 1rem;
   font-weight: 800;
-<<<<<<< HEAD
-  justify-self: end;
-=======
   color: #c0622a;
   background: rgba(192, 98, 42, 0.12);
   border-radius: 999px;
@@ -126,7 +123,6 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
->>>>>>> 131a65d4c252f62a39fc37b2f9321586e09d856e
 }
 
 

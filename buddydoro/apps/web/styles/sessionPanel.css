@@ -1,0 +1,304 @@
+/* ── Session Panel — matches sidebar style exactly ─────────────── */
+
+#sessionPanel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 290px;
+  height: 100vh;
+  border-radius: 0 16px 16px 0;
+  z-index: 1000; /* below sidebar (1001) so sidebar can overlay it */
+  display: flex;
+  flex-direction: column;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+
+  /* Same glassmorphism as sidebar */
+  background: rgba(250, 244, 232, 0.82);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-right: 1px solid rgba(232, 180, 120, 0.40);
+  box-shadow:
+    6px 0 32px rgba(43, 34, 19, 0.22),
+    2px 0 12px rgba(192, 98, 42, 0.12);
+
+  transform: translateX(calc(-100% - 2px));
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+#sessionPanel.is-open {
+  transform: translateX(0);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ── Header (matches sidebar-profile) ──────────────────────────── */
+.session-panel-header {
+  padding: 28px 18px 20px;
+  flex-shrink: 0;
+  background: rgba(250, 244, 232, 0.45);
+  border-bottom: 1px solid rgba(192, 98, 42, 0.18);
+}
+
+.session-panel-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.session-panel-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c0622a;
+  opacity: 0.75;
+}
+
+.session-collapse-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(192, 98, 42, 0.08);
+  color: #5c4033;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.14s;
+  flex-shrink: 0;
+}
+
+.session-collapse-btn:hover  { background: rgba(192, 98, 42, 0.16); }
+.session-collapse-btn:active { background: rgba(192, 98, 42, 0.24); }
+
+.session-goal-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2b2213;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Task list (matches sidebar-goals-container) ────────────────── */
+.session-task-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(192, 98, 42, 0.18) transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ── Task items (match sidebar .tasks-panel glass cards) ─────────── */
+.session-task-item {
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(232, 180, 120, 0.35);
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.session-task-item.is-active {
+  background: rgba(110, 140, 112, 0.10);
+  border-color: #6e8c70;
+  box-shadow: 0 0 0 1.5px rgba(110, 140, 112, 0.30);
+}
+
+.session-task-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #2b2213;
+  line-height: 1.4;
+}
+
+.session-task-item.is-active .session-task-name {
+  color: #6e8c70;
+  font-weight: 700;
+}
+
+.session-task-item.is-done .session-task-name {
+  color: #6e8c70;
+  font-weight: 700;
+  text-decoration: line-through;
+}
+
+.session-done-check {
+  color: #6e8c70;
+  margin-right: 4px;
+}
+
+/* ── Subtask list (matches sidebar .subtasks-list style) ─────────── */
+.session-subtask-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0 0 10px;
+  border-left: 2px solid rgba(110, 140, 112, 0.35);
+}
+
+.session-subtask-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 3px 4px;
+  border-radius: 5px;
+  transition: background 0.12s;
+}
+
+.session-subtask-row:hover {
+  background: rgba(192, 98, 42, 0.05);
+}
+
+.session-subtask-row.is-done .session-subtask-label {
+  text-decoration: line-through;
+  color: #bbb;
+}
+
+.session-subtask-cb {
+  accent-color: #6e8c70;
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.session-subtask-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #5c4033;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Footer + End Session button (matches sidebar logout style) ──── */
+.session-panel-footer {
+  flex-shrink: 0;
+  padding: 10px 12px 14px;
+  border-top: 1px solid rgba(192, 98, 42, 0.10);
+}
+
+.end-session-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #c97b7b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.end-session-btn:hover {
+  background: rgba(201, 123, 123, 0.10);
+  color: #a85050;
+}
+
+.end-session-btn:active {
+  background: rgba(201, 123, 123, 0.18);
+}
+
+/* ── "Next Task / Goal Complete" overlay ─────────────────────────── */
+.session-next-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 34, 19, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.session-next-overlay[hidden] {
+  display: none;
+}
+
+.session-next-card {
+  background: #faf4e8;
+  border-radius: 20px;
+  padding: 32px 28px;
+  max-width: 340px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(43, 34, 19, 0.25);
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+}
+
+.session-next-icon {
+  font-size: 38px;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+
+.session-next-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #2b2213;
+  margin-bottom: 10px;
+}
+
+.session-next-body {
+  font-size: 14px;
+  color: #7a6a5a;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.session-next-body strong {
+  color: #6e8c70;
+  font-weight: 700;
+}
+
+/* ── Task picker (remaining task buttons) ────────────────────────── */
+.session-task-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.session-pick-task-btn {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(250, 244, 232, 0.70);
+  border: 1.5px solid rgba(232, 180, 120, 0.50);
+  border-radius: 10px;
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2b2213;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.14s, border-color 0.14s;
+}
+
+.session-pick-task-btn:hover {
+  background: rgba(110, 140, 112, 0.12);
+  border-color: #6e8c70;
+  color: #4e7050;
+}
+
+.session-next-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}

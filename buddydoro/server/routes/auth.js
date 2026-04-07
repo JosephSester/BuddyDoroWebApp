@@ -66,7 +66,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET, // this must now have a value
-      { expiresIn: '1h' }
+      { expiresIn: '7d' }
     );
 
     console.log('Login successful:', email);
@@ -108,12 +108,13 @@ router.get('/me', async (req, res) => {
     return res.json({
       userId: user._id,
       name: user.name,
-      email: user.email,  
+      email: user.email,
       doros: user.doros,
       diamonds: user.diamonds,
       companionStatuses: user.companionStatuses,
       lastSessionEnd: user.lastSessionEnd,
       hasSeenOnboarding: user.hasSeenOnboarding,
+      settings: user.settings,
     });
 
   } catch (err) {

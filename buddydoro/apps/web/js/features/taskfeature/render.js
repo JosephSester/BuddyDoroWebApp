@@ -317,6 +317,7 @@ export function initRender({ editors, deleteTask, renderTodoList }) {
         updateActiveTaskVisuals();
         notifyActiveChange();
         renderTodoList?.();
+        state.handlers.onAfterRender?.();
     };
 
     return {

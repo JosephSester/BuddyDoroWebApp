@@ -1,6 +1,8 @@
 // Subtasks module: local storage + UI builder
 // Provides helpers to store subtasks per task and render UI sections
 
+import { apiPut } from '../api/apiClient.js';
+
 const SUBTASKS_KEY = 'buddyDoro.taskSubtasks';
 let subtasksMap = null;
 
@@ -33,6 +35,20 @@ export function getSubtasks(taskId) {
 export function setSubtasks(taskId, subtasks) {
     ensureMap();
     subtasksMap[String(taskId)] = subtasks;
+    persist();
+    apiPut(`/tasks/${taskId}/subtasks`, { subtasks }).catch(e =>
+        console.warn('[Subtasks] API sync failed:', e)
+    );
+}
+
+/** Hydrate the local map from tasks already fetched from the API. */
+export function syncSubtasksFromTasks(tasks) {
+    ensureMap();
+    for (const task of tasks) {
+        if (Array.isArray(task.subtasks) && task.subtasks.length > 0) {
+            subtasksMap[String(task.id)] = task.subtasks;
+        }
+    }
     persist();
 }
 

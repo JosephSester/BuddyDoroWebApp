@@ -25,7 +25,14 @@ const taskSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    subtasks: [{
+        _id:      false,
+        id:       { type: String,  required: true },
+        title:    { type: String,  required: true },
+        estimate: { type: Number,  default: null },
+        done:     { type: Boolean, default: false },
+    }],
 });
 
 module.exports = mongoose.model('Task', taskSchema);

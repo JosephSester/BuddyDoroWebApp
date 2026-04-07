@@ -40,7 +40,7 @@ if (slideIndex > 0) {
   await page.focus('body');
   for (let i = 0; i < slideIndex; i++) {
     await page.keyboard.press('ArrowDown');
-    await new Promise(r => setTimeout(r, 900));
+    await new Promise(r => setTimeout(r, 2000));
   }
 }
 

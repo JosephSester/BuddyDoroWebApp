@@ -111,7 +111,13 @@ function showBubble(message) {
   }, 9000);
 }
 
+function isCompanionDead() {
+  const status = window.CompanionStatus?.get?.();
+  return status ? status.health === 0 : false;
+}
+
 function step() {
+  if (isCompanionDead()) return;
   positionNearDragon();
   showBubble(nextMessage());
 }
@@ -139,6 +145,19 @@ export function initCompanionThoughts({ getActiveTask } = {}) {
 
   clearInterval(loopTimer);
   loopTimer = window.setInterval(step, 75 * 1000);
+
+  // Hide bubble immediately when companion dies; allow it again on revival
+  document.addEventListener('companion:died', () => {
+    if (!root) return;
+    clearTimeout(hideTimer);
+    root.classList.remove('is-visible');
+    root.hidden = true;
+  });
+
+  document.addEventListener('companion:revived', () => {
+    if (!root) return;
+    root.hidden = false;
+  });
 
   window.setTimeout(step, 3500);
 }

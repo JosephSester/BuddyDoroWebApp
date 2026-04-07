@@ -75,7 +75,7 @@ export function initEarnDoros(timer, topbar) {
   });
 
   timer.onPause(resetSession);
-  timer.onReset(resetSession);
+  timer.onReset?.(resetSession);
   timer.onComplete(resetSession);
 
   timer.onSummary?.(() => playEarnDorosSound());

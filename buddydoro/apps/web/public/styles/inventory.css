@@ -1,0 +1,193 @@
+/* ---------- Inventory panel ---------- */
+.inventory-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: min(880px, 92vw);
+  max-height: 82vh;
+  overflow-y: auto;
+
+  border-radius: 24px;
+  z-index: 31;
+  border: 2px solid rgba(201, 138, 46, 0.55);
+  background:
+    radial-gradient(ellipse 55% 30% at 30% 0%, rgba(255, 248, 220, 0.55), transparent 60%),
+    linear-gradient(160deg, rgba(252, 244, 228, 0.97) 0%, rgba(244, 233, 210, 0.97) 100%);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow:
+    0 24px 60px rgba(43, 34, 19, 0.30),
+    0 8px 24px rgba(43, 34, 19, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.60);
+  color: #2b2213;
+  pointer-events: auto;
+}
+
+.inventory-panel::-webkit-scrollbar { width: 5px; }
+.inventory-panel::-webkit-scrollbar-track { background: transparent; }
+.inventory-panel::-webkit-scrollbar-thumb {
+  background: rgba(192, 98, 42, 0.30);
+  border-radius: 999px;
+}
+
+
+/* ---------- Inventory header ---------- */
+.inventory-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1.5px solid rgba(201, 138, 46, 0.22);
+}
+
+.inventory-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #2b2213;
+}
+
+
+/* ---------- Inventory content area ---------- */
+.inventory-content {
+  padding: 16px 20px 12px;
+}
+
+
+/* ---------- Inventory grid ---------- */
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+
+/* ---------- Inventory cards ---------- */
+.inventory-card {
+  border: 1.5px solid rgba(201, 138, 46, 0.38);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 3px 10px rgba(43, 34, 19, 0.08);
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.inventory-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.inventory-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(43, 34, 19, 0.13);
+  border-color: rgba(192, 98, 42, 0.42);
+}
+
+.inventory-card-emoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.inventory-card-name {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #2b2213;
+  line-height: 1.3;
+}
+
+.inventory-card-meta {
+  font-size: 0.75rem;
+  color: #8c6b55;
+  margin-top: 2px;
+}
+
+.inventory-card-count {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #c0622a;
+  background: rgba(192, 98, 42, 0.12);
+  border-radius: 999px;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+
+/* ---------- Use button on consumable cards ---------- */
+.inventory-use-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  background: #c0622a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.13s ease, transform 0.1s ease;
+}
+.inventory-use-btn:hover { filter: brightness(1.1); }
+.inventory-use-btn:active { transform: translateY(1px); }
+.inventory-use-btn:focus-visible { outline: 2px solid #2b2213; outline-offset: 2px; }
+
+
+/* ---------- Empty state ---------- */
+.inventory-empty {
+  grid-column: 1 / -1;
+  border: 2px dashed rgba(201, 138, 46, 0.35);
+  border-radius: 14px;
+  padding: 32px 24px;
+  text-align: center;
+  background: rgba(255, 235, 160, 0.20);
+  color: #8c6b55;
+  font-weight: 700;
+}
+
+
+/* ---------- Inventory footer ---------- */
+.inventory-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 10px 20px 16px;
+  border-top: 1.5px solid rgba(201, 138, 46, 0.18);
+}
+
+
+/* ---------- Topbar chip elements ---------- */
+.inventory-chip .inventory-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.inventory-chip .inventory-label {
+  font-size: 16px;
+}
+
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .inventory-panel {
+    width: 94vw;
+  }
+
+  .inventory-grid {
+    grid-template-columns: 1fr;
+  }
+}

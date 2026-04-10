@@ -1,0 +1,107 @@
+/* ---------- AI Plan — shared task card styles ---------- */
+
+.ai-plan-task {
+    border-radius: 18px;
+    border: 2px solid rgba(224, 162, 51, 0.6);
+    background: rgba(255, 255, 255, 0.75);
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+}
+
+.ai-plan-task-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.ai-plan-subheader {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+    font-weight: 700;
+}
+
+.ai-plan-subtasks {
+    display: grid;
+    gap: 8px;
+}
+
+.ai-plan-subtask-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.ai-plan-input {
+    border-radius: 12px;
+    border: 2px solid rgba(224, 162, 51, 0.5);
+    padding: 8px 10px;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.85);
+    color: #2b2213;
+    font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+}
+
+.ai-plan-remove {
+    border-radius: 8px;
+    border: 1.5px solid rgba(192, 98, 42, 0.35);
+    background: rgba(250, 230, 220, 0.70);
+    color: #7a2a10;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.ai-plan-remove:hover {
+    background: rgba(192, 98, 42, 0.18);
+}
+
+.ai-plan-add-subtask {
+    border-radius: 8px;
+    border: 1.5px solid rgba(201, 138, 46, 0.40);
+    background: rgba(250, 244, 200, 0.60);
+    color: #5c4033;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.ai-plan-add-subtask:hover {
+    background: rgba(201, 138, 46, 0.20);
+}
+
+.ai-plan-empty {
+    padding: 40px 20px;
+    border-radius: 16px;
+    border: 1.5px dashed rgba(192, 98, 42, 0.30);
+    text-align: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #8c6b55;
+    background: rgba(250, 244, 232, 0.55);
+}
+
+.ai-plan-label {
+    font-weight: 700;
+}
+
+.ai-plan-description {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.ai-plan-hint {
+    font-size: 13px;
+    opacity: 0.8;
+}

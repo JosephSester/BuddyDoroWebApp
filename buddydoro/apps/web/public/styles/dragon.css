@@ -1,0 +1,164 @@
+/* ---------- dragon sprite ---------- */
+/* Layering note:
+   .scene (background) => z-index: 0
+   .dragon (sprite)    => z-index: 1
+   .ui-layer (controls)=> z-index: 10+  */
+
+.sprite {
+  position: absolute;
+  pointer-events: none; /* let clicks go to UI */
+}
+
+.dragon {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 16vh; /* default: Forest (background-position: center bottom) */
+
+  /* Scale with viewport, but cap min/max so it looks good on all screens */
+  width: clamp(320px, 32vw, 820px);
+
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.35));
+  z-index: 1;
+}
+
+/* ---- Per-background vertical position ----
+   Store backgrounds use background-position: center center, which places
+   platforms higher in the viewport than the default Forest (center bottom).
+   [data-bg] is set on #scene by store.js whenever a store background is active. */
+
+#scene[data-bg] .dragon {
+  bottom: 13vh; /* sits character ~25px into the platform surface (centered) */
+}
+
+/* Floating Island has a much higher platform — needs extra lift */
+#scene[data-bg="Floating Island"] .dragon {
+  bottom: 27vh;
+}
+
+.dragon-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tombstone-img[hidden] {
+  display: none;
+}
+
+.tombstone-img {
+  display: block;
+  width: 75%;        /* ← resize here (33% = 1/3 of the character container width) */
+  height: auto;
+  position: absolute;
+  left: 15%;         /* ← move left/right here (0% = far left, 50% = centered) */
+  bottom: 15%;        /* ← move up/down here (0% = ground level, positive % = higher) */
+}
+
+/* ✅ Only nudge SKIN images upward (default dragon stays the same) */
+/*#dragon img[src*="/Skins/"],
+#dragon img[src*="\\Skins\\"] {
+  transform: translateY(-100px); /* tweak this value */
+/* } */
+
+/* ---- Per-skin vertical alignment ---- */
+/* translateY % is relative to the img's own height, so it scales with viewport size.
+   Negative = move UP. Reference: Dragon.png at translateY(0) sits correctly on the stump.
+   Each skin's value compensates for the transparent space at the bottom of its image
+   so all feet/bodies land at the same stump level as the default dragon. */
+
+#dragon img[src$="/Skins/Alien.png"]          { transform: translateY(-17%); }
+#dragon img[src$="/Skins/Axolotyl.png"]       { transform: translateY(-10%); }
+#dragon img[src$="/Skins/Bigfoot.png"]        { transform: translateY(-16%); }
+#dragon img[src$="/Skins/Butterfly.png"]      { transform: translateY(-10%); }
+#dragon img[src$="/Skins/Capybara.png"]       { transform: translateY(-13%); }
+#dragon img[src$="/Skins/DragonSkin.png"]     { transform: translateY(0%); }
+#dragon img[src$="/Skins/Frog.png"]           { transform: translateY(0%); }
+#dragon img[src$="/Skins/PrayingMantis.png"]  { transform: translateY(-16%); }
+#dragon img[src$="/Skins/Robot.png"]          { transform: translateY(-13%); }
+#dragon img[src$="/Skins/RockCreature.png"]   { transform: translateY(-13%); }
+#dragon img[src$="/Skins/Vampire.png"]        { transform: translateY(-17%); }
+#dragon img[src$="/Skins/IceCream.png"]       { transform: translateY(5%); }
+#dragon img[src$="/Skins/Strawberry.png"]     { transform: translateY(0%); }
+#dragon img[src$="/Skins/Werewolf.png"]       { transform: translateY(-11%); }
+
+/* Optional: a utility to hide the dragon (e.g., during transitions) */
+.dragon.is-hidden {
+  display: none;
+}
+
+/* ---------- companion dead button ---------- */
+.companion-dead-btn {
+  position: absolute;
+  bottom: 13vh;
+  left: 52%;
+  transform: translateX(-50%);
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px 16px 32px;
+  white-space: nowrap;
+
+  background: linear-gradient(180deg, #ffe347 0%, #f6a800 100%);
+  border: none;
+  border-radius: 60px;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(180, 100, 0, 0.45), 0 2px 6px rgba(0,0,0,0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.companion-dead-btn:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 12px 36px rgba(180, 100, 0, 0.55), 0 2px 8px rgba(0,0,0,0.22);
+}
+
+.companion-dead-btn:active {
+  transform: translateX(-50%) translateY(1px);
+  box-shadow: 0 4px 16px rgba(180, 100, 0, 0.4);
+}
+
+.companion-dead-btn[hidden] {
+  display: none;
+}
+
+.companion-dead-text {
+  font-family: inherit;
+  font-size: clamp(16px, 2vw, 22px);
+  font-weight: 800;
+  color: #2b2213;
+  text-align: center;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.companion-dead-arrow {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #fff0a0 0%, #f6c200 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 900;
+  color: #2b2213;
+  line-height: 1;
+}
+
+/* Small screens: lift the dragon slightly and keep it readable */
+@media (max-width: 640px) {
+  .dragon {
+    bottom: 18vh;
+    width: clamp(260px, 48vw, 560px);
+  }
+}
+
+/* Respect users who prefer reduced motion (if you add idle animations later) */
+@media (prefers-reduced-motion: reduce) {
+  .dragon {
+    transition: none;
+    animation: none;
+  }
+}

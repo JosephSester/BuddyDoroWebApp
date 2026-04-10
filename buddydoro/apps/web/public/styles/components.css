@@ -1,0 +1,91 @@
+/* ================================
+   Brand word-mark
+   ================================ */
+
+/* ================================
+   Reusable gold action chip
+   (used for the Tasks-stack "+" button)
+   ================================ */
+.add-chip {
+  width: 56px;
+  height: 56px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+
+  /* gold look consistent with other chips */
+  background: linear-gradient(180deg, #d4753a 0%, #c0622a 60%, #a8501f 100%);
+  color: #2b2213;
+  border: 2px solid rgba(0, 0, 0, .12);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .18), inset 0 2px 0 rgba(255, 255, 255, .35);
+  transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.add-chip:hover {
+  filter: brightness(1.03);
+}
+
+.add-chip:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .18), inset 0 2px 0 rgba(255, 255, 255, .3);
+}
+
+.add-chip:focus-visible {
+  outline: 3px solid rgba(192, 98, 42, 0.40);
+  outline-offset: 2px;
+}
+
+.add-chip-icon {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+}
+
+/* ================================
+   Chip row under Tasks box
+   (keeps the + chip outside but visually aligned)
+   ================================ */
+.tasks-chip-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+/* Ensure consistent chip sizing within the row */
+.tasks-chip-row .chip {
+  display: inline-flex;
+  align-items: center;
+}
+
+.tasks-chip-row .glass-chip {
+  min-height: 56px;
+  padding-inline: 18px;
+}
+
+.tasks-chip-row .timer-chip,
+.tasks-chip-row .ai-plan-chip,
+.tasks-chip-row .todo-chip {
+  gap: 10px;
+  font-size: 16px;
+}
+
+.todo-chip-icon {
+  width: 26px;
+  height: 26px;
+}
+
+/* Optional: a little breathing room on very narrow screens */
+@media (max-width: 520px) {
+  .tasks-chip-row {
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+}
+

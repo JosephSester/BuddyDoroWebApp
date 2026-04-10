@@ -1,0 +1,26 @@
+// apps/web/js/features/taskfeature/state.js
+// Shared in-memory state for task feature.
+
+export const state = {
+    els: { addTaskBtn: null, tasksList: null },
+    tasks: [],
+    nextTaskId: 1,
+    activeTaskId: null,
+    sessionEditor: null,
+    createTaskCtx: null,
+    suppressActiveInTodo: false,
+    todoDialogSetupDone: false,
+    chipRowObserverAttached: false,
+    chipRowObserver: null,
+    domIdCounter: 0,
+    handlers: {
+        onActiveTaskChange: () => { },
+        onShouldStopTimer: () => { },
+        onTaskEstimate: null,
+        onSubtaskEstimate: null,
+        onTaskVisualsRefresh: () => { },
+        onAfterRender: null,
+    },
+};
+
+export const makeDomId = (prefix = 'id') => `${prefix}-${++state.domIdCounter}`;

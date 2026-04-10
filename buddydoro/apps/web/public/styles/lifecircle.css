@@ -1,0 +1,55 @@
+/* apps/web/styles/lifecircle.css
+ * Life Circle: sits under the dragon on the stump.
+ */
+
+.life-circle {
+  position: absolute;           /* JS sets the exact left/top */
+  z-index: 12;                  /* above ground glow, below topbar */
+  width: var(--lc-size, 120px);
+  height: var(--lc-size, 120px);
+  pointer-events: none;         /* never block clicks on the scene */
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.25));
+  user-select: none;
+}
+
+.life-circle .lc-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 120ms ease-in-out, transform 120ms ease-in-out;
+  will-change: opacity, transform;
+}
+
+.life-circle .lc-img.lc-swap {
+  opacity: 0.94;
+  transform: scale(0.995);
+}
+
+/* Subtle, endless “breathing” (heartbeat-like) */
+@keyframes lc-breathe {
+  0%   { transform: scale(1.000); opacity: 0.98; }
+  25%  { transform: scale(1.030); opacity: 1.00; }
+  50%  { transform: scale(1.045); opacity: 1.00; }
+  75%  { transform: scale(1.030); opacity: 1.00; }
+  100% { transform: scale(1.000); opacity: 0.98; }
+}
+
+/* When enabled via .is-breathing on the root */
+.life-circle.is-breathing .lc-img {
+  animation: lc-breathe 2.4s ease-in-out infinite;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .life-circle.is-breathing .lc-img { animation: none; }
+}
+
+
+
+/* Optional: size down slightly on small screens */
+@media (max-width: 480px) {
+  .life-circle {
+    --lc-size: 96px;
+  }
+}

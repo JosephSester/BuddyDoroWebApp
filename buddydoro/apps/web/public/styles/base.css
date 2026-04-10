@@ -1,0 +1,49 @@
+/* ---------- base ---------- */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: #2b2213;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  overflow-y: auto;
+  /* page scroll appears when content + padding requires it */
+}
+
+/* Themed scrollbar to match the gold/brown UI accents */
+/* Themed scrollbar to match the yellow glass UI (applies to all scrollable containers) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c98a2e transparent;
+}
+
+/* WebKit scrollbar styling */
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(201, 138, 46, 0.9) 0%, rgba(192, 98, 42, 0.9) 100%);
+  border-radius: 10px;
+  border: 2px solid rgba(201, 138, 46, 0.6);
+  box-shadow:
+    0 0 0 1px rgba(201, 138, 46, 0.45),
+    0 4px 10px rgba(0, 0, 0, 0.18),
+    0 0 12px rgba(201, 138, 46, 0.45);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(210, 155, 70, 1) 0%, rgba(192, 98, 42, 1) 100%);
+  border-color: rgba(192, 98, 42, 0.9);
+}

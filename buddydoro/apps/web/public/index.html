@@ -45,6 +45,7 @@
   <link rel="stylesheet" href="../styles/store.css" />
   <link rel="stylesheet" href="../styles/inventory.css" />
   <link rel="stylesheet" href="../styles/history.css" />
+  <link rel="stylesheet" href="../styles/music.css" />
   <link rel="stylesheet" href="../styles/animations.css" />
 
   <!-- Life Circle CSS (disabled; using companionStatus instead) -->
@@ -61,6 +62,9 @@
 
   <!-- Logout Modal -->
   <link rel="stylesheet" href="../styles/logoutModal.css" />
+
+  <!-- Stripe.js — load before any payment logic -->
+  <script src="https://js.stripe.com/v3/"></script>
 
   <!-- Theme last so it can override colors if needed -->
   <link rel="stylesheet" href="../styles/themes.css" />
@@ -335,38 +339,38 @@
   </section>
 
 
-   <!-- Inventory dialog (window) -->
-   <div id="inventoryBackdrop" class="backdrop" hidden></div>
+  <!-- Inventory dialog (window) -->
+  <div id="inventoryBackdrop" class="backdrop" hidden></div>
 
-   <section id="inventoryDialog" class="inventory-panel" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle"
-     hidden>
-     <div class="inventory-header">
-       <h2 id="inventoryTitle">Your Inventory</h2>
-       <button id="inventoryClose" class="icon-btn" aria-label="Close inventory">&times;</button>
-     </div>
- 
-     <div class="inventory-content">
-       <div id="inventoryCategoryTabs" class="category-tabs" role="tablist" aria-label="Inventory categories"></div>
-       <div id="inventoryGrid" class="inventory-grid" aria-live="polite"></div>
-     </div>
- 
-     <div class="inventory-footer">
-       <button id="inventoryCloseBottom" class="btn-secondary" type="button">Close</button>
-     </div>
-   </section>
+  <section id="inventoryDialog" class="inventory-panel" role="dialog" aria-modal="true" aria-labelledby="inventoryTitle"
+    hidden>
+    <div class="inventory-header">
+      <h2 id="inventoryTitle">Your Inventory</h2>
+      <button id="inventoryClose" class="icon-btn" aria-label="Close inventory">&times;</button>
+    </div>
+
+    <div class="inventory-content">
+      <div id="inventoryCategoryTabs" class="category-tabs" role="tablist" aria-label="Inventory categories"></div>
+      <div id="inventoryGrid" class="inventory-grid" aria-live="polite"></div>
+    </div>
+
+    <div class="inventory-footer">
+      <button id="inventoryCloseBottom" class="btn-secondary" type="button">Close</button>
+    </div>
+  </section>
 
   <!-- History dialog -->
   <div id="historyBackdrop" class="backdrop" hidden></div>
 
-  <section id="historyDialog" class="history-panel" role="dialog" aria-modal="true"
-    aria-labelledby="historyTitle" hidden>
+  <section id="historyDialog" class="history-panel" role="dialog" aria-modal="true" aria-labelledby="historyTitle"
+    hidden>
     <div class="history-header">
       <h2 id="historyTitle">History</h2>
       <button id="historyClose" class="icon-btn" type="button" aria-label="Close history">&times;</button>
     </div>
 
     <div class="history-tabs" role="tablist" aria-label="History periods">
-      <button class="tab is-active" role="tab" aria-selected="true"  data-period="daily">Daily</button>
+      <button class="tab is-active" role="tab" aria-selected="true" data-period="daily">Daily</button>
       <button class="tab" role="tab" aria-selected="false" data-period="weekly">Weekly</button>
       <button class="tab" role="tab" aria-selected="false" data-period="monthly">Monthly</button>
       <button class="tab" role="tab" aria-selected="false" data-period="yearly">Yearly</button>
@@ -395,8 +399,9 @@
 
       <!-- Tabs -->
       <div class="category-tabs" role="tablist" aria-label="Revival options" style="margin-bottom:14px;">
-        <button class="tab is-active" role="tab" aria-selected="true"  data-dead-tab="potions">Potions</button>
-        <button class="tab"           role="tab" aria-selected="false" data-dead-tab="new-companion">Choose a New Companion</button>
+        <button class="tab is-active" role="tab" aria-selected="true" data-dead-tab="potions">Potions</button>
+        <button class="tab" role="tab" aria-selected="false" data-dead-tab="new-companion">Choose a New
+          Companion</button>
       </div>
 
       <!-- Potions tab panel -->
@@ -404,7 +409,8 @@
         <div class="catalog-grid" style="max-width: 400px;">
           <div class="card">
             <div class="skin-thumb" style="height:110px;">
-              <img src="./assets/artwork/DiamondProducts/RevivalPotion.png" alt="Revival Potion" style="max-width:100px; max-height:100px; object-fit:contain;" />
+              <img src="./assets/artwork/DiamondProducts/RevivalPotion.png" alt="Revival Potion"
+                style="max-width:100px; max-height:100px; object-fit:contain;" />
             </div>
             <div class="item-name">Revival Potion</div>
             <div class="item-price">💎 2 Diamonds</div>
@@ -427,8 +433,8 @@
             </div>
             <div class="item-name">Dragon</div>
             <div class="item-actions">
-              <button class="use-btn choose-companion-btn" type="button"
-                data-open="Dragon.png" data-closed="DragonEyesClosed.png">Choose</button>
+              <button class="use-btn choose-companion-btn" type="button" data-open="Dragon.png"
+                data-closed="DragonEyesClosed.png">Choose</button>
             </div>
           </div>
 
@@ -439,8 +445,8 @@
             </div>
             <div class="item-name">Axolotl</div>
             <div class="item-actions">
-              <button class="use-btn choose-companion-btn" type="button"
-                data-open="Skins/Axolotyl.png" data-closed="Skins/Axolotyl.png">Choose</button>
+              <button class="use-btn choose-companion-btn" type="button" data-open="Skins/Axolotyl.png"
+                data-closed="Skins/Axolotyl.png">Choose</button>
             </div>
           </div>
 
@@ -451,8 +457,8 @@
             </div>
             <div class="item-name">Frog</div>
             <div class="item-actions">
-              <button class="use-btn choose-companion-btn" type="button"
-                data-open="Skins/Frog.png" data-closed="Skins/Frog.png">Choose</button>
+              <button class="use-btn choose-companion-btn" type="button" data-open="Skins/Frog.png"
+                data-closed="Skins/Frog.png">Choose</button>
             </div>
           </div>
 
@@ -468,7 +474,8 @@
   <!-- Diamond Store dialog (Buy Diamonds) -->
   <div id="diamondStoreBackdrop" class="backdrop" hidden></div>
 
-  <section id="diamondStoreDialog" class="diamond-store-panel" role="dialog" aria-modal="true" aria-labelledby="diamondStoreTitle" hidden>
+  <section id="diamondStoreDialog" class="diamond-store-panel" role="dialog" aria-modal="true"
+    aria-labelledby="diamondStoreTitle" hidden>
     <div class="diamond-store-header">
       <div class="diamond-store-left">
         <img src="./assets/artwork/DiamondIcon.png" alt="Diamond" class="diamond-store-title-icon" />
@@ -486,10 +493,76 @@
     </div>
   </section>
 
+  <!-- Phase 1 music mini-player (local/default source + Spotify placeholder) -->
   <div class="music-fab-wrap">
-    <button id="musicChip" class="music-fab" aria-label="Open music" aria-expanded="false">♫</button>
+    <button id="musicChip" class="music-fab" type="button" aria-label="Open music" aria-expanded="false">♫</button>
     <section id="musicMiniPanel" class="music-mini-panel" hidden>
-      <!-- now playing + controls / track list -->
+      <div class="music-panel-header">
+        <h3>Music</h3>
+        <label class="music-toggle" for="musicEnabledToggle">
+          <input id="musicEnabledToggle" type="checkbox" checked />
+          <span class="music-toggle-ui" aria-hidden="true"></span>
+          <span class="music-toggle-text">On</span>
+        </label>
+      </div>
+      <div class="music-source-row" role="group" aria-label="Music source">
+        <label class="music-source-pill">
+          <input type="radio" name="music-source" id="musicSourceDefault" value="default" checked />
+          Default
+        </label>
+        <label class="music-source-pill">
+          <input type="radio" name="music-source" id="musicSourceSpotify" value="spotify" />
+          Spotify
+        </label>
+      </div>
+
+      <div id="musicPlayerCard" class="music-player-card music-cassette" aria-live="polite">
+        <div class="music-cassette-screw music-cassette-screw--tl" aria-hidden="true"></div>
+        <div class="music-cassette-screw music-cassette-screw--tr" aria-hidden="true"></div>
+        <div class="music-cassette-screw music-cassette-screw--bl" aria-hidden="true"></div>
+        <div class="music-cassette-screw music-cassette-screw--br" aria-hidden="true"></div>
+        <div class="music-cassette-inner">
+          <div class="music-cassette-window">
+            <div class="music-cassette-reel-wrap" aria-hidden="true">
+              <span class="music-cassette-reel"></span>
+            </div>
+            <div class="music-cassette-label">
+              <div id="musicPlayerTitle" class="music-player-title">—</div>
+              <div id="musicPlayerSubtitle" class="music-player-subtitle"></div>
+            </div>
+            <div class="music-cassette-reel-wrap" aria-hidden="true">
+              <span class="music-cassette-reel"></span>
+            </div>
+          </div>
+          <div class="music-cassette-teeth" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div id="musicProgressSection" class="music-progress-section">
+        <div class="music-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+          aria-label="Track progress" id="musicProgressTrack">
+          <div id="musicProgressFill" class="music-progress-fill"></div>
+        </div>
+        <div class="music-progress-times">
+          <span id="musicTimeElapsed">0:00</span>
+          <span id="musicTimeDuration">0:00</span>
+        </div>
+      </div>
+
+      <p id="musicSpotifyHint" class="music-spotify-hint" hidden>
+        Connect Spotify Premium to play in the browser.
+      </p>
+      <div class="music-controls">
+        <button type="button" id="musicPrevBtn" class="music-control-btn music-control-round" aria-label="Previous track">⏮</button>
+        <button type="button" id="musicPlayPauseBtn" class="music-control-btn is-primary music-control-main" aria-label="Play or pause">Play</button>
+        <button type="button" id="musicNextBtn" class="music-control-btn music-control-round" aria-label="Next track">⏭</button>
+      </div>
+      <button type="button" id="musicSpotifyConnectBtn" class="music-spotify-btn" hidden>Connect Spotify</button>
+      <div id="musicTrackList" class="music-track-list" aria-label="Tracks or playlists"></div>
+      <div class="music-ambient">
+        <div class="music-ambient-title">Ambient</div>
+        <div id="musicAmbientList" class="music-ambient-list"></div>
+      </div>
     </section>
   </div>
 
@@ -540,6 +613,12 @@
 
   <!-- Companion status bars (health, happiness, thirst) -->
   <script src="../js/features/companionStatus.js"></script>
+
+  <!-- Spotify Web Playback SDK: no-op until music.js assigns the real callback -->
+  <script>
+    window.onSpotifyWebPlaybackSDKReady = function () {};
+  </script>
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
 
   <!-- Entry script: lives in apps/web/js/main.js -->
   <script type="module" src="../js/main.js"></script>

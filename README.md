@@ -140,3 +140,52 @@ Currently using local MongoDB. Will migrate to MongoDB Atlas soon for team colla
 - `POST /api/tasks` - Create a new task
 - `PUT /api/tasks/:id` - Update a task
 - `DELETE /api/tasks/:id` - Delete a task
+
+## Team Setup (Stripe Test Mode)
+
+Use these steps so each teammate can run payments locally with their own Stripe test account.
+
+### 1. Create env file from example
+
+From `buddydoro/`:
+
+```bash
+copy .env.example .env
+```
+
+Fill these values in `buddydoro/.env`:
+
+- `MONGO_URI`
+- `JWT_SECRET`
+- `STRIPE_SECRET_KEY` (from Stripe test mode)
+- `STRIPE_PUBLISHABLE_KEY` (from Stripe test mode)
+
+### 2. Install dependencies
+
+```bash
+cd buddydoro
+npm install
+```
+
+### 3. Start backend API
+
+```bash
+node server/server.js
+```
+
+### 4. Start frontend static server (repo root)
+
+```bash
+node serve.mjs
+```
+
+Open: `http://localhost:9090/public/login.html`
+
+### 5. Test a transaction
+
+1. Sign up or log in.
+2. Open Buy Diamonds.
+3. Use Stripe test card `4242 4242 4242 4242`.
+4. Use any future expiry, any CVC, and valid ZIP/postal code.
+
+You should see the in-app confirmation page and a test payment in Stripe Dashboard (Test mode).

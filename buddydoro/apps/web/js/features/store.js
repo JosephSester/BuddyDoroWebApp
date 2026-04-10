@@ -1,5 +1,5 @@
 // Store dialog. Requires callbacks to read/update Doros.
-import { fetchInventory, purchaseItem, useItem, inventoryToMap} from '../api/inventoryService.js';
+import { purchaseItem } from '../api/inventoryService.js';
 import { showNotification, setBusy } from '../utils/notifications.js';
 import { fetchCatalog } from '../api/storeService.js';
 import { setDragonSkin } from './dragon.js';
@@ -19,14 +19,13 @@ export function initStore({ getDoros, spendDoros }) {
 
   const tabs = Array.from(document.querySelectorAll('.category-tabs .tab'));
   const grid = document.getElementById('catalogGrid');
-  const invUl = document.getElementById('inventoryList');
-  const useBtn = document.getElementById('useSelectedBtn');
+  const storeDorosBalanceEl = document.getElementById('storeDorosBalance');
+  const storeDiamondsBalanceEl = document.getElementById('storeDiamondsBalance');
 
   let currentCat = 'food';
   let selectedSku = null;
   let allItems = [];           // ← Loaded from API
   let itemsByCategory = {};    // ← Grouped for tabs
-  const inventory = new Map();
 
   const SKINS = [
   'Alien.png',
@@ -175,17 +174,39 @@ function niceNameFromFile(filename) {
     console.error('[Store] storeChip not found');
     return;
   }
-  
+
+  // Store is buy-only for catalog items.
+  // Currency defaults to Doros unless explicitly marked as Diamonds.
+  function getItemCurrency(item) {
+    return item?.currency === 'diamonds' ? 'diamonds' : 'doros';
+  }
+
+  // Shared display formatter so cards always show correct currency label.
+  function formatCatalogPrice(item) {
+    return `${(item.price || 0).toLocaleString()} ${getItemCurrency(item) === 'diamonds' ? 'Diamonds' : 'Doros'}`;
+  }
+
+  // Right-side balances panel mirrors current live balances from global sources.
+  function paintStoreBalances() {
+    const doros = window.earnDoros?.getBalance?.() ?? getDoros?.() ?? 0;
+    const diamonds = window.Diamonds?.getBalance?.() ?? 0;
+
+    if (storeDorosBalanceEl) {
+      storeDorosBalanceEl.textContent = Number(doros).toLocaleString('en-US');
+    }
+    if (storeDiamondsBalanceEl) {
+      storeDiamondsBalanceEl.textContent = Number(diamonds).toLocaleString('en-US');
+    }
+  }
 
   async function openStore() {
     storeBackdrop.hidden = false;
     storeDialog.hidden = false;
     storeChip.setAttribute('aria-expanded', 'true');
     (storeDialog.querySelector('.tab') || storeClose).focus();
-
     setBusy(true, 'Loading store...');
 
-    // Load catalog from backend (independent of inventory)
+    // Load catalog only (inventory view was removed from store panel).
     try {
       const apiItems = await fetchCatalog();
       allItems = apiItems;
@@ -202,20 +223,8 @@ function niceNameFromFile(filename) {
       itemsByCategory = {};
     }
 
-    // Load inventory (failure here won't blank the catalog)
-    try {
-      const apiInventory = await fetchInventory();
-      inventory.clear();
-      const loaded = inventoryToMap(apiInventory);
-      for (const [sku, count] of loaded.entries()) {
-        inventory.set(sku, count);
-      }
-    } catch (error) {
-      console.warn('Failed to load inventory:', error);
-      inventory.clear();
-    }
-
     setBusy(false);
+    paintStoreBalances();
 
     // Activate default tab or first available
     const defaultTab = tabs.find(t => t.dataset.cat === currentCat) || tabs[0];
@@ -225,7 +234,6 @@ function niceNameFromFile(filename) {
       renderCatalog([]);
     }
 
-    renderInventory();
     document.addEventListener('keydown', onStoreKey);
   }
 
@@ -403,74 +411,57 @@ function niceNameFromFile(filename) {
       card.innerHTML = `
         <div class="item-emoji" aria-hidden="true">${it.emoji || '🎁'}</div>
         <div class="item-name">${it.name || it.sku}</div>
-        <div class="item-price">${(it.price || 0).toLocaleString()} Doros</div>
+        <div class="item-price">${formatCatalogPrice(it)}</div>
         <div class="item-actions">
           <button class="buy-btn" type="button">Buy</button>
-          <button class="use-btn" type="button">Use</button>
         </div>
       `;
 
       card.querySelector('.buy-btn').addEventListener('click', async () => {
-        if (getDoros() < it.price) {
+        const currency = getItemCurrency(it);
+        const price = Number(it.price || 0);
+
+        // Validate against the correct balance before attempting purchase.
+        if (currency === 'doros' && getDoros() < price) {
           showNotification('Not enough Doros', 'error');
+          return;
+        }
+        if (currency === 'diamonds' && (window.Diamonds?.getBalance?.() ?? 0) < price) {
+          showNotification('Not enough Diamonds', 'error');
           return;
         }
 
         try {
           setBusy(true, `Buying ${it.name}...`);
-          spendDoros(it.price);
-          const response = await purchaseItem(it.sku);
-
-          inventory.clear();
-          const updated = inventoryToMap(response);
-          for (const [sku, count] of updated.entries()) {
-            inventory.set(sku, count);
+          // Spend from the matching currency source.
+          if (currency === 'doros') {
+            spendDoros(price);
+          } else {
+            const ok = await window.Diamonds?.spendDiamond?.(price);
+            if (!ok) {
+              setBusy(false);
+              showNotification('Not enough Diamonds', 'error');
+              return;
+            }
           }
+          await purchaseItem(it.sku);
 
           setBusy(false);
           showNotification(`Purchased ${it.name}!`, 'success');
-          renderInventory();
-
-          const el = document.getElementById('dorosAmount');
-          if (el) {
-            // Re-query current balance from earnDoros (safest)
-            const currentBalance = window.earnDoros?.getBalance?.() ?? 0;
-            el.textContent = currentBalance.toLocaleString('en-US');
-            console.log('Forced Doros pill update to:', currentBalance);
-          }
+          // Refresh store-side balances immediately after successful purchase.
+          paintStoreBalances();
 
         } catch (error) {
           setBusy(false);
           showNotification(`Failed to buy ${it.name}`, 'error');
           console.error('Purchase error:', error);
-          spendDoros(-it.price); // refund
-        }
-      });
-
-      card.querySelector('.use-btn').addEventListener('click', async () => {
-        if ((inventory.get(it.sku) || 0) <= 0) {
-          showNotification('You do not own this item', 'error');
-          return;
-        }
-
-        try {
-          setBusy(true, `Using ${it.name}...`);
-          const response = await useItem(it.sku);
-
-          inventory.clear();
-          const updated = inventoryToMap(response);
-          for (const [sku, count] of updated.entries()) {
-            inventory.set(sku, count);
+          // Refund the same currency if purchase API fails after local spend.
+          if (currency === 'doros') {
+            spendDoros(-price); // refund
+          } else {
+            await window.Diamonds?.addDiamond?.(price); // refund
           }
-
-          setBusy(false);
-          showNotification(`${it.name} used! 🐉✨`, 'success');
-          renderInventory();
-          emitItemUsed(it.sku);
-        } catch (error) {
-          setBusy(false);
-          showNotification(`Failed to use ${it.name}`, 'error');
-          console.error('Use item error:', error);
+          paintStoreBalances();
         }
       });
 
@@ -486,25 +477,6 @@ function niceNameFromFile(filename) {
     highlightSelection();
   }
 
-  function renderInventory() {
-    invUl.innerHTML = '';
-    if (inventory.size === 0) {
-      const li = document.createElement('li');
-      li.className = 'inventory-item';
-      li.textContent = 'No items yet — earn Doros and buy something!';
-      invUl.appendChild(li);
-      return;
-    }
-
-    for (const [sku, count] of inventory.entries()) {
-      const meta = findItemBySku(sku);
-      const li = document.createElement('li');
-      li.className = 'inventory-item';
-      li.innerHTML = `<span>${meta?.emoji || '🎁'} ${meta?.name || sku}</span><span>x${count}</span>`;
-      invUl.appendChild(li);
-    }
-  }
-
   function highlightSelection() {
     const cards = Array.from(grid.querySelectorAll('.card'));
     cards.forEach(c => {
@@ -514,59 +486,10 @@ function niceNameFromFile(filename) {
     });
   }
 
-  function findItemBySku(sku) {
-    return allItems.find(i => i.sku === sku) || null;
-  }
-
-  function emitItemUsed(sku) {
-    const meta = findItemBySku(sku);
-    if (!meta) return;
-
-    const detail = {
-      sku,
-      name: meta.name || sku,
-      emoji: meta.emoji || '',
-      category: meta.category || 'other'
-    };
-
-    const evt = new CustomEvent('store:itemUsed', { detail });
-    window.dispatchEvent(evt);
-  }
-
   function emitOpenSkins() {
     const evt = new CustomEvent('store:openSkins');
     window.dispatchEvent(evt);
   }
-
-
-  // Optional: keep this for manual use button if you want to keep it
-  useBtn?.addEventListener('click', () => {
-    if (!selectedSku) {
-      showNotification('Select an item card first', 'error');
-      return;
-    }
-    if ((inventory.get(selectedSku) || 0) <= 0) {
-      showNotification('You do not own that item', 'error');
-      return;
-    }
-
-    // You could call useItem() here instead of local decrement
-    // For consistency with buy, better to use API
-    const meta = findItemBySku(selectedSku);
-    useItem(selectedSku)
-      .then(response => {
-        inventory.clear();
-        const updated = inventoryToMap(response);
-        for (const [s, c] of updated.entries()) inventory.set(s, c);
-        renderInventory();
-        showNotification(`${meta?.name || selectedSku} used! 🐉✨`, 'success');
-        emitItemUsed(selectedSku);
-      })
-      .catch(err => {
-        console.error(err);
-        showNotification('Failed to use item', 'error');
-      });
-  });
 
   return { openStore };
 }

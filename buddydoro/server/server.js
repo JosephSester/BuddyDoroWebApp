@@ -11,6 +11,7 @@ const inventoryRoutes = require('./routes/inventory');
 const ItemsRoutes = require('./routes/items');
 const aiRoutes = require('./routes/ai');
 const userRoutes = require('./routes/user');
+const stripeRoutes = require('./routes/stripe');
 const historyRoutes = require('./routes/history');
 const resourceRoutes = require('./routes/resources');
 const pathwayRoutes  = require('./routes/pathway');
@@ -42,9 +43,13 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/items', ItemsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/stripe', stripeRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/resources', resourceRoutes);
 app.use('/api/pathway',  pathwayRoutes);
+
+const spotifyRoutes = require('./routes/spotify');
+app.use('/api/spotify', spotifyRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/buddydoro')

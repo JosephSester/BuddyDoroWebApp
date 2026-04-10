@@ -248,13 +248,6 @@ a.topbar-icon-btn { text-decoration: none; }
   outline-offset: 2px;
 }
 
-/* ---------- Music toggle chip ---------- */
-.music-toggle-icon {
-  width: 28px;
-  height: 28px;
-  display: block;
-}
-
 /* ---------- History chip ---------- */
 .history-icon {
   width: 28px;

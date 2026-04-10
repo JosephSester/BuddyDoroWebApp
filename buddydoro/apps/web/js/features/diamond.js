@@ -40,8 +40,8 @@ async function changeBalance(delta) {
     setBalance(data.diamonds);
     updateUI();
     } catch (err) {
-      console.error('Failed to sync Doros:', err);
-      balance = oldBalance; // Rollback
+      console.error('Failed to sync Diamonds:', err);
+      diamondBalance = oldBalance; // Rollback
       updateUI();
     }
 }

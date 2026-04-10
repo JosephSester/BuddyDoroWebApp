@@ -12,6 +12,7 @@ import { initDiamondStore } from './features/diamondStore.js';
 import { initTasks, getActiveTask } from './features/taskfeature/index.js';
 import { state as taskState } from './features/taskfeature/state.js';
 import { initCompanionThoughts } from './features/companionThoughts.js';
+import { initMusic } from './features/music.js';
 import { API_BASE } from './api/apiClient.js';
 import { saveSession } from './features/historyStorage.js';
 import { initAppTour } from './features/appTour.js';
@@ -175,6 +176,9 @@ const { topbar, earnDoros } = await initUserTopbarAndEarnDoros();
 
 // Dedicated inventory modal (separate from store purchase flow).
 initInventory();
+
+// Bottom-right mini music player (ambient on load; default tracks follow the focus timer).
+initMusic({ timer });
 
 // ----- Diamond Store ----------------------------------------------------------
 initDiamondStore();

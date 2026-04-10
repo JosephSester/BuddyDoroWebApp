@@ -47,25 +47,28 @@ function cancelPendingResume() {
  * Handles browser autoplay policy with a deferred resume on first interaction.
  */
 function switchToSong(song) {
+  // Always silence both songs first, then cancel any pending resume
+  happyMelody.pause();
+  mourningSong.pause();
   cancelPendingResume();
-
-  // Silence whichever song is not the new one
-  const other = song === happyMelody ? mourningSong : happyMelody;
-  other.pause();
-  other.currentTime = 0;
 
   activeSong = song;
   song.currentTime = 0;
   song.play().catch(() => {
-    // Autoplay blocked — resume on first user interaction
+    // Autoplay blocked — resume on first user interaction.
+    // Handler removes ALL THREE listeners itself so none are left dangling.
     pendingResumeHandler = () => {
+      document.removeEventListener('click',      pendingResumeHandler);
+      document.removeEventListener('keydown',    pendingResumeHandler);
+      document.removeEventListener('touchstart', pendingResumeHandler);
+      pendingResumeHandler = null;
+      if (activeSong !== song) return; // song switched since we queued
       if (!song.paused) return;
       song.play().catch(() => {});
-      pendingResumeHandler = null;
     };
-    document.addEventListener('click',      pendingResumeHandler, { once: true });
-    document.addEventListener('keydown',    pendingResumeHandler, { once: true });
-    document.addEventListener('touchstart', pendingResumeHandler, { once: true });
+    document.addEventListener('click',      pendingResumeHandler);
+    document.addEventListener('keydown',    pendingResumeHandler);
+    document.addEventListener('touchstart', pendingResumeHandler);
   });
 }
 

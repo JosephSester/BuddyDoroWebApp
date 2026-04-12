@@ -294,7 +294,7 @@
       const token = localStorage.getItem('authToken');
       if (!token) return; // offline or not logged in — silent fail
 
-      const res = await fetch('http://localhost:3000/api/user/life', {
+      const res = await fetch(((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3000/api' : '/api') + '/user/life', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -336,7 +336,7 @@ window.addEventListener('beforeunload', () => {
   if (navigator.onLine) {
     const token = localStorage.getItem('authToken');
     if (token) {
-      fetch('http://localhost:3000/api/user/life', {
+      fetch(((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3000/api' : '/api') + '/user/life', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -62,7 +62,12 @@ app.get('/', (req, res) => {
   res.send('BuddyDoro server is running!');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+// Only start the HTTP server when running locally (not when loaded by Vercel)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+}
 
+// Export the app for Vercel serverless
+module.exports = app;

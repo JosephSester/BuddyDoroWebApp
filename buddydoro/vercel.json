@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "outputDirectory": "apps/web/public",
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.js" },
+    { "handle": "filesystem" }
   ]
 }

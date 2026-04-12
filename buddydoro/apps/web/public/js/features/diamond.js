@@ -1,3 +1,7 @@
+const _DIAMOND_API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000/api'
+  : '/api';
+
 let diamondBalance = 0;
 
 function formatNumber(num) {
@@ -25,7 +29,7 @@ async function changeBalance(delta) {
       const token = localStorage.getItem('authToken');
       if (!token) throw new Error('No auth token');
 
-      const res = await fetch('http://localhost:3000/api/user/diamonds', {
+      const res = await fetch(`${_DIAMOND_API_BASE}/user/diamonds`, {
         method: 'PATCH',
         headers: {
              'Content-Type': 'application/json',

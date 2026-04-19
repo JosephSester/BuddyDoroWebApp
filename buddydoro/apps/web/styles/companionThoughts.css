@@ -16,14 +16,14 @@
 .companion-thought-text {
   border-radius: 18px;
   padding: 10px 12px;
-  color: #2b2213;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 800;
   line-height: 1.35;
   background:
     radial-gradient(150px circle at 38% 10%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.15) 72%),
-    rgba(255, 255, 255, 0.9);
-  border: 2px solid rgba(224, 162, 51, 0.9);
+    rgba(26, 54, 110, 0.90);
+  border: 2px solid rgba(124, 92, 191, 0.9);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22), inset 0 0 0 4px rgba(255, 210, 100, 0.16);
 }
 
@@ -34,8 +34,8 @@
   margin-top: -2px;
   transform: rotate(45deg);
   background: rgba(255, 246, 230, 0.94);
-  border-right: 2px solid rgba(224, 162, 51, 0.9);
-  border-bottom: 2px solid rgba(224, 162, 51, 0.9);
+  border-right: 2px solid rgba(124, 92, 191, 0.9);
+  border-bottom: 2px solid rgba(124, 92, 191, 0.9);
 }
 
 @media (max-width: 720px) {

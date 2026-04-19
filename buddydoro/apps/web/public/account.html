@@ -14,21 +14,21 @@
 
     body {
       font-family: "Plus Jakarta Sans", sans-serif;
-      background: linear-gradient(145deg, #faf4e8 0%, #f5efe3 50%, #eddfc8 100%);
+      background: linear-gradient(145deg, #274d84 0%, #2f5490 50%, #1c3566 100%);
       background-attachment: fixed;
       min-height: 100vh;
       margin: 0;
       padding: 0;
-      color: #2b2213;
+      color: #ffffff;
     }
 
     .glass-card {
-      background: rgba(250, 244, 232, 0.72);
+      background: rgba(15, 28, 65, 0.72);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-radius: 2rem;
-      border: 1px solid rgba(232, 180, 120, 0.30);
-      box-shadow: 0 12px 32px -8px rgba(43, 34, 19, 0.10);
+      border: 1px solid rgba(124, 92, 191, 0.30);
+      box-shadow: 0 12px 32px -8px rgba(26, 54, 110, 0.10);
     }
 
     .material-symbols-outlined {
@@ -38,33 +38,34 @@
 
     input { font-family: "Plus Jakarta Sans", sans-serif; }
     input:focus { outline: none; }
-    input::placeholder { color: rgba(92, 64, 51, 0.45); }
+    input::placeholder { color: rgba(157, 176, 204, 0.45); }
 
     .field-input {
       width: 100%;
       padding: 13px 20px;
       border-radius: 9999px;
-      border: 1.5px solid rgba(43, 34, 19, 0.12);
-      background: rgba(255, 255, 255, 0.88);
-      color: #2b2213;
+      border: 1.5px solid rgba(120, 140, 200, 0.28);
+      background: rgba(15, 28, 65, 0.70);
+      color: #ffffff;
       font-size: 0.9375rem;
       font-family: "Plus Jakarta Sans", sans-serif;
       box-shadow: 0 0 0 0 transparent;
-      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
     .field-input:focus {
-      box-shadow: 0 0 0 4px rgba(192, 98, 42, 0.18);
-      border-color: rgba(192, 98, 42, 0.50);
+      box-shadow: 0 0 0 4px rgba(124, 92, 191, 0.15);
+      border-color: rgba(124, 92, 191, 0.65);
+      background: rgba(15, 28, 65, 0.85);
     }
     .field-input:disabled {
-      background: rgba(245, 239, 227, 0.60);
-      color: rgba(43, 34, 19, 0.4);
+      background: rgba(15, 28, 65, 0.40);
+      color: rgba(157, 176, 204, 0.45);
       cursor: not-allowed;
     }
 
     .btn-primary-grove {
-      background: linear-gradient(to bottom, #c0622a, #a8501f);
-      color: #fff0e4;
+      background: linear-gradient(to bottom, #7c5cbf, #6448a8);
+      color: #ffffff;
       border: none;
       border-radius: 9999px;
       padding: 13px 28px;
@@ -75,7 +76,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 6px 20px -4px rgba(192, 98, 42, 0.40);
+      box-shadow: 0 6px 20px -4px rgba(124, 92, 191, 0.40);
       transition: transform 0.15s ease, filter 0.15s ease;
       text-decoration: none;
     }
@@ -83,9 +84,9 @@
     .btn-primary-grove:active { transform: scale(0.98); }
 
     .btn-ghost {
-      background: rgba(43, 34, 19, 0.06);
-      color: #5c4033;
-      border: 1.5px solid rgba(43, 34, 19, 0.12);
+      background: rgba(26, 54, 110, 0.06);
+      color: #9db0cc;
+      border: 1.5px solid rgba(26, 54, 110, 0.12);
       border-radius: 9999px;
       padding: 13px 24px;
       font-size: 0.9375rem;
@@ -98,12 +99,12 @@
       transition: background 0.15s ease;
       text-decoration: none;
     }
-    .btn-ghost:hover { background: rgba(43, 34, 19, 0.10); }
+    .btn-ghost:hover { background: rgba(26, 54, 110, 0.10); }
 
     .btn-outline {
-      background: rgba(43, 34, 19, 0.05);
-      color: #a8501f;
-      border: 1.5px solid rgba(192, 98, 42, 0.30);
+      background: rgba(26, 54, 110, 0.05);
+      color: #6448a8;
+      border: 1.5px solid rgba(124, 92, 191, 0.30);
       border-radius: 9999px;
       padding: 12px 20px;
       font-size: 0.875rem;
@@ -116,7 +117,7 @@
       transition: background 0.15s ease, border-color 0.15s ease;
       text-decoration: none;
     }
-    .btn-outline:hover { background: rgba(192, 98, 42, 0.08); border-color: rgba(192, 98, 42, 0.50); }
+    .btn-outline:hover { background: rgba(124, 92, 191, 0.08); border-color: rgba(124, 92, 191, 0.50); }
 
     .orb {
       position: fixed;
@@ -127,7 +128,7 @@
 
     .section-divider {
       height: 1px;
-      background: rgba(43, 34, 19, 0.08);
+      background: rgba(26, 54, 110, 0.08);
       margin: 1.25rem 0;
     }
 
@@ -135,15 +136,15 @@
       width: 44px;
       height: 44px;
       border-radius: 9999px;
-      background: rgba(192, 98, 42, 0.14);
+      background: rgba(124, 92, 191, 0.14);
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      color: #a8501f;
+      color: #6448a8;
     }
-    .icon-chip.green { background: rgba(110, 140, 112, 0.15); color: #4e6650; }
-    .icon-chip.blue  { background: rgba(110, 140, 112, 0.12); color: #4e6650; }
+    .icon-chip.green { background: rgba(62, 207, 178, 0.15); color: #4e6650; }
+    .icon-chip.blue  { background: rgba(62, 207, 178, 0.12); color: #4e6650; }
 
     #accountMsg:not(:empty) {
       font-size: 0.875rem;
@@ -151,15 +152,15 @@
       padding: 8px 16px;
       border-radius: 9999px;
     }
-    #accountMsg.success { color: #4e6650; background: rgba(110, 140, 112, 0.14); }
-    #accountMsg.error   { color: #b02500; background: rgba(176, 37, 0, 0.1); }
+    #accountMsg.success { color: #4e6650; background: rgba(62, 207, 178, 0.14); }
+    #accountMsg.error   { color: #f87171; background: rgba(248, 113, 113, 0.1); }
 
     /* FAQ accordion */
     details + details { margin-top: 0; }
     summary {
       font-size: 0.9375rem;
       font-weight: 600;
-      color: #2b2213;
+      color: #ffffff;
       cursor: pointer;
       padding: 1rem 0;
       list-style: none;
@@ -175,19 +176,19 @@
       font-family: "Material Symbols Outlined";
       font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
       font-size: 20px;
-      color: #8c6b55;
+      color: #9db0cc;
       transition: transform 0.2s ease;
       flex-shrink: 0;
     }
     details[open] summary::after { transform: rotate(180deg); }
     .faq-answer {
       font-size: 0.875rem;
-      color: #5c4033;
+      color: #9db0cc;
       line-height: 1.7;
       padding: 0 0 1rem 0;
     }
     .faq-row {
-      border-bottom: 1px solid rgba(43, 34, 19, 0.08);
+      border-bottom: 1px solid rgba(26, 54, 110, 0.08);
     }
     .faq-row:last-of-type { border-bottom: none; }
   </style>
@@ -195,9 +196,9 @@
 <body>
 
   <!-- Ambient orbs -->
-  <div class="orb" style="top:40px; right:80px; width:300px; height:300px; background:rgba(192,98,42,0.10); filter:blur(85px);"></div>
-  <div class="orb" style="bottom:60px; left:60px; width:340px; height:340px; background:rgba(110,140,112,0.10); filter:blur(95px);"></div>
-  <div class="orb" style="top:50%; left:50%; transform:translate(-50%,-50%); width:400px; height:400px; background:rgba(250,244,232,0.40); filter:blur(120px);"></div>
+  <div class="orb" style="top:40px; right:80px; width:300px; height:300px; background:rgba(124,92,191,0.10); filter:blur(85px);"></div>
+  <div class="orb" style="bottom:60px; left:60px; width:340px; height:340px; background:rgba(62,207,178,0.10); filter:blur(95px);"></div>
+  <div class="orb" style="top:50%; left:50%; transform:translate(-50%,-50%); width:400px; height:400px; background:rgba(15,28,65,0.40); filter:blur(120px);"></div>
 
   <!-- Page wrapper -->
   <div style="max-width:680px; margin:0 auto; padding:2rem 1.25rem 4rem;">
@@ -205,15 +206,15 @@
     <!-- ── Header ── -->
     <header style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
       <a href="index.html" aria-label="Back to app"
-         style="display:flex; align-items:center; gap:6px; color:#5c4033; text-decoration:none; font-weight:600; font-size:0.9375rem;
-                background:rgba(192,98,42,0.10); border:1.5px solid rgba(192,98,42,0.25); padding:10px 18px; border-radius:9999px; backdrop-filter:blur(12px); transition:background 0.15s; white-space:nowrap;"
-         onmouseover="this.style.background='rgba(192,98,42,0.18)'" onmouseout="this.style.background='rgba(192,98,42,0.10)'">
+         style="display:flex; align-items:center; gap:6px; color:#9db0cc; text-decoration:none; font-weight:600; font-size:0.9375rem;
+                background:rgba(124,92,191,0.10); border:1.5px solid rgba(120,140,200,0.28); padding:10px 18px; border-radius:9999px; backdrop-filter:blur(12px); transition:background 0.15s; white-space:nowrap;"
+         onmouseover="this.style.background='rgba(124,92,191,0.18)'" onmouseout="this.style.background='rgba(124,92,191,0.10)'">
         <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
         Back
       </a>
       <div>
-        <h1 style="font-size:1.5rem; font-weight:800; color:#2b2213; margin:0; letter-spacing:-0.02em;">Account Settings</h1>
-        <p style="font-size:0.8125rem; color:#5c4033; margin:0;">Manage your email, password, and preferences</p>
+        <h1 style="font-size:1.5rem; font-weight:800; color:#ffffff; margin:0; letter-spacing:-0.02em;">Account Settings</h1>
+        <p style="font-size:0.8125rem; color:#9db0cc; margin:0;">Manage your email, password, and preferences</p>
       </div>
     </header>
 
@@ -227,26 +228,26 @@
             <span class="material-symbols-outlined">mail</span>
           </div>
           <div>
-            <h2 id="emailTitle" style="font-size:1.0625rem; font-weight:700; color:#2b2213; margin:0;">Email address</h2>
-            <p style="font-size:0.8125rem; color:#5c4033; margin:0;">Update the email tied to your account</p>
+            <h2 id="emailTitle" style="font-size:1.0625rem; font-weight:700; color:#ffffff; margin:0;">Email address</h2>
+            <p style="font-size:0.8125rem; color:#9db0cc; margin:0;">Update the email tied to your account</p>
           </div>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:1rem;">
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <label for="currentEmail" style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">Current email</label>
+            <label for="currentEmail" style="font-size:0.75rem; font-weight:700; color:#9db0cc; margin-left:16px;">Current email</label>
             <input id="currentEmail" type="email" class="field-input ac-input ac-input-readonly" autocomplete="email" disabled />
           </div>
 
           <div class="section-divider"></div>
 
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <label for="newEmail" style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">New email</label>
+            <label for="newEmail" style="font-size:0.75rem; font-weight:700; color:#9db0cc; margin-left:16px;">New email</label>
             <input id="newEmail" type="email" class="field-input ac-input" autocomplete="off" placeholder="you@example.com" />
           </div>
 
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <label for="confirmNewEmail" style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">Confirm new email</label>
+            <label for="confirmNewEmail" style="font-size:0.75rem; font-weight:700; color:#9db0cc; margin-left:16px;">Confirm new email</label>
             <input id="confirmNewEmail" type="email" class="field-input ac-input" autocomplete="off" placeholder="Re-enter new email" />
           </div>
         </div>
@@ -260,26 +261,26 @@
             <span class="material-symbols-outlined">lock</span>
           </div>
           <div>
-            <h2 id="pwTitle" style="font-size:1.0625rem; font-weight:700; color:#2b2213; margin:0;">Password</h2>
-            <p style="font-size:0.8125rem; color:#5c4033; margin:0;">Leave blank if you don't want to change it</p>
+            <h2 id="pwTitle" style="font-size:1.0625rem; font-weight:700; color:#ffffff; margin:0;">Password</h2>
+            <p style="font-size:0.8125rem; color:#9db0cc; margin:0;">Leave blank if you don't want to change it</p>
           </div>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:1rem;">
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <label for="currentPassword" style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">Current password</label>
+            <label for="currentPassword" style="font-size:0.75rem; font-weight:700; color:#9db0cc; margin-left:16px;">Current password</label>
             <input id="currentPassword" type="password" class="field-input ac-input" autocomplete="current-password" placeholder="••••••••" />
           </div>
 
           <div class="section-divider"></div>
 
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <label for="newPassword" style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">New password</label>
+            <label for="newPassword" style="font-size:0.75rem; font-weight:700; color:#9db0cc; margin-left:16px;">New password</label>
             <input id="newPassword" type="password" class="field-input ac-input" autocomplete="new-password" minlength="8" placeholder="8+ characters" />
           </div>
 
           <div style="display:flex; flex-direction:column; gap:6px;">
-            <label for="confirmNewPassword" style="font-size:0.75rem; font-weight:700; color:#8c6b55; margin-left:16px;">Confirm new password</label>
+            <label for="confirmNewPassword" style="font-size:0.75rem; font-weight:700; color:#9db0cc; margin-left:16px;">Confirm new password</label>
             <input id="confirmNewPassword" type="password" class="field-input ac-input" autocomplete="new-password" minlength="8" placeholder="Re-enter new password" />
           </div>
         </div>
@@ -301,12 +302,12 @@
     <section class="glass-card" style="padding:2rem;" aria-labelledby="faqTitle">
 
       <div style="display:flex; align-items:center; gap:14px; margin-bottom:1.5rem;">
-        <div class="icon-chip" style="background:rgba(110,140,112,0.15); color:#4e6650;">
+        <div class="icon-chip" style="background:rgba(62,207,178,0.15); color:#4e6650;">
           <span class="material-symbols-outlined">help</span>
         </div>
         <div>
-          <h2 id="faqTitle" style="font-size:1.0625rem; font-weight:700; color:#2b2213; margin:0;">Help &amp; FAQ</h2>
-          <p style="font-size:0.8125rem; color:#5c4033; margin:0;">Common actions and answers</p>
+          <h2 id="faqTitle" style="font-size:1.0625rem; font-weight:700; color:#ffffff; margin:0;">Help &amp; FAQ</h2>
+          <p style="font-size:0.8125rem; color:#9db0cc; margin:0;">Common actions and answers</p>
         </div>
       </div>
 
@@ -337,7 +338,7 @@
         </div>
       </div>
 
-      <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid rgba(43,34,19,0.08);">
+      <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:1.5rem; padding-top:1.25rem; border-top:1px solid rgba(26, 54, 110,0.08);">
         <button type="button" class="btn-outline ac-btn ac-btn-outline" id="redoOnboardingBtn">
           <span class="material-symbols-outlined" style="font-size:18px;">replay</span>
           Replay onboarding

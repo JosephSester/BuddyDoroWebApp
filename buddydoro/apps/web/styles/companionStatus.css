@@ -17,23 +17,23 @@
   gap: 4px;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 2px solid rgba(194, 178, 140, 0.4);
+  border: 2px solid rgba(124, 92, 191, 0.4);
   background:
     radial-gradient(120px circle at 50% 42%, rgba(255, 255, 255, 0.4), rgba(245, 240, 230, 0.15) 70%),
-    linear-gradient(135deg, rgba(222, 196, 160, 0.45) 0%, rgba(194, 178, 140, 0.35) 100%);
+    linear-gradient(135deg, rgba(222, 196, 160, 0.45) 0%, rgba(124, 92, 191, 0.35) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   box-shadow:
     0 10px 24px rgba(0, 0, 0, 0.25),
     inset 0 0 0 1px rgba(245, 240, 230, 0.25),
-    0 0 20px rgba(194, 178, 140, 0.2);
+    0 0 20px rgba(124, 92, 191, 0.2);
 }
 
 .companion-status-label {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.6px;
-  color: #2b2213;
+  color: #ffffff;
   text-transform: uppercase;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
 }
@@ -47,8 +47,8 @@
   height: 6px;
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(43, 34, 19, 0.22);
-  border: 1px solid rgba(43, 34, 19, 0.16);
+  background: rgba(26, 54, 110, 0.22);
+  border: 1px solid rgba(26, 54, 110, 0.16);
 }
 
 .companion-status-fill {
@@ -71,18 +71,18 @@
 }
 
 .companion-status-fill.is-green {
-  background: linear-gradient(180deg, #6e8c70, #4e6650);
-  box-shadow: 0 0 6px rgba(110, 140, 112, 0.35);
+  background: linear-gradient(180deg, #3ecfb2, #2aad94);
+  box-shadow: 0 0 6px rgba(62, 207, 178, 0.35);
 }
 
 .companion-status-fill.is-orange {
-  background: linear-gradient(180deg, #c98a2e, #a8501f);
-  box-shadow: 0 0 6px rgba(201, 138, 46, 0.35);
+  background: linear-gradient(180deg, #a78fe0, #6448a8);
+  box-shadow: 0 0 6px rgba(167, 143, 224, 0.35);
 }
 
 .companion-status-fill.is-red {
   background: linear-gradient(180deg, #f95630, #b02500);
-  box-shadow: 0 0 6px rgba(176, 37, 0, 0.35);
+  box-shadow: 0 0 6px rgba(248, 113, 113, 0.35);
 }
 
 @media (max-width: 720px) {

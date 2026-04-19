@@ -33,24 +33,36 @@ const TOUR_STEPS = [
         tip: 'Click the menu to reveal more features and continue the tour.',
         position: 'bottom',
         hideNext: true,
+        spotlightClick: true,
     },
     {
-        target: '#addTasksPanel',
+        target: '#sidebarTasksBtn',
         badge: '5',
-        tip: 'Add tasks to stay organized and track what you\'re working on.',
+        tip: 'Add a new goal here to organize what you\'re working on.',
+        position: 'bottom',
+        beforeShow: () => {}, // wait for sidebar open animation before measuring
+    },
+    {
+        target: '#sidebarAiPlanBtn',
+        badge: '6',
+        tip: 'Let AI build a study plan for any goal — broken into actionable tasks.',
         position: 'right',
     },
     {
-        target: '#aiPlanBtn',
-        badge: '6',
-        tip: 'Generate an AI-powered plan for any goal — broken into actionable steps.',
+        target: '#startSessionBtn',
+        badge: '7',
+        tip: 'Start a focus session when you\'re ready. Your buddy studies with you!',
         position: 'right',
+        beforeShow: () => {
+            const el = document.getElementById('startSessionBtn');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        },
     },
     {
         target: '#timerChip',
-        badge: '7',
-        tip: 'Start a focus session here. Pick a duration and stay in the zone.',
-        position: 'right',
+        badge: '8',
+        tip: 'Access the timer anytime from here. Set your focus duration and go.',
+        position: 'bottom',
     },
 ];
 
@@ -62,16 +74,18 @@ export function initAppTour() {
     // ── Build DOM ─────────────────────────────────────────────
     // 4 shade panels create the darkened backdrop by framing the spotlight.
     // The target element is naturally visible and clickable through the gap.
-    const shadeT = document.createElement('div');
-    const shadeB = document.createElement('div');
-    const shadeL = document.createElement('div');
-    const shadeR = document.createElement('div');
-    const ring   = document.createElement('div');
-    const card   = document.createElement('div');
+    const shadeT   = document.createElement('div');
+    const shadeB   = document.createElement('div');
+    const shadeL   = document.createElement('div');
+    const shadeR   = document.createElement('div');
+    const ring     = document.createElement('div');
+    const card     = document.createElement('div');
+    const spotOver = document.createElement('div');
 
     shadeT.className = shadeB.className = shadeL.className = shadeR.className = 'tour-shade';
     ring.id = 'tour-spotlight-ring';
     card.id = 'tour-card';
+    spotOver.id = 'tour-spotlight-overlay';
     card.innerHTML = `
         <div id="tour-badge"></div>
         <p id="tour-tip"></p>
@@ -84,17 +98,17 @@ export function initAppTour() {
         </div>
     `;
 
-    [shadeT, shadeB, shadeL, shadeR, ring, card].forEach(el => document.body.appendChild(el));
+    [shadeT, shadeB, shadeL, shadeR, ring, spotOver, card].forEach(el => document.body.appendChild(el));
 
     // ── Inject styles ─────────────────────────────────────────
     const tourStyle = document.createElement('style');
     tourStyle.id = 'tour-styles';
     tourStyle.textContent = `
-        /* BuddyDoro Tour — warm earthy shade */
+        /* BuddyDoro Tour — dark night theme */
         .tour-shade {
             position: fixed;
             z-index: 9000;
-            background: rgba(26, 18, 10, 0.80);
+            background: rgba(26, 54, 110, 0.82);
             pointer-events: auto;
             transition: left 0.38s cubic-bezier(0.4,0,0.2,1),
                         top  0.38s cubic-bezier(0.4,0,0.2,1),
@@ -102,12 +116,12 @@ export function initAppTour() {
                         height 0.38s cubic-bezier(0.4,0,0.2,1);
         }
 
-        /* Spotlight ring — terracotta */
+        /* Spotlight ring — teal */
         #tour-spotlight-ring {
             position: fixed;
             border-radius: 1.5rem;
-            border: 2px solid rgba(192, 98, 42, 0.75);
-            box-shadow: 0 0 0 4px rgba(192,98,42,0.10), 0 0 28px rgba(192,98,42,0.35);
+            border: 2px solid rgba(62, 207, 178, 0.70);
+            box-shadow: 0 0 0 4px rgba(62,207,178,0.10), 0 0 28px rgba(62,207,178,0.35);
             pointer-events: none;
             z-index: 9001;
             transition: left 0.38s cubic-bezier(0.4,0,0.2,1),
@@ -116,36 +130,36 @@ export function initAppTour() {
                         height 0.38s cubic-bezier(0.4,0,0.2,1);
         }
 
-        /* Tour card — cream glass */
+        /* Tour card — dark glass */
         #tour-card {
             position: fixed;
             z-index: 9010;
             width: 272px;
             opacity: 0;
-            background: rgba(250, 244, 232, 0.90);
+            background: rgba(15, 28, 65, 0.92);
             backdrop-filter: blur(28px);
             -webkit-backdrop-filter: blur(28px);
-            border: 1px solid rgba(232, 180, 120, 0.30);
+            border: 1px solid rgba(120, 140, 200, 0.28);
             border-radius: 1.5rem;
             padding: 20px 22px 18px;
-            box-shadow: 0 12px 40px rgba(43,34,19,0.18), 0 0 0 1px rgba(232,180,120,0.15);
+            box-shadow: 0 12px 40px rgba(26, 54, 110,0.40), 0 0 0 1px rgba(120,140,200,0.15);
             pointer-events: auto;
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
         }
 
-        /* Step badge — terracotta gradient */
+        /* Step badge — teal gradient */
         #tour-badge {
             width: 30px; height: 30px; border-radius: 9999px;
-            background: linear-gradient(to bottom, #c0622a, #a8501f);
+            background: linear-gradient(to bottom, #3ecfb2, #2aad94);
             display: flex; align-items: center; justify-content: center;
-            font-size: 11px; font-weight: 800; color: #fff0e4;
-            box-shadow: 0 0 0 3px rgba(192,98,42,0.20), 0 4px 16px rgba(192,98,42,0.45);
+            font-size: 11px; font-weight: 800; color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(62,207,178,0.20), 0 4px 16px rgba(62,207,178,0.45);
             margin-bottom: 12px;
         }
 
         #tour-tip {
             font-size: 13px; font-weight: 500; line-height: 1.6;
-            color: #2b2213; margin: 0 0 16px;
+            color: #e8d5f5; margin: 0 0 16px;
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
         }
 
@@ -157,7 +171,7 @@ export function initAppTour() {
         #tour-counter {
             font-size: 10px; font-weight: 700;
             letter-spacing: 1.5px;
-            color: rgba(92, 64, 51, 0.60);
+            color: #9db0cc;
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
         }
 
@@ -167,29 +181,38 @@ export function initAppTour() {
             background: none; border: none;
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
             font-size: 11px; font-weight: 700;
-            color: rgba(92, 64, 51, 0.55);
+            color: #9db0cc;
             cursor: pointer; padding: 5px 8px; border-radius: 9999px;
             transition: color 0.15s ease, background 0.15s ease;
         }
         #tour-skip-btn:hover {
-            color: #5c4033;
-            background: rgba(192,98,42,0.10);
+            color: #ffffff;
+            background: rgba(62,207,178,0.12);
         }
 
-        /* Next button — terracotta gradient */
+        /* Next button — teal→purple gradient */
         #tour-next-btn {
             display: flex; align-items: center; gap: 6px;
-            background: linear-gradient(to bottom, #c0622a, #a8501f);
+            background: linear-gradient(to bottom right, #3ecfb2, #7c5cbf);
             border: none; border-radius: 9999px;
             font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-            font-size: 12px; font-weight: 700; color: #fff0e4;
+            font-size: 12px; font-weight: 700; color: #ffffff;
             padding: 8px 16px; cursor: pointer;
-            box-shadow: 0 4px 16px rgba(192,98,42,0.40);
+            box-shadow: 0 4px 16px rgba(124,92,191,0.40);
             transition: transform 0.15s ease, filter 0.15s ease;
         }
         #tour-next-btn:hover  { transform: translateY(-1px); filter: brightness(1.06); }
         #tour-next-btn:active { transform: translateY(0); filter: brightness(0.97); }
         #tour-next-btn i { font-size: 10px; }
+
+        /* Transparent click-capture overlay for spotlightClick steps */
+        #tour-spotlight-overlay {
+            position: fixed;
+            z-index: 9002;
+            background: transparent;
+            cursor: pointer;
+            display: none;
+        }
 
         @keyframes tourCardIn {
             from { opacity: 0; transform: scale(0.94) translateY(6px); }
@@ -214,15 +237,15 @@ export function initAppTour() {
     function positionShade(rect) {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        const sl = rect.left   - PAD;
-        const st = rect.top    - PAD;
-        const sr = rect.right  + PAD;
-        const sb = rect.bottom + PAD;
+        const sl = Math.max(0, rect.left   - PAD);
+        const st = Math.max(0, rect.top    - PAD);
+        const sr = Math.min(vw, rect.right  + PAD);
+        const sb = Math.min(vh, rect.bottom + PAD);
 
-        Object.assign(shadeT.style, { left: '0', top: '0',      width: '100%',        height: `${st}px` });
-        Object.assign(shadeB.style, { left: '0', top: `${sb}px`, width: '100%',        height: `${vh - sb}px` });
-        Object.assign(shadeL.style, { left: '0', top: `${st}px`, width: `${sl}px`,     height: `${sb - st}px` });
-        Object.assign(shadeR.style, { left: `${sr}px`, top: `${st}px`, width: `${vw - sr}px`, height: `${sb - st}px` });
+        Object.assign(shadeT.style, { left: '0', top: '0',       width: '100%',             height: `${st}px` });
+        Object.assign(shadeB.style, { left: '0', top: `${sb}px`, width: '100%',             height: `${Math.max(0, vh - sb)}px` });
+        Object.assign(shadeL.style, { left: '0', top: `${st}px`, width: `${sl}px`,          height: `${Math.max(0, sb - st)}px` });
+        Object.assign(shadeR.style, { left: `${sr}px`, top: `${st}px`, width: `${Math.max(0, vw - sr)}px`, height: `${Math.max(0, sb - st)}px` });
 
         ring.style.left   = `${sl}px`;
         ring.style.top    = `${st}px`;
@@ -293,11 +316,36 @@ export function initAppTour() {
             return;
         }
 
+        if (step.beforeShow) {
+            step.beforeShow();
+            setTimeout(() => renderStep(index, step, target), 420);
+            return;
+        }
+
+        renderStep(index, step, target);
+    }
+
+    function renderStep(index, step, target) {
         attachTarget(target);
 
         const rect = target.getBoundingClientRect();
+
         positionShade(rect);
         positionCard(rect, step.position);
+
+        // For steps where the target is small, cover the whole spotlight area
+        // with a transparent overlay so clicking anywhere in it counts.
+        if (step.spotlightClick) {
+            spotOver.style.display = 'block';
+            spotOver.style.left   = `${rect.left   - PAD}px`;
+            spotOver.style.top    = `${rect.top    - PAD}px`;
+            spotOver.style.width  = `${rect.width  + PAD * 2}px`;
+            spotOver.style.height = `${rect.height + PAD * 2}px`;
+            spotOver.onclick = () => { target.click(); };
+        } else {
+            spotOver.style.display = 'none';
+            spotOver.onclick = null;
+        }
 
         badgeEl.textContent = step.badge;
         tipEl.textContent   = step.tip;
@@ -318,7 +366,8 @@ export function initAppTour() {
     function endTour() {
         detachTarget();
         localStorage.setItem('hasTakenTour', 'true');
-        const els = [shadeT, shadeB, shadeL, shadeR, ring, card];
+        spotOver.style.display = 'none';
+        const els = [shadeT, shadeB, shadeL, shadeR, ring, spotOver, card];
         els.forEach(el => { el.style.transition = 'opacity 0.4s ease'; el.style.opacity = '0'; });
         setTimeout(() => { els.forEach(el => el.remove()); tourStyle.remove(); }, 420);
     }

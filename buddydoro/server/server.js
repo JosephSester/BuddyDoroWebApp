@@ -1,5 +1,8 @@
 // server/server.js
-require('dotenv').config();
+const path = require('path');
+// Load .env from server/ and repo root (cwd is often buddydoro/server when using node server.js)
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -51,18 +54,21 @@ app.use('/api/pathway',  pathwayRoutes);
 const spotifyRoutes = require('./routes/spotify');
 app.use('/api/spotify', spotifyRoutes);
 
+// BuddyDoro web UI (open http://localhost:3000/ in the browser)
+const webPublic = path.join(__dirname, '..', 'apps', 'web', 'public');
+app.use(express.static(webPublic));
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/buddydoro')
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-
-// Test route
-app.get('/', (req, res) => {
-  res.send('BuddyDoro server is running!');
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, service: 'buddydoro' });
 });
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
+  console.log(`Web app: http://localhost:${PORT}/`);
 });
 

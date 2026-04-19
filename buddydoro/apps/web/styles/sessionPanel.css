@@ -13,13 +13,13 @@
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
 
   /* Same glassmorphism as sidebar */
-  background: rgba(250, 244, 232, 0.82);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  border-right: 1px solid rgba(232, 180, 120, 0.40);
+  background: rgba(26, 54, 110, 0.82);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border-right: 1px solid rgba(124, 92, 191, 0.40);
   box-shadow:
-    6px 0 32px rgba(43, 34, 19, 0.22),
-    2px 0 12px rgba(192, 98, 42, 0.12);
+    6px 0 32px rgba(26, 54, 110, 0.22),
+    2px 0 12px rgba(120, 140, 200, 0.15);
 
   transform: translateX(calc(-100% - 2px));
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
@@ -36,8 +36,8 @@
 .session-panel-header {
   padding: 28px 18px 20px;
   flex-shrink: 0;
-  background: rgba(250, 244, 232, 0.45);
-  border-bottom: 1px solid rgba(192, 98, 42, 0.18);
+  background: rgba(26, 54, 110, 0.45);
+  border-bottom: 1px solid rgba(120, 140, 200, 0.20);
 }
 
 .session-panel-header-top {
@@ -52,7 +52,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #c0622a;
+  color: #7c5cbf;
   opacity: 0.75;
 }
 
@@ -61,8 +61,8 @@
   height: 28px;
   border-radius: 8px;
   border: none;
-  background: rgba(192, 98, 42, 0.08);
-  color: #5c4033;
+  background: rgba(124, 92, 191, 0.08);
+  color: #9db0cc;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -71,13 +71,13 @@
   flex-shrink: 0;
 }
 
-.session-collapse-btn:hover  { background: rgba(192, 98, 42, 0.16); }
-.session-collapse-btn:active { background: rgba(192, 98, 42, 0.24); }
+.session-collapse-btn:hover  { background: rgba(124, 92, 191, 0.16); }
+.session-collapse-btn:active { background: rgba(124, 92, 191, 0.24); }
 
 .session-goal-title {
   font-size: 17px;
   font-weight: 800;
-  color: #2b2213;
+  color: #ffffff;
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
@@ -91,7 +91,7 @@
   overflow-x: hidden;
   padding: 14px 12px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(192, 98, 42, 0.18) transparent;
+  scrollbar-color: rgba(120, 140, 200, 0.20) transparent;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -100,38 +100,38 @@
 /* ── Task items (match sidebar .tasks-panel glass cards) ─────────── */
 .session-task-item {
   background: rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(232, 180, 120, 0.35);
+  border: 1px solid rgba(124, 92, 191, 0.35);
   border-radius: 12px;
   padding: 12px 14px;
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 
 .session-task-item.is-active {
-  background: rgba(110, 140, 112, 0.10);
-  border-color: #6e8c70;
-  box-shadow: 0 0 0 1.5px rgba(110, 140, 112, 0.30);
+  background: rgba(62, 207, 178, 0.10);
+  border-color: #3ecfb2;
+  box-shadow: 0 0 0 1.5px rgba(62, 207, 178, 0.30);
 }
 
 .session-task-name {
   font-size: 13.5px;
   font-weight: 600;
-  color: #2b2213;
+  color: #ffffff;
   line-height: 1.4;
 }
 
 .session-task-item.is-active .session-task-name {
-  color: #6e8c70;
+  color: #3ecfb2;
   font-weight: 700;
 }
 
 .session-task-item.is-done .session-task-name {
-  color: #6e8c70;
+  color: #3ecfb2;
   font-weight: 700;
   text-decoration: line-through;
 }
 
 .session-done-check {
-  color: #6e8c70;
+  color: #3ecfb2;
   margin-right: 4px;
 }
 
@@ -142,7 +142,7 @@
   flex-direction: column;
   gap: 2px;
   padding: 4px 0 0 10px;
-  border-left: 2px solid rgba(110, 140, 112, 0.35);
+  border-left: 2px solid rgba(62, 207, 178, 0.35);
 }
 
 .session-subtask-row {
@@ -156,7 +156,7 @@
 }
 
 .session-subtask-row:hover {
-  background: rgba(192, 98, 42, 0.05);
+  background: rgba(124, 92, 191, 0.05);
 }
 
 .session-subtask-row.is-done .session-subtask-label {
@@ -165,7 +165,7 @@
 }
 
 .session-subtask-cb {
-  accent-color: #6e8c70;
+  accent-color: #3ecfb2;
   width: 12px;
   height: 12px;
   cursor: pointer;
@@ -175,7 +175,7 @@
 .session-subtask-label {
   font-size: 12px;
   font-weight: 500;
-  color: #5c4033;
+  color: #9db0cc;
   line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
@@ -186,7 +186,7 @@
 .session-panel-footer {
   flex-shrink: 0;
   padding: 10px 12px 14px;
-  border-top: 1px solid rgba(192, 98, 42, 0.10);
+  border-top: 1px solid rgba(124, 92, 191, 0.10);
 }
 
 .end-session-btn {
@@ -220,7 +220,7 @@
 .session-next-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(43, 34, 19, 0.55);
+  background: rgba(26, 54, 110, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -232,13 +232,13 @@
 }
 
 .session-next-card {
-  background: #faf4e8;
+  background: #1c3566;
   border-radius: 20px;
   padding: 32px 28px;
   max-width: 340px;
   width: 90%;
   text-align: center;
-  box-shadow: 0 8px 40px rgba(43, 34, 19, 0.25);
+  box-shadow: 0 8px 40px rgba(26, 54, 110, 0.25);
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
 }
 
@@ -251,7 +251,7 @@
 .session-next-title {
   font-size: 20px;
   font-weight: 800;
-  color: #2b2213;
+  color: #ffffff;
   margin-bottom: 10px;
 }
 
@@ -263,7 +263,7 @@
 }
 
 .session-next-body strong {
-  color: #6e8c70;
+  color: #3ecfb2;
   font-weight: 700;
 }
 
@@ -278,21 +278,21 @@
 .session-pick-task-btn {
   width: 100%;
   padding: 10px 14px;
-  background: rgba(250, 244, 232, 0.70);
-  border: 1.5px solid rgba(232, 180, 120, 0.50);
+  background: rgba(26, 54, 110, 0.70);
+  border: 1.5px solid rgba(124, 92, 191, 0.50);
   border-radius: 10px;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
   font-size: 13px;
   font-weight: 600;
-  color: #2b2213;
+  color: #ffffff;
   cursor: pointer;
   text-align: left;
   transition: background 0.14s, border-color 0.14s;
 }
 
 .session-pick-task-btn:hover {
-  background: rgba(110, 140, 112, 0.12);
-  border-color: #6e8c70;
+  background: rgba(62, 207, 178, 0.12);
+  border-color: #3ecfb2;
   color: #4e7050;
 }
 

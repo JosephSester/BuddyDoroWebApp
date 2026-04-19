@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BuddyDoro — Focus with a Friend. Grow Together.</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary":       "#6448a8",
+            "primary-light": "#7c5cbf",
+            "on-primary":    "#e8d5f5",
+            "surface":       "#274d84",
+            "surface-dim":   "#2f5490",
+            "on-surface":    "#e8d5f5",
+            "on-surface-v":  "#9db0cc",
+          },
+          fontFamily: { sans: ["Plus Jakarta Sans", "sans-serif"] },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: "Plus Jakarta Sans", sans-serif; margin: 0; background: #0d1020; }
+
+    /* ── Nav ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      padding: 14px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(13, 16, 32, 0.72);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      background: linear-gradient(to bottom right, #3ecfb2, #7c5cbf);
+      color: #ffffff; border: none; border-radius: 9999px;
+      padding: 11px 26px; font-size: 0.9375rem; font-weight: 700;
+      font-family: inherit; cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 6px 24px rgba(62,207,178,0.35);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .btn-primary:hover  { transform: translateY(-2px); filter: brightness(1.08); }
+    .btn-primary:active { transform: translateY(0);    filter: brightness(0.96); }
+    .btn-primary-lg { padding: 15px 36px; font-size: 1.0625rem; }
+
+    .btn-ghost {
+      background: transparent; color: rgba(255,255,255,0.75);
+      border: 1px solid rgba(255,255,255,0.18); border-radius: 9999px;
+      padding: 11px 26px; font-size: 0.9375rem; font-weight: 600;
+      font-family: inherit; cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.10); color: #fff; }
+
+    /* ── Orbs ── */
+    .orb {
+      position: absolute; border-radius: 9999px;
+      pointer-events: none; filter: blur(90px);
+    }
+
+    /* ── Feature cards ── */
+    .feat-card {
+      background: rgba(15,28,65,0.75);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(124,92,191,0.32);
+      border-radius: 2rem; padding: 2rem;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .feat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 24px 56px rgba(26, 54, 110,0.13), 0 0 0 1px rgba(120,140,200,0.28);
+    }
+
+    /* ── Companion cards ── */
+    .buddy-card {
+      background: rgba(15,28,65,0.65);
+      border: 1px solid rgba(124,92,191,0.28);
+      border-radius: 2rem; padding: 1.75rem 1.25rem;
+      text-align: center;
+      transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .buddy-card:hover { transform: translateY(-8px) scale(1.03); }
+
+    /* ── Eyebrow ── */
+    .eyebrow {
+      font-size: 0.75rem; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase; color: #3ecfb2;
+    }
+
+    /* ── Animations ── */
+    @keyframes floatY {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-14px); }
+    }
+    .float { animation: floatY 5s ease-in-out infinite; }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(28px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .fu-1 { animation: fadeUp 0.75s 0.00s cubic-bezier(0.4,0,0.2,1) both; }
+    .fu-2 { animation: fadeUp 0.75s 0.15s cubic-bezier(0.4,0,0.2,1) both; }
+    .fu-3 { animation: fadeUp 0.75s 0.30s cubic-bezier(0.4,0,0.2,1) both; }
+    .fu-4 { animation: fadeUp 0.75s 0.45s cubic-bezier(0.4,0,0.2,1) both; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .hero-ctas { flex-direction: column; align-items: stretch; }
+      .hero-ctas .btn-primary, .hero-ctas .btn-ghost { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- NAV                                                          -->
+<!-- ──────────────────────────────────────────────────────────── -->
+<nav class="nav">
+  <img src="./assets/artwork/BuddyDoroName.png" alt="BuddyDoro" style="height:34px; width:auto;" />
+  <div class="nav-links" style="display:flex; gap:12px; align-items:center;">
+    <a href="./login.html"  class="btn-ghost">Log In</a>
+    <a href="./signup.html" class="btn-primary">Get Started Free</a>
+  </div>
+</nav>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- HERO                                                         -->
+<!-- ──────────────────────────────────────────────────────────── -->
+<section style="
+  background: linear-gradient(160deg, #0f0e1c 0%, #1a1535 45%, #0d1929 100%);
+  min-height: 100vh; position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 120px 24px 80px; text-align: center;
+">
+  <!-- Ambient glow -->
+  <div class="orb" style="top:-120px; left:-80px;  width:560px; height:560px; background:rgba(124,92,191,0.13);"></div>
+  <div class="orb" style="top:10%;   right:-120px; width:500px; height:500px; background:rgba(100,70,200,0.16);"></div>
+  <div class="orb" style="bottom:-80px; left:20%; width:480px; height:480px; background:rgba(62,207,178,0.10);"></div>
+
+  <!-- Badge -->
+  <div class="fu-1" style="
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(124,92,191,0.18); border: 1px solid rgba(124,92,191,0.38);
+    border-radius: 9999px; padding: 6px 18px;
+    font-size: 0.8125rem; font-weight: 700; color: #3ecfb2;
+    margin-bottom: 28px;
+  ">✨ Now with AI-powered study plans</div>
+
+  <!-- Headline -->
+  <h1 class="fu-2" style="
+    font-size: clamp(2.6rem, 6vw, 5rem); font-weight: 900;
+    line-height: 1.08; letter-spacing: -0.03em; color: #fff;
+    margin: 0 0 22px; max-width: 860px;
+  ">
+    Study smarter with a<br/>
+    <span style="
+      background: linear-gradient(95deg, #3ecfb2 0%, #7c5cbf 55%, #a78fe0 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    ">companion by your side</span>
+  </h1>
+
+  <!-- Sub -->
+  <p class="fu-3" style="
+    font-size: clamp(1rem, 2vw, 1.1875rem); color: rgba(255,255,255,0.55);
+    line-height: 1.75; max-width: 520px; margin: 0 0 44px;
+  ">
+    BuddyDoro turns every Pomodoro session into an adventure. Earn rewards, unlock companions, and let AI build your study plan.
+  </p>
+
+  <!-- CTAs -->
+  <div class="hero-ctas fu-4" style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-bottom:60px;">
+    <a href="./signup.html" class="btn-primary btn-primary-lg">
+      Start for free <i class="fas fa-arrow-right"></i>
+    </a>
+    <a href="./login.html" class="btn-ghost" style="padding:15px 36px; font-size:1.0625rem;">
+      Log in
+    </a>
+  </div>
+
+  <!-- Hero image -->
+  <div class="float fu-4" style="
+    width: 100%; max-width: 960px; position: relative;
+    border-radius: 2.25rem; overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.07),
+      0 40px 100px rgba(0,0,0,0.65),
+      0 0 140px rgba(120,140,200,0.28),
+      0 0 60px  rgba(100,70,200,0.18);
+  ">
+    <img
+      src="./assets/artwork/Backgrounds/LandingPageImage.jpeg"
+      alt="BuddyDoro — focus sessions with your companion"
+      style="width:100%; display:block;"
+    />
+    <!-- Subtle bottom vignette so it fades into the next section -->
+    <div style="
+      position:absolute; inset:0;
+      background: linear-gradient(to bottom, transparent 60%, rgba(13,16,32,0.55) 100%);
+      pointer-events:none;
+    "></div>
+  </div>
+
+  <!-- Pill strip -->
+  <div class="fu-4" style="
+    margin-top: 40px; display: flex; align-items: center; gap: 20px;
+    color: rgba(255,255,255,0.38); font-size: 0.875rem; font-weight: 600;
+    flex-wrap: wrap; justify-content: center;
+  ">
+    <span>🍅 Pomodoro Timer</span>
+    <span style="opacity:.35">·</span>
+    <span>🐲 Virtual Companions</span>
+    <span style="opacity:.35">·</span>
+    <span>🤖 AI Study Plans</span>
+    <span style="opacity:.35">·</span>
+    <span>💰 Earn Doros</span>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- FEATURES                                                     -->
+<!-- ──────────────────────────────────────────────────────────── -->
+<section style="
+  background: linear-gradient(180deg, #274d84 0%, #2f5490 100%);
+  padding: 110px 24px;
+">
+  <div style="max-width: 1120px; margin: 0 auto;">
+
+    <div style="text-align:center; margin-bottom:68px;">
+      <p class="eyebrow">Everything you need</p>
+      <h2 style="
+        font-size: clamp(2rem, 4vw, 3rem); font-weight: 900;
+        letter-spacing: -0.03em; color: #ffffff; margin: 14px 0 0;
+      ">Focus, grow, and have fun</h2>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:24px;">
+
+      <div class="feat-card">
+        <div style="
+          width:52px; height:52px; border-radius:1.25rem; margin-bottom:20px;
+          background:linear-gradient(to bottom, #7c5cbf, #6448a8);
+          display:flex; align-items:center; justify-content:center;
+          font-size:1.6rem;
+          box-shadow:0 8px 24px rgba(124,92,191,0.35);
+        ">🍅</div>
+        <h3 style="font-size:1.125rem; font-weight:800; color:#ffffff; margin:0 0 10px;">Pomodoro Timer</h3>
+        <p style="font-size:0.9375rem; color:#9db0cc; line-height:1.65; margin:0;">
+          Classic 25/5 cycles, fully customizable. Focus mode, short breaks, long breaks — your rhythm, your rules.
+        </p>
+      </div>
+
+      <div class="feat-card">
+        <div style="
+          width:52px; height:52px; border-radius:1.25rem; margin-bottom:20px;
+          background:linear-gradient(to bottom, #7c4f9e, #5c3580);
+          display:flex; align-items:center; justify-content:center;
+          font-size:1.6rem;
+          box-shadow:0 8px 24px rgba(124,79,158,0.35);
+        ">🐲</div>
+        <h3 style="font-size:1.125rem; font-weight:800; color:#ffffff; margin:0 0 10px;">Virtual Companions</h3>
+        <p style="font-size:0.9375rem; color:#9db0cc; line-height:1.65; margin:0;">
+          Your buddy reacts to every session. Keep them happy, unlock new companions, and watch them grow.
+        </p>
+      </div>
+
+      <div class="feat-card">
+        <div style="
+          width:52px; height:52px; border-radius:1.25rem; margin-bottom:20px;
+          background:linear-gradient(to bottom, #3ecfb2, #2aad94);
+          display:flex; align-items:center; justify-content:center;
+          font-size:1.6rem;
+          box-shadow:0 8px 24px rgba(62,207,178,0.40);
+        ">🤖</div>
+        <h3 style="font-size:1.125rem; font-weight:800; color:#ffffff; margin:0 0 10px;">AI Study Plans</h3>
+        <p style="font-size:0.9375rem; color:#9db0cc; line-height:1.65; margin:0;">
+          Describe any goal and let AI break it into actionable tasks. Upload your degree plan for a full roadmap.
+        </p>
+      </div>
+
+      <div class="feat-card">
+        <div style="
+          width:52px; height:52px; border-radius:1.25rem; margin-bottom:20px;
+          background:linear-gradient(to bottom, #c49a20, #a07c12);
+          display:flex; align-items:center; justify-content:center;
+          font-size:1.6rem;
+          box-shadow:0 8px 24px rgba(196,154,32,0.35);
+        ">💰</div>
+        <h3 style="font-size:1.125rem; font-weight:800; color:#ffffff; margin:0 0 10px;">Earn Doros</h3>
+        <p style="font-size:0.9375rem; color:#9db0cc; line-height:1.65; margin:0;">
+          Every focused minute earns Doros. Spend them in the shop on skins, backgrounds, and companion care items.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- COMPANIONS                                                   -->
+<!-- ──────────────────────────────────────────────────────────── -->
+<section style="background: #1c3566; padding: 110px 24px;">
+  <div style="max-width: 1120px; margin: 0 auto;">
+
+    <div style="text-align:center; margin-bottom:68px;">
+      <p class="eyebrow">Choose your buddy</p>
+      <h2 style="
+        font-size: clamp(2rem, 4vw, 3rem); font-weight: 900;
+        letter-spacing: -0.03em; color: #ffffff; margin: 14px 0 14px;
+      ">Meet your study companions</h2>
+      <p style="
+        font-size: 1.0625rem; color: #9db0cc; margin: 0 auto; line-height: 1.7;
+        max-width: 460px;
+      ">Unlock new buddies as you focus. Each has its own personality and animations.</p>
+    </div>
+
+    <div style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 20px; max-width: 960px; margin: 0 auto;
+    ">
+
+      <div class="buddy-card">
+        <img src="./assets/artwork/Dragon.png" alt="Dragon"
+          style="width:120px; height:120px; object-fit:contain; object-position:top; display:block; margin:0 auto;" />
+        <p style="font-size:1rem; font-weight:800; color:#ffffff; margin:14px 0 4px;">Dragon</p>
+        <span style="
+          font-size:0.75rem; font-weight:700; color:#3ecfb2;
+          background:rgba(62,207,178,0.15); border-radius:9999px; padding:3px 12px;
+        ">Default</span>
+      </div>
+
+      <div class="buddy-card">
+        <img src="./assets/artwork/Skins/Axolotyl.png" alt="Axolotl"
+          style="width:120px; height:120px; object-fit:contain; display:block; margin:0 auto;" />
+        <p style="font-size:1rem; font-weight:800; color:#ffffff; margin:14px 0 4px;">Axolotl</p>
+        <span style="
+          font-size:0.75rem; font-weight:700; color:#6448a8;
+          background:rgba(124,92,191,0.12); border-radius:9999px; padding:3px 12px;
+        ">🔒 Unlock</span>
+      </div>
+
+      <div class="buddy-card">
+        <img src="./assets/artwork/Skins/Frog.png" alt="Frog"
+          style="width:120px; height:120px; object-fit:contain; display:block; margin:0 auto;" />
+        <p style="font-size:1rem; font-weight:800; color:#ffffff; margin:14px 0 4px;">Frog</p>
+        <span style="
+          font-size:0.75rem; font-weight:700; color:#6448a8;
+          background:rgba(124,92,191,0.12); border-radius:9999px; padding:3px 12px;
+        ">🔒 Unlock</span>
+      </div>
+
+      <div class="buddy-card">
+        <img src="./assets/artwork/Skins/Capybara.png" alt="Capybara"
+          style="width:120px; height:120px; object-fit:contain; display:block; margin:0 auto;" />
+        <p style="font-size:1rem; font-weight:800; color:#ffffff; margin:14px 0 4px;">Capybara</p>
+        <span style="
+          font-size:0.75rem; font-weight:700; color:#6448a8;
+          background:rgba(124,92,191,0.12); border-radius:9999px; padding:3px 12px;
+        ">🔒 Unlock</span>
+      </div>
+
+      <div class="buddy-card" style="background:rgba(26, 54, 110,0.07);">
+        <div style="
+          width:120px; height:120px; border-radius:9999px;
+          background: rgba(26, 54, 110,0.06);
+          display:flex; align-items:center; justify-content:center;
+          font-size:2.5rem; margin:0 auto;
+        ">✨</div>
+        <p style="font-size:1rem; font-weight:800; color:#ffffff; margin:14px 0 4px;">& more</p>
+        <span style="
+          font-size:0.75rem; font-weight:700; color:#9db0cc;
+          background:rgba(157,176,204,0.10); border-radius:9999px; padding:3px 12px;
+        ">12+ companions</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- FINAL CTA                                                    -->
+<!-- ──────────────────────────────────────────────────────────── -->
+<section style="
+  background: linear-gradient(160deg, #1a1535 0%, #0d1020 100%);
+  padding: 110px 24px; text-align: center; position: relative; overflow: hidden;
+">
+  <div class="orb" style="top:-120px; right:-80px; width:520px; height:520px; background:rgba(124,92,191,0.13);"></div>
+  <div class="orb" style="bottom:-80px; left:-80px; width:480px; height:480px; background:rgba(62,207,178,0.10);"></div>
+  <div class="orb" style="top:40%; left:50%; transform:translate(-50%,-50%); width:360px; height:360px; background:rgba(62,207,178,0.06);"></div>
+
+  <div style="position:relative; max-width:620px; margin:0 auto;">
+    <img src="./assets/artwork/Dragon.png" alt=""
+      style="width:110px; height:110px; object-fit:contain; object-position:top; margin-bottom:28px;" />
+    <h2 style="
+      font-size: clamp(2rem, 4vw, 3.25rem); font-weight:900;
+      letter-spacing:-0.03em; color:#fff; margin:0 0 18px; line-height:1.1;
+    ">
+      Your companion is<br/><span style="background:linear-gradient(90deg,#3ecfb2,#a78fe0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">waiting for you.</span>
+    </h2>
+    <p style="
+      font-size:1.0625rem; color:rgba(255,255,255,0.50); margin:0 0 44px; line-height:1.7;
+    ">
+      Join BuddyDoro and turn every study session into an adventure.<br/>Free to start, rewarding to continue.
+    </p>
+    <a href="./signup.html" class="btn-primary btn-primary-lg">
+      Create free account <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+</section>
+
+<!-- ──────────────────────────────────────────────────────────── -->
+<!-- FOOTER                                                       -->
+<!-- ──────────────────────────────────────────────────────────── -->
+<footer style="
+  background: #090b16;
+  padding: 28px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+">
+  <img src="./assets/artwork/BuddyDoroName.png" alt="BuddyDoro" style="height:26px; width:auto; opacity:0.6;" />
+  <p style="font-size:0.8125rem; color:rgba(255,255,255,0.25); margin:0; font-weight:500;">
+    © 2025 BuddyDoro. All rights reserved.
+  </p>
+  <div style="display:flex; gap:24px;">
+    <a href="./login.html"  style="font-size:0.8125rem; color:rgba(255,255,255,0.35); text-decoration:none; font-weight:600;">Log In</a>
+    <a href="./signup.html" style="font-size:0.8125rem; color:rgba(255,255,255,0.35); text-decoration:none; font-weight:600;">Sign Up</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,5 +1,5 @@
 /* =============================================================================
-   BUDDYDORO — RADIANT GROVE DESIGN SYSTEM
+   BUDDYDORO — MIDNIGHT GROVE DESIGN SYSTEM
    The single source of truth for color, shape, elevation, type, and components.
    Import this file first in every HTML page:
      <link rel="stylesheet" href="../styles/design-system.css" />
@@ -9,58 +9,67 @@
 /* ── 1. TOKENS: Color ─────────────────────────────────────────────────────── */
 :root {
 
-  /* Terracotta — primary actions, high-impact CTAs */
-  --color-primary:               #c0622a;
-  --color-primary-dim:           #a8501f;
-  --color-primary-dark:          #8a3f18;
-  --color-on-primary:            #fff0e4;
+  /* Dragon Purple — primary actions, high-impact CTAs */
+  --color-primary:               #7c5cbf;
+  --color-primary-container:     #9070d0;
+  --color-primary-dim:           #6448a8;
+  --color-primary-dark:          #4e3590;
+  --color-on-primary:            #e8d5f5;
 
-  /* Ochre — accent, highlights, secondary actions */
-  --color-accent:                #c98a2e;
-  --color-accent-dim:            #a8711f;
-  --color-on-accent:             #fff0e4;
+  /* Soft Lavender — secondary accent, highlights */
+  --color-accent:                #a78fe0;
+  --color-accent-dim:            #8e74cc;
+  --color-on-accent:             #1c3566;
 
-  /* Sage — success states, nature tags, active indicators only */
-  --color-sage:                  #6e8c70;
-  --color-sage-dim:              #4e6650;
-  --color-sage-glass:            rgba(110, 140, 112, 0.15);
-  --color-sage-border:           rgba(110, 140, 112, 0.35);
-  --color-on-sage:               #2b2213;
+  /* Teal Glow — CTA/highlight, success states, active selection ring */
+  --color-cta:                   #3ecfb2;
+  --color-cta-dim:               #2aad94;
+  --color-cta-glass:             rgba(62, 207, 178, 0.15);
+  --color-cta-border:            rgba(62, 207, 178, 0.70);  /* active/selected ring */
+  --color-on-cta:                #1c3566;
 
-  /* Surface tiers — warm parchment stack */
-  --color-background:            #faf4e8;
-  --color-surface:               #faf4e8;
-  --color-surface-parchment:     #f5efe3;
-  --color-surface-container:     rgba(250, 244, 232, 0.72);
-  --color-surface-container-low: rgba(250, 244, 232, 0.55);
-  --color-surface-elevated:      rgba(250, 244, 232, 0.88);
+  /* Crystal Cyan — gem/reward indicators */
+  --color-gem:                   #5be8d0;
+  --color-gem-dim:               #3ec8b0;
+  --color-gem-glass:             rgba(91, 232, 208, 0.14);
+  --color-gem-border:            rgba(91, 232, 208, 0.32);
 
-  /* On-surface ink */
-  --color-on-surface:            #2b2213;
-  --color-on-surface-mid:        #5c4033;
-  --color-on-surface-muted:      #8c6b55;
-  --color-on-background:         #2b2213;
+  /* Surface tiers — frosted light navy glass (scene bleeds through) */
+  --color-background:            linear-gradient(145deg, #274d84 0%, #2f5490 50%, #1c3566 100%);
+  --color-surface:               rgba(26, 54, 110, 0.55);
+  --color-surface-card:          rgba(26, 54, 110, 0.55);
+  --color-surface-container:     rgba(26, 54, 110, 0.55);
+  --color-surface-container-low: rgba(26, 54, 110, 0.40);
+  --color-surface-elevated:      rgba(26, 54, 110, 0.75);
 
-  /* Outline / border */
-  --color-outline:               rgba(232, 180, 120, 0.40);
-  --color-outline-strong:        rgba(192, 98, 42, 0.35);
-  --color-outline-sage:          rgba(110, 140, 112, 0.35);
+  /* On-surface text — three tiers */
+  --color-on-surface:            #ffffff;           /* headings, primary labels */
+  --color-on-surface-body:       #e8d5f5;           /* body text, descriptions */
+  --color-on-surface-mid:        #e8d5f5;
+  --color-on-surface-muted:      #9db0cc;           /* secondary / muted */
+  --color-on-background:         #ffffff;
 
-  /* Glassmorphism */
-  --glass-bg:                    rgba(250, 244, 232, 0.72);
-  --glass-blur:                  blur(14px) saturate(160%);
-  --glass-bg-low:                rgba(250, 244, 232, 0.55);
-  --glass-bg-high:               rgba(250, 244, 232, 0.88);
-  --glass-sage:                  rgba(110, 140, 112, 0.15);
+  /* Outline / border — cool perimeter glow (default) vs teal ring (active) */
+  --color-outline:               rgba(120, 140, 200, 0.28);  /* default glass border */
+  --color-outline-strong:        rgba(120, 140, 200, 0.55);
+  --color-outline-active:        rgba(62, 207, 178, 0.70);   /* active/selected */
+  --color-outline-gem:           rgba(91, 232, 208, 0.32);
+
+  /* Glassmorphism — frosted light navy glass */
+  --glass-bg:                    rgba(26, 54, 110, 0.55);
+  --glass-blur:                  blur(16px) saturate(140%);
+  --glass-bg-low:                rgba(26, 54, 110, 0.40);
+  --glass-bg-high:               rgba(26, 54, 110, 0.75);
+  --glass-gem:                   rgba(62, 207, 178, 0.08);
 
   /* Error */
-  --color-error:                 #b02500;
-  --color-error-container:       rgba(176, 37, 0, 0.10);
-  --color-on-error:              #ffefec;
+  --color-error:                 #f87171;
+  --color-error-container:       rgba(248, 113, 113, 0.12);
+  --color-on-error:              #1c3566;
 
   /* Inverse */
-  --color-inverse-surface:       #2b2213;
-  --color-inverse-on-surface:    #faf4e8;
+  --color-inverse-surface:       #e8d5f5;
+  --color-inverse-on-surface:    #1c3566;
 }
 
 
@@ -126,29 +135,29 @@
 
 /* ── 5. TOKENS: Elevation & Shadow ───────────────────────────────────────── */
 :root {
-  /* Shadows tinted with brown-dark, never grey */
-  --shadow-ambient: 0 24px 48px -12px rgba(43, 34, 19, 0.10);
-  --shadow-float:   0 12px 32px -8px  rgba(43, 34, 19, 0.12);
-  --shadow-panel:   0 6px  20px -4px  rgba(43, 34, 19, 0.10);
-  --shadow-primary: 0 8px  24px -4px  rgba(192, 98, 42, 0.35);
-  --shadow-accent:  0 6px  20px -4px  rgba(201, 138, 46, 0.28);
+  /* Shadows tinted with deep night, never grey */
+  --shadow-ambient: 0 24px 48px -12px rgba(26, 54, 110, 0.50);
+  --shadow-float:   0 12px 32px -8px  rgba(26, 54, 110, 0.40);
+  --shadow-panel:   0 6px  20px -4px  rgba(26, 54, 110, 0.35);
+  --shadow-primary: 0 8px  24px -4px  rgba(124, 92, 191, 0.40);
+  --shadow-accent:  0 6px  20px -4px  rgba(62, 207, 178, 0.30);
 
-  /* Ghost border */
-  --ghost-border: 1px solid rgba(232, 180, 120, 0.40);
+  /* Ghost border — cool perimeter glow */
+  --ghost-border: 1px solid rgba(120, 140, 200, 0.28);
 }
 
 
 /* ── 6. TOKENS: Glassmorphism ─────────────────────────────────────────────── */
 :root {
   /* card-blur kept for legacy references */
-  --glass-card-bg:      rgba(250, 244, 232, 0.55);
-  --glass-card-blur:    blur(14px) saturate(160%);
+  --glass-card-bg:      rgba(26, 54, 110, 0.55);
+  --glass-card-blur:    blur(16px) saturate(140%);
 
-  --glass-elevated-bg:  rgba(250, 244, 232, 0.88);
-  --glass-elevated-blur:blur(14px) saturate(160%);
+  --glass-elevated-bg:  rgba(26, 54, 110, 0.75);
+  --glass-elevated-blur:blur(16px) saturate(140%);
 
-  --glass-subtle-bg:    rgba(250, 244, 232, 0.40);
-  --glass-subtle-blur:  blur(10px);
+  --glass-subtle-bg:    rgba(26, 54, 110, 0.40);
+  --glass-subtle-blur:  blur(12px) saturate(140%);
 }
 
 
@@ -187,7 +196,7 @@ a:hover { text-decoration: underline; }
 /* Remove default focus outline — we use glow states instead */
 :focus { outline: none; }
 :focus-visible {
-  box-shadow: 0 0 0 3px rgba(192, 98, 42, 0.4);
+  box-shadow: 0 0 0 3px rgba(124, 92, 191, 0.50);
   border-radius: var(--radius-full);
 }
 
@@ -238,15 +247,15 @@ a:hover { text-decoration: underline; }
   z-index: -1;
 }
 .rg-orb-sun {
-  background: rgba(192, 98, 42, 0.12);
+  background: rgba(124, 92, 191, 0.16);
   filter: blur(80px);
 }
 .rg-orb-canopy {
-  background: rgba(110, 140, 112, 0.10);
+  background: rgba(62, 207, 178, 0.10);
   filter: blur(90px);
 }
 .rg-orb-surface {
-  background: rgba(250, 244, 232, 0.40);
+  background: rgba(50, 80, 130, 0.50);
   filter: blur(120px);
 }
 
@@ -283,34 +292,36 @@ a:hover { text-decoration: underline; }
 
 /* Secondary — elevated surface, no border */
 .rg-btn-secondary {
-  background: var(--color-surface-parchment);
+  background: var(--color-surface-card);
   color: var(--color-on-surface);
 }
 .rg-btn-secondary:hover { background: var(--color-surface-container); }
 
 /* Ghost — translucent, muted */
 .rg-btn-ghost {
-  background: rgba(255, 255, 255, 0.5);
-  color: var(--color-on-surface-variant);
+  background: rgba(50, 80, 130, 0.55);
+  color: var(--color-on-surface-muted);
+  border: 1px solid rgba(124, 92, 191, 0.22);
 }
-.rg-btn-ghost:hover { background: rgba(255, 255, 255, 0.82); }
+.rg-btn-ghost:hover { background: rgba(50, 80, 130, 0.82); color: var(--color-on-surface); }
 
 /* Tertiary — text-only, primary color */
 .rg-btn-tertiary {
   background: transparent;
-  color: var(--color-primary);
+  color: var(--color-accent);
   padding-left: var(--space-3);
   padding-right: var(--space-3);
   font-weight: 800;
 }
-.rg-btn-tertiary:hover { background: rgba(192, 98, 42, 0.08); }
+.rg-btn-tertiary:hover { background: rgba(124, 92, 191, 0.12); }
 
 /* Outline — ghost with primary text */
 .rg-btn-outline {
-  background: rgba(255, 255, 255, 0.5);
-  color: var(--color-primary);
+  background: rgba(50, 80, 130, 0.50);
+  color: var(--color-accent);
+  border: 1px solid rgba(124, 92, 191, 0.35);
 }
-.rg-btn-outline:hover { background: rgba(255, 255, 255, 0.82); }
+.rg-btn-outline:hover { background: rgba(50, 80, 130, 0.80); }
 
 /* Size modifiers */
 .rg-btn-sm { padding: 9px 18px; font-size: var(--text-label-md); }
@@ -319,10 +330,10 @@ a:hover { text-decoration: underline; }
 
 /* Danger */
 .rg-btn-danger {
-  background: rgba(176, 37, 0, 0.1);
+  background: rgba(248, 113, 113, 0.10);
   color: var(--color-error);
 }
-.rg-btn-danger:hover { background: rgba(176, 37, 0, 0.18); }
+.rg-btn-danger:hover { background: rgba(248, 113, 113, 0.18); }
 
 
 /* ── 10. COMPONENT: Input Fields ──────────────────────────────────────────── */
@@ -348,27 +359,28 @@ a:hover { text-decoration: underline; }
   width: 100%;
   padding: 13px 20px;
   border-radius: var(--radius-full);
-  border: none;
-  background: rgba(255, 255, 255, 0.90);
+  border: 1px solid rgba(124, 92, 191, 0.22);
+  background: rgba(26, 54, 110, 0.80);
   color: var(--color-on-surface);
   font-size: var(--text-body-md);
   font-family: var(--font-family);
   box-shadow: 0 0 0 0 transparent;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .rg-input:focus {
-  box-shadow: 0 0 0 4px rgba(192, 98, 42, 0.22);
+  box-shadow: 0 0 0 4px rgba(124, 92, 191, 0.28);
+  border-color: rgba(124, 92, 191, 0.55);
 }
 
 .rg-input:disabled {
-  background: rgba(255, 255, 255, 0.45);
-  color: rgba(43, 34, 19, 0.5);
+  background: rgba(26, 54, 110, 0.40);
+  color: rgba(157, 176, 204, 0.50);
   cursor: not-allowed;
 }
 
 .rg-input::placeholder {
-  color: rgba(92, 64, 51, 0.45);
+  color: rgba(157, 176, 204, 0.45);
 }
 
 /* Input with leading icon */
@@ -381,7 +393,7 @@ a:hover { text-decoration: underline; }
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(92, 64, 51, 0.55);
+  color: rgba(157, 176, 204, 0.60);
   font-size: 18px;
   pointer-events: none;
 }
@@ -397,7 +409,7 @@ a:hover { text-decoration: underline; }
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-  color: rgba(92, 64, 51, 0.6);
+  color: rgba(157, 176, 204, 0.65);
   background: none;
   border: none;
   padding: 0;
@@ -405,11 +417,11 @@ a:hover { text-decoration: underline; }
   align-items: center;
   transition: color 0.15s ease;
 }
-.rg-input-trailing-action:hover { color: var(--color-primary); }
+.rg-input-trailing-action:hover { color: var(--color-accent); }
 
 .rg-hint {
   font-size: var(--text-label-sm);
-  color: rgba(92, 64, 51, 0.7);
+  color: var(--color-on-surface-muted);
   margin-left: 16px;
 }
 
@@ -427,9 +439,9 @@ a:hover { text-decoration: underline; }
   font-size: 20px;
 }
 
-.rg-icon-chip-sun    { background: rgba(192, 98, 42, 0.15);   color: var(--color-primary); }
-.rg-icon-chip-sage   { background: var(--color-sage-glass);  color: var(--color-sage-dim); }
-.rg-icon-chip-ochre  { background: rgba(201, 138, 46, 0.15); color: var(--color-accent); }
+.rg-icon-chip-sun    { background: rgba(124, 92, 191, 0.18);  color: var(--color-accent); }
+.rg-icon-chip-sage   { background: var(--color-cta-glass);   color: var(--color-cta-dim); }
+.rg-icon-chip-ochre  { background: var(--color-gem-glass);   color: var(--color-gem); }
 .rg-icon-chip-error  { background: var(--color-error-container); color: var(--color-error); }
 
 /* Large variant */
@@ -486,7 +498,7 @@ a:hover { text-decoration: underline; }
 /* ── 13. COMPONENT: Progress Bars (Dragon Vitals) ─────────────────────────── */
 
 .rg-vitals-bar-wrap {
-  background: rgba(228, 254, 222, 0.40);
+  background: rgba(50, 80, 130, 0.50);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: var(--radius-full);
@@ -498,25 +510,25 @@ a:hover { text-decoration: underline; }
   width: 100%;
   height: 8px;
   border-radius: var(--radius-full);
-  background: rgba(110, 140, 112, 0.15);
+  background: rgba(50, 80, 130, 0.60);
   overflow: hidden;
 }
 
 .rg-vitals-bar-fill {
   height: 100%;
   border-radius: var(--radius-full);
-  background: linear-gradient(to right, var(--color-sage), var(--color-sage));
+  background: linear-gradient(to right, var(--color-cta-dim), var(--color-cta));
   transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Hunger bar — warm amber fill */
+/* Hunger bar — gem/cyan fill */
 .rg-vitals-bar-fill-hunger {
-  background: linear-gradient(to right, var(--color-primary), var(--color-primary-container));
+  background: linear-gradient(to right, var(--color-primary), var(--color-accent));
 }
 
 /* Health bar — red when low */
 .rg-vitals-bar-fill-health {
-  background: linear-gradient(to right, #b02500, #f95630);
+  background: linear-gradient(to right, #ef4444, #f87171);
 }
 
 
@@ -532,10 +544,10 @@ a:hover { text-decoration: underline; }
   font-weight: var(--text-label-weight);
 }
 
-.rg-tag-primary { background: rgba(192, 98, 42, 0.12);  color: var(--color-primary); }
-.rg-tag-sage    { background: var(--color-sage-glass);  color: var(--color-sage-dim); }
-.rg-tag-ochre   { background: rgba(201, 138, 46, 0.12); color: var(--color-accent); }
-.rg-tag-surface { background: rgba(245, 239, 227, 0.70); color: var(--color-on-surface-mid); }
+.rg-tag-primary { background: rgba(124, 92, 191, 0.18);  color: var(--color-accent); }
+.rg-tag-sage    { background: var(--color-cta-glass);   color: var(--color-cta-dim); }
+.rg-tag-ochre   { background: var(--color-gem-glass);   color: var(--color-gem); }
+.rg-tag-surface { background: rgba(50, 80, 130, 0.60);   color: var(--color-on-surface-muted); }
 
 
 /* ── 15. COMPONENT: Dividers ──────────────────────────────────────────────── */
@@ -545,7 +557,7 @@ a:hover { text-decoration: underline; }
 
 .rg-section-break {
   height: 1px;
-  background: rgba(92, 64, 51, 0.10);
+  background: rgba(124, 92, 191, 0.12);
   margin: var(--space-5) 0;
   border: none;
 }
@@ -554,9 +566,10 @@ a:hover { text-decoration: underline; }
 /* ── 16. COMPONENT: Companion Dialogue Bubble ─────────────────────────────── */
 
 .rg-bubble {
-  background: rgba(196, 230, 190, 0.70); /* surface-variant @ 70% */
+  background: rgba(50, 80, 130, 0.82);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(124, 92, 191, 0.28);
   border-radius: var(--radius-md);
   padding: var(--space-4) var(--space-5);
   position: relative;
@@ -577,7 +590,7 @@ a:hover { text-decoration: underline; }
   height: 0;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-top: 10px solid rgba(196, 230, 190, 0.70);
+  border-top: 10px solid rgba(50, 80, 130, 0.82);
   filter: blur(0);
 }
 
@@ -599,18 +612,18 @@ a:hover { text-decoration: underline; }
 }
 
 .rg-toast-success {
-  background: var(--color-sage-glass);
-  color: var(--color-sage-dim);
+  background: var(--color-cta-glass);
+  color: var(--color-cta-dim);
 }
 
 .rg-toast-error {
-  background: rgba(176, 37, 0, 0.10);
+  background: rgba(248, 113, 113, 0.12);
   color: var(--color-error);
 }
 
 .rg-toast-info {
-  background: rgba(192, 98, 42, 0.12);
-  color: var(--color-primary);
+  background: rgba(124, 92, 191, 0.15);
+  color: var(--color-accent);
 }
 
 
@@ -635,20 +648,22 @@ a:hover { text-decoration: underline; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--color-on-surface-variant);
+  color: var(--color-on-surface-muted);
   text-decoration: none;
   font-weight: 600;
   font-size: var(--text-body-md);
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(50, 80, 130, 0.55);
+  border: 1px solid rgba(124, 92, 191, 0.20);
   padding: 10px 18px;
   border-radius: var(--radius-full);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   white-space: nowrap;
 }
 .rg-settings-back:hover {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(50, 80, 130, 0.85);
+  color: var(--color-on-surface);
   text-decoration: none;
 }
 
@@ -705,7 +720,7 @@ a:hover { text-decoration: underline; }
   gap: var(--space-8);
   padding-bottom: 0;
   margin-bottom: var(--space-8);
-  border-bottom: 1px solid rgba(92, 64, 51, 0.12);
+  border-bottom: 1px solid rgba(124, 92, 191, 0.18);
 }
 
 .rg-auth-tab {
@@ -738,7 +753,7 @@ a:hover { text-decoration: underline; }
 /* ── 20. COMPONENT: FAQ Accordion ─────────────────────────────────────────── */
 
 .rg-faq details + details {
-  border-top: 1px solid rgba(92, 64, 51, 0.08);
+  border-top: 1px solid rgba(124, 92, 191, 0.12);
 }
 
 .rg-faq summary {
@@ -791,9 +806,9 @@ a:hover { text-decoration: underline; }
 
 .rg-msg:empty { display: none; }
 
-.rg-msg-success { color: var(--color-sage-dim); background: var(--color-sage-glass); }
-.rg-msg-error   { color: var(--color-error);       background: rgba(176,37,0,0.10); }
-.rg-msg-info    { color: var(--color-primary);     background: rgba(192,98,42,0.10); }
+.rg-msg-success { color: var(--color-cta-dim);  background: var(--color-cta-glass); }
+.rg-msg-error   { color: var(--color-error);    background: rgba(248,113,113,0.10); }
+.rg-msg-info    { color: var(--color-accent);   background: rgba(124,92,191,0.12); }
 
 
 /* ── 22. UTILITY CLASSES ──────────────────────────────────────────────────── */
@@ -812,10 +827,10 @@ a:hover { text-decoration: underline; }
 .rg-label-sm    { font-size: var(--text-label-sm); font-weight: var(--text-label-weight); letter-spacing: var(--text-label-tracking); }
 
 /* Color shortcuts */
-.rg-text-primary  { color: var(--color-primary); }
-.rg-text-secondary{ color: var(--color-sage); }
+.rg-text-primary  { color: var(--color-accent); }
+.rg-text-secondary{ color: var(--color-cta); }
 .rg-text-on       { color: var(--color-on-surface); }
-.rg-text-muted    { color: var(--color-on-surface-variant); }
+.rg-text-muted    { color: var(--color-on-surface-muted); }
 .rg-text-error    { color: var(--color-error); }
 
 /* Spacing helpers */

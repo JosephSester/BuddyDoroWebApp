@@ -17,11 +17,11 @@
     width: clamp(320px, 40vw, 550px);
     padding: 24px 36px 20px;
     border-radius: 40px;
-    color: #2b2213;
+    color: #ffffff;
     background:
         radial-gradient(180px circle at 30% 20%, rgba(255, 255, 255, .75), rgba(255, 255, 255, .2) 70%),
         rgba(255, 255, 255, .15);
-    border: 3px solid rgba(224, 162, 51, .9);
+    border: 3px solid rgba(124, 92, 191, .9);
     box-shadow: 0 15px 30px rgba(0, 0, 0, .3), inset 0 0 0 8px rgba(255, 210, 100, .3);
     z-index: 10;
     pointer-events: auto;
@@ -46,7 +46,7 @@
 .welcome-text {
     font-size: clamp(24px, 3.5vw, 36px);
     font-weight: 800;
-    color: #2b2213;
+    color: #ffffff;
     margin-bottom: 5px;
 }
 
@@ -82,24 +82,24 @@
 
 .form-field input {
     appearance: none;
-    border: 2px solid rgba(43, 34, 19, .2);
+    border: 2px solid rgba(26, 54, 110, .2);
     border-radius: 18px;
     padding: 14px 20px;
     background: #FFF;
     font-weight: 600;
     font-size: 17px;
-    color: #2b2213;
+    color: #ffffff;
     box-shadow: 0 3px 8px rgba(0, 0, 0, .1) inset;
     transition: all 0.2s ease-in-out;
 }
 
 .form-field input::placeholder {
-    color: rgba(43, 34, 19, .5);
+    color: rgba(26, 54, 110, .5);
 }
 
 .form-field input:focus-visible {
     outline: none;
-    border-color: #ffb400;
+    border-color: #7c5cbf;
     box-shadow: 0 0 0 3px rgba(255, 180, 0, 0.4), 0 3px 8px rgba(0, 0, 0, .1) inset;
 }
 
@@ -113,19 +113,19 @@
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    color: rgba(43, 34, 19, .5);
+    color: rgba(26, 54, 110, .5);
     font-size: 18px;
     transition: color 0.2s;
 }
 
 .password-toggle:hover {
-    color: #2b2213;
+    color: #ffffff;
 }
 
 /* --- New Styles for Sign Up Page --- */
 
 .signup-error {
-    color: #b22f1e;
+    color: #f87171;
     font-weight: 600;
     font-size: 14px;
     text-align: center;
@@ -142,8 +142,8 @@
 /* This is the new, centered Sign Up button */
 .signup-btn {
     /* Copied from the .log-in-btn style in login.css */
-    background: linear-gradient(145deg, #ffb400, #ffa500);
-    color: #2b2213;
+    background: linear-gradient(145deg, #7c5cbf, #ffa500);
+    color: #ffffff;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 180, 0, 0.8);
 
@@ -167,7 +167,7 @@
 .signup-terms {
     margin-top: 10px;
     font-size: 13px;
-    color: rgba(43, 34, 19, .6);
+    color: rgba(26, 54, 110, .6);
     font-weight: 600;
     max-width: 350px;
     line-height: 1.4;

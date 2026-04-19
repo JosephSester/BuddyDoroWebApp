@@ -67,11 +67,11 @@
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  border: 1.5px solid rgba(232, 180, 120, 0.40);
-  background: rgba(250, 244, 232, 0.55);
+  border: 1.5px solid rgba(124, 92, 191, 0.40);
+  background: rgba(26, 54, 110, 0.55);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  color: #5c4033;
+  color: #9db0cc;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -88,12 +88,12 @@
 a.topbar-icon-btn { text-decoration: none; }
 
 .topbar-icon-btn:hover {
-  background: rgba(192, 98, 42, 0.09);
-  color: #2b2213;
+  background: rgba(124, 92, 191, 0.09);
+  color: #ffffff;
 }
 
 .topbar-icon-btn:active {
-  background: rgba(192, 98, 42, 0.16);
+  background: rgba(124, 92, 191, 0.16);
 }
 
 /* ---- Action buttons (Tasks, AI Plan, Timer) ---- */
@@ -102,10 +102,10 @@ a.topbar-icon-btn { text-decoration: none; }
   align-items: center;
   gap: 7px;
   padding: 6px 10px;
-  border: 1.5px solid rgba(232, 180, 120, 0.40);
+  border: 1.5px solid rgba(124, 92, 191, 0.40);
   border-radius: 999px;
-  background: rgba(250, 244, 232, 0.55);
-  color: #2b2213;
+  background: rgba(26, 54, 110, 0.55);
+  color: #ffffff;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
   font-size: 13.5px;
   font-weight: 600;
@@ -115,22 +115,22 @@ a.topbar-icon-btn { text-decoration: none; }
 }
 
 .topbar-action-btn:hover {
-  background: rgba(192, 98, 42, 0.09);
+  background: rgba(124, 92, 191, 0.09);
 }
 
 .topbar-action-btn:active {
-  background: rgba(192, 98, 42, 0.16);
+  background: rgba(124, 92, 191, 0.16);
 }
 
 .topbar-action-btn:focus-visible {
-  outline: 2px solid rgba(192, 98, 42, 0.40);
+  outline: 2px solid rgba(124, 92, 191, 0.40);
   outline-offset: -2px;
 }
 
 .topbar-action-icon {
   width: 17px;
   height: 17px;
-  color: #c0622a;
+  color: #7c5cbf;
   flex-shrink: 0;
 }
 
@@ -140,21 +140,21 @@ a.topbar-icon-btn { text-decoration: none; }
   align-items: center;
   gap: 5px;
   padding: 3px 8px 3px 5px;
-  background: rgba(250, 244, 232, 0.55);
-  border: 1.5px solid rgba(232, 180, 120, 0.40);
+  background: rgba(26, 54, 110, 0.55);
+  border: 1.5px solid rgba(124, 92, 191, 0.40);
   border-radius: 999px;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
   font-size: 12.5px;
   font-weight: 700;
-  color: #2b2213;
+  color: #ffffff;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.14s, border-color 0.14s;
 }
 
 .topbar-currency-pill:hover {
-  background: rgba(255, 255, 255, 0.65);
-  border-color: rgba(192, 98, 42, 0.35);
+  background: rgba(26, 54, 110, 0.70);
+  border-color: rgba(124, 92, 191, 0.35);
 }
 
 .topbar-currency-icon {
@@ -177,17 +177,15 @@ a.topbar-icon-btn { text-decoration: none; }
   height: 50px;
   padding: 8px 16px;
   border-radius: 999px;
-  border: 2px solid rgba(194, 178, 140, .4);
-  background:
-    radial-gradient(120px circle at 50% 42%, rgba(255, 255, 255, .4), rgba(245, 240, 230, .15) 70%),
-    linear-gradient(135deg, rgba(222, 196, 160, .45) 0%, rgba(194, 178, 140, .35) 100%);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 2px solid rgba(120, 140, 200, .28);
+  background: rgba(26, 54, 110, 0.55);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
   box-shadow:
-    0 10px 24px rgba(0, 0, 0, .25),
-    inset 0 0 0 1px rgba(245, 240, 230, .25),
-    0 0 20px rgba(194, 178, 140, .2);
-  color: #2b2213;
+    0 10px 24px rgba(0, 0, 0, .30),
+    inset 0 0 0 1px rgba(120, 140, 200, .15),
+    0 0 20px rgba(124, 92, 191, .18);
+  color: #ffffff;
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
@@ -196,16 +194,14 @@ a.topbar-icon-btn { text-decoration: none; }
 
 .chip.glass-chip:hover {
   transform: translateY(-1px);
-  background:
-    radial-gradient(120px circle at 50% 42%, rgba(255, 255, 255, .45), rgba(245, 240, 230, .2) 70%),
-    linear-gradient(135deg, rgba(222, 196, 160, .55) 0%, rgba(194, 178, 140, .45) 100%);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border: 2px solid rgba(194, 178, 140, .5);
+  background: rgba(26, 54, 110, 0.70);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 2px solid rgba(120, 140, 200, .45);
   box-shadow:
-    0 12px 28px rgba(0, 0, 0, .3),
-    inset 0 0 0 1px rgba(245, 240, 230, .3),
-    0 0 30px rgba(194, 178, 140, .3);
+    0 12px 28px rgba(0, 0, 0, .35),
+    inset 0 0 0 1px rgba(120, 140, 200, .20),
+    0 0 30px rgba(124, 92, 191, .25);
   filter: brightness(1.05);
 }
 
@@ -213,15 +209,15 @@ a.topbar-icon-btn { text-decoration: none; }
   transform: translateY(0);
   box-shadow:
     0 8px 20px rgba(0, 0, 0, .25),
-    inset 0 0 0 1px rgba(245, 240, 230, .25),
-    0 0 20px rgba(194, 178, 140, .2);
+    inset 0 0 0 1px rgba(120, 140, 200, .12),
+    0 0 20px rgba(124, 92, 191, .15);
 }
 
 .timer-chip {
   justify-content: center;
   gap: 0;
   padding: 8px 14px;
-  color: #000;
+  color: #ffffff;
 }
 
 .timer-chip-icon {
@@ -234,7 +230,7 @@ a.topbar-icon-btn { text-decoration: none; }
   justify-content: center;
   gap: 0;
   padding: 10px 14px;
-  color: #000;
+  color: #ffffff;
 }
 
 .menu-chip-icon {
@@ -244,7 +240,7 @@ a.topbar-icon-btn { text-decoration: none; }
 }
 
 .chip.glass-chip:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }
 
@@ -312,8 +308,8 @@ a.topbar-icon-btn { text-decoration: none; }
   width: min(280px, 68vw);
   padding: 14px 16px;
   border-radius: 18px;
-  background: radial-gradient(160px circle at 50% 15%, rgba(255, 255, 255, .6), rgba(255, 255, 255, .14) 72%), rgba(255, 255, 255, .92);
-  border: 2px solid rgba(224, 162, 51, .85);
+  background: radial-gradient(160px circle at 50% 15%, rgba(124, 92, 191, 0.15), rgba(26, 54, 110, 0.14) 72%), rgba(26, 54, 110, 0.92);
+  border: 2px solid rgba(124, 92, 191, .85);
   box-shadow: 0 14px 30px rgba(0, 0, 0, .25), inset 0 0 0 4px rgba(255, 210, 100, .18);
   z-index: 220;
   display: flex;
@@ -336,9 +332,9 @@ a.topbar-icon-btn { text-decoration: none; }
   border: none;
   border-radius: 12px;
   padding: 10px 12px;
-  background: rgba(255, 235, 160, .55);
+  background: rgba(26, 54, 110, .55);
   font-weight: 700;
-  color: #2b2213;
+  color: #ffffff;
   text-align: left;
   cursor: pointer;
   transition: transform .1s ease, filter .15s ease;
@@ -357,7 +353,7 @@ a.topbar-icon-btn { text-decoration: none; }
 .greet-menu-divider {
   border: none;
   height: 1px;
-  background: rgba(224, 162, 51, .45);
+  background: rgba(124, 92, 191, .45);
   margin: 0;
 }
 
@@ -376,12 +372,12 @@ a.topbar-icon-btn { text-decoration: none; }
 .greet-defaults-label {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(43, 34, 19, .85);
+  color: rgba(26, 54, 110, .85);
 }
 
 .greet-defaults-input {
   appearance: none;
-  border: 1px solid rgba(43, 34, 19, .35);
+  border: 1px solid rgba(26, 54, 110, .35);
   border-radius: 12px;
   padding: 8px 10px;
   background: rgba(255, 255, 255, .95);
@@ -393,23 +389,23 @@ a.topbar-icon-btn { text-decoration: none; }
 }
 
 .greet-defaults-input:focus-visible {
-  outline: 2px solid #ffb400;
+  outline: 2px solid #7c5cbf;
   outline-offset: 2px;
 }
 
 .greet-defaults-error {
   font-size: 12px;
   font-weight: 600;
-  color: #b22f1e;
+  color: #f87171;
 }
 
 .greet-defaults-save {
   appearance: none;
   border-radius: 999px;
   padding: 10px 18px;
-  border: 2px solid #e0a233;
-  background: linear-gradient(#ffd36b, #f2b942);
-  color: #2b2213;
+  border: 2px solid #7c5cbf;
+  background: linear-gradient(#7c5cbf, #6448a8);
+  color: #ffffff;
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
@@ -425,7 +421,7 @@ a.topbar-icon-btn { text-decoration: none; }
 }
 
 .greet-defaults-save:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }
 
@@ -447,8 +443,8 @@ a.topbar-icon-btn { text-decoration: none; }
   min-width: 200px;
   padding: 10px;
   border-radius: 18px;
-  background: radial-gradient(140px circle at 30% 15%, rgba(255, 255, 255, .6), rgba(255, 255, 255, .14) 72%), rgba(255, 255, 255, .92);
-  border: 2px solid rgba(224, 162, 51, .85);
+  background: radial-gradient(140px circle at 30% 15%, rgba(124, 92, 191, 0.15), rgba(26, 54, 110, 0.14) 72%), rgba(26, 54, 110, 0.92);
+  border: 2px solid rgba(124, 92, 191, .85);
   box-shadow: 0 12px 28px rgba(0, 0, 0, .25), inset 0 0 0 4px rgba(255, 210, 100, .18);
   display: flex;
   flex-direction: column;
@@ -463,10 +459,10 @@ a.topbar-icon-btn { text-decoration: none; }
 
 .doros-menu-item {
   appearance: none;
-  border: 2px solid #e0a233;
+  border: 2px solid #7c5cbf;
   border-radius: 999px;
-  background: linear-gradient(#ffd36b, #f2b942);
-  color: #2b2213;
+  background: linear-gradient(#7c5cbf, #6448a8);
+  color: #ffffff;
   font-weight: 700;
   text-align: left;
   padding: 10px 18px;
@@ -483,6 +479,6 @@ a.topbar-icon-btn { text-decoration: none; }
 }
 
 .doros-menu-item:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }

@@ -1,4 +1,5 @@
 import { API_BASE } from './api/apiClient.js';
+import { applyPreferencesToStorage, getStoredPreferences } from './utils/preferences.js';
 
 // ── Text splitting ─────────────────────────────────────────────
 function wrapWords(el) {
@@ -361,8 +362,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const prevSlide = () => { if (currentSlide > 0) updateSlide(currentSlide - 1, 'prev'); };
 
   async function completeOnboarding() {
-    localStorage.setItem('buddydoro.skin.open',   `Skins/${selectedSkin}`);
-    localStorage.setItem('buddydoro.skin.closed', `Skins/${selectedSkin}`);
+    const preferences = applyPreferencesToStorage({
+      skinOpen: `Skins/${selectedSkin}`,
+      skinClosed: `Skins/${selectedSkin}`,
+      background: getStoredPreferences().background,
+    }, { preserveExisting: true });
 
     if (anime?.animate) {
       anime.animate(document.querySelector('.ob-wrap'), { opacity: [1, 0], duration: 500, ease: 'outQuad' });
@@ -378,10 +382,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       await fetch(`${API_BASE}/user/onboarding`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify(preferences),
       });
     } catch(e) { console.warn('Onboarding sync failed', e); }
 
-    setTimeout(() => { window.location.href = 'index.html'; }, 500);
+    setTimeout(() => { window.location.replace('index.html'); }, 500);
   }
 
   nextBtn.addEventListener('click', nextSlide);

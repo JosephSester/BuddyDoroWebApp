@@ -5,6 +5,33 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BuddyDoro</title>
+  <script>
+    (function () {
+      const authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+
+      if (!authToken) {
+        window.location.replace('login.html');
+        return;
+      }
+
+      if (hasSeenOnboarding !== 'true') {
+        window.location.replace('onboarding.html');
+        return;
+      }
+
+      document.documentElement.setAttribute('data-auth-gate', 'ready');
+    })();
+  </script>
+  <style>
+    html:not([data-auth-gate="ready"]) body {
+      visibility: hidden;
+    }
+
+    #dragon:not([data-booted="true"]) {
+      visibility: hidden;
+    }
+  </style>
 
   <!-- Preload artwork (paths are relative to the web root served from /apps/web/public) -->
   <link rel="preload" as="image" href="/assets/artwork/BackgroundDay.jpg" />
@@ -84,6 +111,18 @@
       <img src="./assets/artwork/Dragon.png" alt="Friendly dragon" class="dragon-img" />
       <img src="./assets/artwork/Tombstone/Tombstone.png" alt="Tombstone" class="tombstone-img" hidden />
     </div>
+    <script>
+      (function () {
+        const dragonEl = document.getElementById('dragon');
+        const dragonImg = dragonEl?.querySelector('.dragon-img');
+        if (!dragonEl || !dragonImg) return;
+
+        const savedSkin = localStorage.getItem('buddydoro.skin.open') || 'Dragon.png';
+        dragonImg.src = `./assets/artwork/${savedSkin}`;
+        dragonImg.alt = 'Friendly companion';
+        dragonEl.setAttribute('data-booted', 'true');
+      })();
+    </script>
     <button id="companionDeadBtn" class="companion-dead-btn" hidden>
       <span class="companion-dead-text">Your companion has died.<br>Continue here.</span>
       <span class="companion-dead-arrow">&#8250;</span>

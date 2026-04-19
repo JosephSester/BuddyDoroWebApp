@@ -1,4 +1,5 @@
 import { API_BASE } from './api/apiClient.js';
+import { applyPreferencesToStorage } from './utils/preferences.js';
 
 // Ensure the DOM is fully loaded before running the script
 console.log('login.js loaded');
@@ -84,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
+      const previousUserId = localStorage.getItem('userId');
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,9 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('userId', data.userId);
       if (data.name) localStorage.setItem('userName', data.name);
       localStorage.setItem('hasSeenOnboarding', data.hasSeenOnboarding ? 'true' : 'false');
+      applyPreferencesToStorage(data.preferences || {}, {
+        preserveExisting: !!previousUserId && previousUserId === String(data.userId),
+      });
 
       console.log('Login successful!');
-      window.location.href = data.hasSeenOnboarding ? 'index.html' : 'onboarding.html';
+      window.location.replace(data.hasSeenOnboarding ? 'index.html' : 'onboarding.html');
 
     } catch (err) {
       showLoginError('Server unreachable');

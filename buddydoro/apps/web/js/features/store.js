@@ -3,6 +3,12 @@ import { purchaseItem } from '../api/inventoryService.js';
 import { showNotification, setBusy } from '../utils/notifications.js';
 import { fetchCatalog } from '../api/storeService.js';
 import { setDragonSkin } from './dragon.js';
+import {
+  BG_STORAGE_KEY,
+  applyPreferencesToStorage,
+  getStoredPreferences,
+  saveUserPreferences,
+} from '../utils/preferences.js';
 
 
 console.log('[Store Init] storeChip:', !!document.getElementById('storeChip'));
@@ -48,31 +54,25 @@ export function initStore({ getDoros, spendDoros }) {
   // NEW: Backgrounds (day shown in store, night auto-applied at night)
   // ----------------------------
   const BACKGROUNDS = [
-    { key: 'Forest', day: '../BackgroundDay.jpg', night: '../BackgroundNight.png', isDefault: true },
-    { key: 'African', day: 'AfricanBackgroundDay.png', night: 'AfricanBackgroundNight.png' },
-    { key: 'Arctic', day: 'ArcticBackgroundDay.png', night: 'ArcticBackgroundNight.png' },
-    { key: 'Beach', day: 'BeachBackgroundDay.png', night: 'BeachBackgroundNight.png' },
-    { key: 'Cemetery', day: 'CemeteryBackgroundDay.png', night: 'CemeteryBackgroundNight.png' },
-    { key: 'Desert', day: 'DesertBackgroundDay.png', night: 'DesertBackgroundNight.png' },
-    { key: 'Everglades', day: 'EvergladesBackgroundDay.png', night: 'EvergladesBackgroundNight.png' },
-    { key: 'Floating Island', day: 'FloatingIslandBackgroundDay.png', night: 'FloatingIslandBackgroundNight.png' },
-    { key: 'Inca', day: 'IncaBackgroundDay.png', night: 'IncaBackgroundNight.png' },
-    { key: 'Japanese', day: 'JapaneseBackgroundDay.png', night: 'JapaneseBackgroundNight.png' },
-    { key: 'Jungle', day: 'JungleBackgroundDay.png', night: 'JungleBackgroundNight.png' },
-    { key: 'Mayan', day: 'MayanBackgroundDay.png', night: 'MayanBackgroundNight.png' },
-    { key: 'Mountain', day: 'MountainBackgroundDay.png', night: 'MountainBackgroundNight.png' },
-    { key: 'Rainforest', day: 'RainforestBackgroundDay.png', night: 'RainforestBackgroundNight.png' },
-
-    // These appear to be single-file backgrounds (use same image day+night)
-    { key: 'Inner Earth', day: 'InnerEarthBackground.png', night: 'InnerEarthBackground.png' },
-    { key: 'Moon', day: 'MoonBackground.png', night: 'MoonBackground.png' },
-
-    // If Mars only has a day file in your folder, we just reuse day at night
-    { key: 'Mars', day: 'MarsBackgroundDay.png', night: 'MarsBackgroundDay.png' },
-    { key: 'Dessert Land', day: 'DessertLandBackground.png', night: 'DessertLandBackground.png' },
+    { key: 'Forest', imageUrl: 'Backgrounds/BackgroundDay.jpg', day: 'BackgroundDay.jpg', night: 'BackgroundNight.png', isDefault: true, dragonBottom: '16vh', deadButtonBottom: '13vh' },
+    { key: 'African', imageUrl: 'Backgrounds/AfricanBackgroundDay.png', day: 'AfricanBackgroundDay.png', night: 'AfricanBackgroundNight.png', dragonBottom: '15vh', deadButtonBottom: '12vh' },
+    { key: 'Arctic', imageUrl: 'Backgrounds/ArcticBackgroundDay.png', day: 'ArcticBackgroundDay.png', night: 'ArcticBackgroundNight.png', dragonBottom: '15vh', deadButtonBottom: '12vh' },
+    { key: 'Beach', imageUrl: 'Backgrounds/BeachBackgroundDay.png', day: 'BeachBackgroundDay.png', night: 'BeachBackgroundNight.png', dragonBottom: '12vh', deadButtonBottom: '9vh' },
+    { key: 'Cemetery', imageUrl: 'Backgrounds/CemeteryBackgroundDay.png', day: 'CemeteryBackgroundDay.png', night: 'CemeteryBackgroundNight.png', dragonBottom: '15vh', deadButtonBottom: '12vh' },
+    { key: 'Desert', imageUrl: 'Backgrounds/DesertBackgroundDay.png', day: 'DesertBackgroundDay.png', night: 'DesertBackgroundNight.png', dragonBottom: '13vh', deadButtonBottom: '10vh' },
+    { key: 'Everglades', imageUrl: 'Backgrounds/EvergladesBackgroundDay.png', day: 'EvergladesBackgroundDay.png', night: 'EvergladesBackgroundNight.png', dragonBottom: '14vh', deadButtonBottom: '11vh' },
+    { key: 'Floating Island', imageUrl: 'Backgrounds/FloatingIslandBackgroundDay.png', day: 'FloatingIslandBackgroundDay.png', night: 'FloatingIslandBackgroundNight.png', dragonBottom: '27vh', deadButtonBottom: '24vh' },
+    { key: 'Inca', imageUrl: 'Backgrounds/IncaBackgroundDay.png', day: 'IncaBackgroundDay.png', night: 'IncaBackgroundNight.png', dragonBottom: '14vh', deadButtonBottom: '11vh' },
+    { key: 'Japanese', imageUrl: 'Backgrounds/JapaneseBackgroundDay.png', day: 'JapaneseBackgroundDay.png', night: 'JapaneseBackgroundNight.png', dragonBottom: '14vh', deadButtonBottom: '11vh' },
+    { key: 'Jungle', imageUrl: 'Backgrounds/JungleBackgroundDay.png', day: 'JungleBackgroundDay.png', night: 'JungleBackgroundNight.png', dragonBottom: '14vh', deadButtonBottom: '11vh' },
+    { key: 'Mayan', imageUrl: 'Backgrounds/MayanBackgroundDay.png', day: 'MayanBackgroundDay.png', night: 'MayanBackgroundNight.png', dragonBottom: '14vh', deadButtonBottom: '11vh' },
+    { key: 'Mountain', imageUrl: 'Backgrounds/MountainBackgroundDay.png', day: 'MountainBackgroundDay.png', night: 'MountainBackgroundNight.png', dragonBottom: '16vh', deadButtonBottom: '13vh' },
+    { key: 'Rainforest', imageUrl: 'Backgrounds/RainforestBackgroundDay.png', day: 'RainforestBackgroundDay.png', night: 'RainforestBackgroundNight.png', dragonBottom: '14vh', deadButtonBottom: '11vh' },
+    { key: 'Inner Earth', imageUrl: 'Backgrounds/InnerEarthBackground.png', day: 'InnerEarthBackground.png', night: 'InnerEarthBackground.png', dragonBottom: '15vh', deadButtonBottom: '12vh' },
+    { key: 'Moon', imageUrl: 'Backgrounds/MoonBackground.png', day: 'MoonBackground.png', night: 'MoonBackground.png', dragonBottom: '14vh', deadButtonBottom: '11vh' },
+    { key: 'Mars', imageUrl: 'Backgrounds/MarsBackgroundDay.png', day: 'MarsBackgroundDay.png', night: 'MarsBackgroundDay.png', dragonBottom: '13vh', deadButtonBottom: '10vh' },
+    { key: 'Dessert Land', imageUrl: 'Backgrounds/DessertLandBackground.png', day: 'DessertLandBackground.png', night: 'DessertLandBackground.png', dragonBottom: '13vh', deadButtonBottom: '10vh' },
   ];
-
-  const BG_STORAGE_KEY = 'buddydoro:selectedBackground';
 
   function getSceneEl() {
     return document.getElementById('scene');
@@ -113,16 +113,18 @@ export function initStore({ getDoros, spendDoros }) {
     // Apply inline background image (works even if backgroundnight.js exists)
     scene.style.backgroundImage = `url("${url}")`;
     scene.style.backgroundRepeat = 'no-repeat';
-    scene.style.backgroundPosition = 'center center';
+    scene.style.backgroundPosition = 'center bottom';
     scene.style.backgroundSize = 'cover';
+    scene.style.setProperty('--dragon-bottom', bg.dragonBottom || '16vh');
+    scene.style.setProperty('--companion-dead-bottom', bg.deadButtonBottom || '13vh');
 
     // Tag the scene with the background key so dragon.css can adjust
     // the character's vertical position per-background
     scene.dataset.bg = bg.key;
   }
 
-  function saveSelectedBackground(bgKey) {
-    localStorage.setItem(BG_STORAGE_KEY, bgKey);
+  function saveSelectedBackground(imageUrl) {
+    localStorage.setItem(BG_STORAGE_KEY, imageUrl);
   }
 
   function loadSelectedBackgroundKey() {
@@ -130,9 +132,8 @@ export function initStore({ getDoros, spendDoros }) {
   }
 
   function getSelectedBackground() {
-    const key = loadSelectedBackgroundKey();
-    if (!key) return null;
-    return BACKGROUNDS.find(b => b.key === key) || null;
+    const key = loadSelectedBackgroundKey() || getStoredPreferences().background;
+    return BACKGROUNDS.find(b => b.imageUrl === key) || BACKGROUNDS.find(b => b.isDefault) || null;
   }
 
   // Keep background synced if your day/night logic flips classes on <body> or #scene.
@@ -313,7 +314,14 @@ function niceNameFromFile(filename) {
       // Equip button
       card.querySelector('.use-btn').addEventListener('click', () => {
         // For now: open = closed = same image until you add closed-eye versions
-        setDragonSkin({ open: `Skins/${file}`, closed: `Skins/${file}` });
+        const preferences = applyPreferencesToStorage({
+          skinOpen: `Skins/${file}`,
+          skinClosed: `Skins/${file}`,
+        }, { preserveExisting: true });
+        setDragonSkin({ open: preferences.skinOpen, closed: preferences.skinClosed });
+        saveUserPreferences(preferences).catch(error => {
+          console.warn('Skin preference sync failed:', error);
+        });
         showNotification(`${name} equipped! 🐉✨`, 'success');
       });
 
@@ -357,21 +365,28 @@ function niceNameFromFile(filename) {
       card.querySelector('.use-btn').addEventListener('click', () => {
         if (bg.isDefault) {
           // Clear custom selection so backgroundnight.js resumes day/night switching
-          localStorage.removeItem(BG_STORAGE_KEY);
-          window.BackgroundNight?.apply();
+          const preferences = applyPreferencesToStorage({
+            background: bg.imageUrl,
+          }, { preserveExisting: true });
+          saveSelectedBackground(preferences.background);
           // Remove bg tag so dragon uses the default Forest bottom position
           const scene = getSceneEl();
           if (scene) {
             scene.removeAttribute('data-bg');
             scene.style.backgroundPosition = 'center bottom';
+            scene.style.removeProperty('--dragon-bottom');
+            scene.style.removeProperty('--companion-dead-bottom');
           }
           selectedSku = null;
           highlightSelection();
           showNotification(`Default Forest background equipped! 🌲✨`, 'success');
           return;
         }
-        saveSelectedBackground(bg.key);
+        saveSelectedBackground(bg.imageUrl);
         applyBackground(bg);
+        saveUserPreferences({ background: bg.imageUrl }).catch(error => {
+          console.warn('Background preference sync failed:', error);
+        });
         showNotification(`${name} background equipped! 🌄✨`, 'success');
       });
 

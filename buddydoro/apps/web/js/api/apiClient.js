@@ -6,7 +6,23 @@
 // Note: This runs IN THE BROWSER, not on the server
 // ============================================================
 
-export const API_BASE = 'http://localhost:3000/api';
+/**
+ * Backend runs on port 3000. Use the same hostname as the current page for
+ * localhost vs 127.0.0.1 so OAuth (/spotify/login) and API calls stay consistent
+ * with SPOTIFY_REDIRECT_URI and FRONTEND_URL in .env.
+ */
+function resolveApiBase() {
+  if (typeof window === 'undefined' || !window.location) {
+    return 'http://localhost:3000/api';
+  }
+  const { protocol, hostname } = window.location;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `${protocol}//${hostname}:3000/api`;
+  }
+  return 'http://localhost:3000/api';
+}
+
+export const API_BASE = resolveApiBase();
 
 // Get auth token from localStorage
 function getAuthToken() {

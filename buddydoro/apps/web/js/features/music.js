@@ -157,6 +157,9 @@ export function initMusic(options = {}) {
     trackAudio.pause();
     ambientAudio.pause();
     state.isPlaying = false;
+    if (spotifyPlayer) {
+      spotifyPlayer.pause().catch(() => {});
+    }
   }
 
   function pauseTrackAudio() {
@@ -165,7 +168,7 @@ export function initMusic(options = {}) {
   }
 
   // Sync ambient loop to current mode + day/night variant.
-  // Ambient sounds are app-level environment audio and should play continuously.
+  // Respects master sound toggle: when off, ambience stays paused (src still updates if mode changes).
   async function syncAmbientPlayback() {
     const mode = state.ambientMode;
     const config = AMBIENT_AUDIO[mode];
@@ -174,6 +177,11 @@ export function initMusic(options = {}) {
     const src = isNightNow() ? (config.night || config.day) : config.day;
     if (ambientAudio.src !== new URL(src, window.location.href).href) {
       ambientAudio.src = src;
+    }
+
+    if (!state.enabled) {
+      ambientAudio.pause();
+      return;
     }
 
     await safePlay(ambientAudio);
@@ -232,6 +240,9 @@ export function initMusic(options = {}) {
    */
   async function fetchSpotifyToken() {
     const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      throw new Error('BuddyDoro session missing — log in again, then connect Spotify.');
+    }
     const res = await fetch(`${API_BASE}/spotify/token`, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
@@ -240,6 +251,9 @@ export function initMusic(options = {}) {
       throw new Error(err.message || 'Failed to get Spotify token');
     }
     const data = await res.json();
+    if (!data.accessToken || typeof data.accessToken !== 'string') {
+      throw new Error('Server did not return a Spotify access token. Try Disconnect, then Connect Spotify again.');
+    }
     spotifyToken = data.accessToken;
     return spotifyToken;
   }
@@ -271,22 +285,30 @@ export function initMusic(options = {}) {
     spotifyPlayer = new window.Spotify.Player({
       name: 'BuddyDoro',
       // The SDK calls this whenever it needs a token (including refresh).
+      // Never call cb('') without handling it: Spotify then returns 401 "No token provided" on their APIs.
       getOAuthToken: async (cb) => {
         try {
           const token = await fetchSpotifyToken();
           cb(token);
-        } catch {
+        } catch (err) {
+          console.error('[music] Spotify getOAuthToken failed:', err);
+          showNotification(err.message || 'Spotify token failed — log in or reconnect Spotify.', 'error');
+          cleanupSpotifyPlayer();
           cb('');
         }
       },
       volume: 0.6,
     });
 
-    // Fires when the SDK has a device ready for playback.
+    // Fires when the SDK has registered this tab as a Spotify Connect device (device_id is stable for this session).
+    // We then tell Spotify's API to switch the "active" Connect device to this tab so playback targets the browser.
     spotifyPlayer.addListener('ready', ({ device_id }) => {
       spotifyDeviceId = device_id;
-      showNotification('Spotify connected! Select a playlist or press Play.', 'success');
-      render();
+      void (async () => {
+        await transferPlaybackHere();
+        showNotification('Spotify connected! Select a playlist or press Play.', 'success');
+        render();
+      })();
     });
 
     spotifyPlayer.addListener('not_ready', () => {
@@ -318,6 +340,40 @@ export function initMusic(options = {}) {
     }
   }
 
+  /**
+   * Ask Spotify to make the Web Playback SDK device (this browser tab) the active
+   * Connect target, without starting playback yet (play: false).
+   *
+   * Flow:
+   * 1. User may already be playing on phone/TV/etc. Spotify still considers that the "active device".
+   * 2. Our PUT /player/play calls include device_id, but transferring first avoids edge cases where
+   *    audio stays on the other device or the first command targets the wrong player.
+   * 3. Browser → Buddy API (Bearer JWT) → Spotify Web API with the user's stored tokens (server-side).
+   *
+   * Requires spotifyDeviceId (from SDK `ready`) and spotifyToken (from initial fetchSpotifyToken in boot).
+   * Failures are ignored at call sites (best-effort); playlist play can still succeed.
+   */
+  async function transferPlaybackHere() {
+    if (!spotifyDeviceId || !spotifyToken) return;
+    const authToken = localStorage.getItem('authToken');
+    try {
+      const res = await fetch(`${API_BASE}/spotify/player`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ device_ids: [spotifyDeviceId], play: false }),
+      });
+      if (!res.ok && res.status !== 204) {
+        // Non-fatal: user can still try Play; optional follow-up in playSpotifyContext.
+        console.warn('[music] transferPlaybackHere:', res.status);
+      }
+    } catch (e) {
+      console.warn('[music] transferPlaybackHere failed:', e);
+    }
+  }
+
   /** Tear down the SDK player and reset Spotify-specific state. */
   function cleanupSpotifyPlayer() {
     if (spotifyPlayer) {
@@ -333,22 +389,6 @@ export function initMusic(options = {}) {
   }
 
   /**
-   * Transfers playback to BuddyDoro's SDK device so audio plays here
-   * instead of another Spotify Connect device the user might have open.
-   */
-  async function transferPlaybackHere() {
-    if (!spotifyDeviceId || !spotifyToken) return;
-    await fetch('https://api.spotify.com/v1/me/player', {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${spotifyToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ device_ids: [spotifyDeviceId], play: false }),
-    });
-  }
-
-  /**
    * Fetches the user's Spotify playlists and renders them in the
    * track-list area when source is set to Spotify.
    * Uses _playlistsRendered to avoid re-fetching on every render() cycle.
@@ -359,11 +399,16 @@ export function initMusic(options = {}) {
     tracksRoot.className = 'music-playlist-browse';
     tracksRoot.innerHTML = '<div class="music-empty">Loading playlists…</div>';
     try {
-      const token = await fetchSpotifyToken();
-      const res = await fetch('https://api.spotify.com/v1/me/playlists?limit=10', {
-        headers: { Authorization: `Bearer ${token}` },
+      const authToken = localStorage.getItem('authToken');
+      const res = await fetch(`${API_BASE}/spotify/me/playlists?limit=10`, {
+        headers: { Authorization: `Bearer ${authToken}` },
       });
-      if (!res.ok) throw new Error('Failed to load playlists');
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(
+          errBody.message || errBody.detail || `Failed to load playlists (${res.status})`,
+        );
+      }
       const data = await res.json();
 
       tracksRoot.innerHTML = '';
@@ -381,6 +426,7 @@ export function initMusic(options = {}) {
         tracksRoot.appendChild(row);
       });
     } catch (err) {
+      _playlistsRendered = false;
       tracksRoot.innerHTML = `<div class="music-empty">${err.message}</div>`;
     }
   }
@@ -395,15 +441,23 @@ export function initMusic(options = {}) {
       return;
     }
     try {
-      const token = await fetchSpotifyToken();
-      await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spotifyDeviceId}`, {
+      // Re-affirm this tab as the active device right before starting a context (e.g. user resumed on phone since ready).
+      await transferPlaybackHere();
+
+      const authToken = localStorage.getItem('authToken');
+      const playRes = await fetch(`${API_BASE}/spotify/player/play?device_id=${encodeURIComponent(spotifyDeviceId)}`, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ context_uri: contextUri }),
       });
+      if (!playRes.ok) {
+        const err = await playRes.json().catch(() => ({}));
+        showNotification(err.detail || err.message || 'Could not start Spotify playback.', 'error');
+        return;
+      }
       state.isPlaying = true;
       render();
       saveState();
@@ -492,7 +546,7 @@ export function initMusic(options = {}) {
     panel.hidden = !state.panelOpen;
 
     enableToggle.checked = state.enabled;
-    if (enableToggleText) enableToggleText.textContent = state.enabled ? 'On' : 'Off';
+    if (enableToggleText) enableToggleText.textContent = state.enabled ? 'Sound on' : 'Sound off';
     sourceDefault.checked = state.source === 'default';
     sourceSpotify.checked = state.source === 'spotify';
 
@@ -516,7 +570,7 @@ export function initMusic(options = {}) {
         playerSubtitleEl.textContent = 'Add audio in music catalog';
       } else {
         playerTitleEl.textContent = currentTrack.title;
-        const stateLabel = !state.enabled ? 'Music off' : state.isPlaying ? 'Playing' : 'Paused';
+        const stateLabel = !state.enabled ? 'All sound off' : state.isPlaying ? 'Playing' : 'Paused';
         playerSubtitleEl.textContent = `BuddyDoro · ${stateLabel}`;
       }
     }
@@ -590,13 +644,13 @@ export function initMusic(options = {}) {
     }
   });
 
-  // Master toggle controls only track music.
-  // Ambient/environment sounds remain active at all times.
+  // Master toggle: all audio (focus tracks, Spotify, and ambient nature sounds).
   enableToggle.addEventListener('change', async () => {
     state.enabled = enableToggle.checked;
     if (!state.enabled) {
-      pauseTrackAudio();
+      pauseAllAudio();
     } else {
+      await syncAmbientPlayback();
       if (state.source === 'default' && state.isPlaying) {
         await playCurrentDefaultTrack();
       }
@@ -633,7 +687,8 @@ export function initMusic(options = {}) {
     } else {
       // Redirect to our backend which kicks off the Spotify OAuth flow.
       const token = localStorage.getItem('authToken');
-      window.location.href = `${API_BASE}/spotify/login?token=${encodeURIComponent(token)}`;
+      const returnTo = `${window.location.origin}${window.location.pathname}`;
+      window.location.href = `${API_BASE}/spotify/login?token=${encodeURIComponent(token)}&return_to=${encodeURIComponent(returnTo)}`;
     }
   });
 
@@ -724,11 +779,19 @@ export function initMusic(options = {}) {
     state.source = 'spotify';
     _playlistsRendered = false;
     showNotification('Spotify account connected!', 'success');
-    window.history.replaceState({}, '', window.location.pathname);
+    window.history.replaceState({}, '', `${window.location.pathname}${window.location.hash || ''}`);
   }
-  if (urlParams.get('spotifyError')) {
-    showNotification(`Spotify error: ${urlParams.get('spotifyError')}`, 'error');
-    window.history.replaceState({}, '', window.location.pathname);
+  const spotifyErr = urlParams.get('spotifyError');
+  if (spotifyErr) {
+    const spotifyErrMessages = {
+      oauth_session_expired: 'Spotify login expired. Open Connect Spotify and try again.',
+      token_exchange_failed: 'Spotify could not complete login. Check SPOTIFY_REDIRECT_URI matches your Spotify app settings.',
+      access_denied: 'Spotify access was denied.',
+      missing_authorization_code: 'Spotify did not return an authorization code. Try Connect again.',
+      user_not_found: 'Could not save Spotify link to your account. Try logging in again.',
+    };
+    showNotification(spotifyErrMessages[spotifyErr] || `Spotify: ${spotifyErr}`, 'error');
+    window.history.replaceState({}, '', `${window.location.pathname}${window.location.hash || ''}`);
   }
 
   // Default / BuddyDoro tracks: never auto-play on page load — they start with the focus timer (see below).
@@ -778,29 +841,27 @@ export function initMusic(options = {}) {
     if (typeof window.Spotify !== 'undefined') bootSpotifyPlayer();
   }
 
-  // Retry ambient playback after first user interaction if autoplay was blocked.
-  const resumeAmbient = () => syncAmbientPlayback();
+  // Retry ambient playback after first user interaction if autoplay was blocked (only when sound is on).
+  const resumeAmbient = () => {
+    if (state.enabled) syncAmbientPlayback();
+  };
   window.addEventListener('pointerdown', resumeAmbient, { once: true });
   window.addEventListener('keydown', resumeAmbient, { once: true });
 
   // Extra attempts so nature sounds start as early as possible after load / bfcache restore.
-  window.addEventListener('load', () => { syncAmbientPlayback(); });
-  window.addEventListener('pageshow', () => { syncAmbientPlayback(); });
+  window.addEventListener('load', resumeAmbient);
+  window.addEventListener('pageshow', resumeAmbient);
 
   // Keep forest ambience synced when day/night context changes over time.
   setInterval(() => {
-    if (state.ambientMode === 'forest') {
+    if (state.ambientMode === 'forest' && state.enabled) {
       syncAmbientPlayback();
     }
   }, 60 * 1000);
 
   return {
     stop() {
-      // Stop track playback while keeping ambient environment active.
-      pauseTrackAudio();
-      if (spotifyPlayer) {
-        spotifyPlayer.pause().catch(() => {});
-      }
+      pauseAllAudio();
       render();
       saveState();
     },

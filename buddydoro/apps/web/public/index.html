@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BuddyDoro</title>
 
-  <!-- Preload artwork (paths are relative to the web root served from /apps/web/public) -->
-  <link rel="preload" as="image" href="/assets/artwork/BackgroundDay.jpg" />
-  <link rel="preload" as="image" href="/assets/artwork/Dragon.png" />
-  <link rel="preload" as="image" href="/assets/artwork/BackgroundNight.png" />
+  <!-- Preload artwork — use ./ not / so nested URLs (e.g. Live Server) resolve correctly -->
+  <link rel="preload" as="image" href="./assets/artwork/BackgroundDay.jpg" />
+  <link rel="preload" as="image" href="./assets/artwork/Dragon.png" />
+  <link rel="preload" as="image" href="./assets/artwork/BackgroundNight.png" />
 
 
   <!-- Fonts -->
@@ -27,7 +27,7 @@
   <link rel="stylesheet" href="../styles/notifications.css" />
 
   <!-- Moon overlay -->
-  <link rel="preload" as="image" href="/assets/artwork/Moon.png" /> <!-- ✅ UPDATED -->
+  <link rel="preload" as="image" href="./assets/artwork/Moon.png" />
 
   <link rel="stylesheet" href="../styles/moon.css" />
 
@@ -498,11 +498,13 @@
     <button id="musicChip" class="music-fab" type="button" aria-label="Open music" aria-expanded="false">♫</button>
     <section id="musicMiniPanel" class="music-mini-panel" hidden>
       <div class="music-panel-header">
-        <h3>Music</h3>
-        <label class="music-toggle" for="musicEnabledToggle">
-          <input id="musicEnabledToggle" type="checkbox" checked />
+        <h3>Audio</h3>
+        <label class="music-toggle" for="musicEnabledToggle"
+          title="Includes focus music, Spotify, and ambient nature sounds">
+          <input id="musicEnabledToggle" type="checkbox" checked
+            aria-label="All sound on or off, including ambient" />
           <span class="music-toggle-ui" aria-hidden="true"></span>
-          <span class="music-toggle-text">On</span>
+          <span class="music-toggle-text">Sound on</span>
         </label>
       </div>
       <div class="music-source-row" role="group" aria-label="Music source">

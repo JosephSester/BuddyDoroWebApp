@@ -1,7 +1,8 @@
 // historyStorage.js — Save and read timed session records for the History window.
 
+import { API_BASE } from '../api/apiClient.js';
+
 const HISTORY_KEY        = 'buddydoro_history';
-const API_BASE           = 'http://localhost:3000/api';
 
 function getToken() { return localStorage.getItem('authToken'); }
 

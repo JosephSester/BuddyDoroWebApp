@@ -1,0 +1,52 @@
+flowchart LR
+  subgraph Identity["Identity & account"]
+    U[Registered user]
+  end
+
+  subgraph Focus["Focus & productivity"]
+    FS[Pomodoro focus sessions]
+    BR[Breaks & session flow]
+    GL[Goals & task lists]
+    AP[AI-assisted planning]
+  end
+
+  subgraph Companion["Companion experience"]
+    BD[Buddy / companion]
+    CS[Vitals & status]
+    SC[Scene & cosmetics]
+  end
+
+  subgraph Economy["Reward economy"]
+    DR[Doros earned]
+    DM[Diamonds premium]
+    ST[Store catalog]
+    INV[Inventory & equip]
+  end
+
+  subgraph Library["Learning resources"]
+    RS["Saved resources & notes"]
+    PW[Degree pathway planner]
+  end
+
+  subgraph Integrations["External services"]
+    SP[Spotify music]
+    PY[Stripe payments]
+    AI[AI provider]
+  end
+
+  U --> FS
+  U --> GL
+  U --> AP
+  FS --> DR
+  DR --> ST
+  DM --> ST
+  ST --> INV
+  INV --> SC
+  FS --> CS
+  CS --> BD
+  GL --> FS
+  AP --> AI
+  U --> RS
+  U --> PW
+  FS --> SP
+  DM --> PY

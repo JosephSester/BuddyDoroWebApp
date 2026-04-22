@@ -1,0 +1,34 @@
+flowchart TB
+  subgraph client["Client tier"]
+    UI["Browser UI<br/>HTML CSS JS feature modules"]
+    AC["apiClient.js<br/>REST + Authorization Bearer"]
+  end
+
+  subgraph server["Server tier Node.js Express port 3000"]
+    ST["Static files<br/>express.static apps/web/public"]
+    EX["Express JSON body + CORS"]
+    MW["JWT authMiddleware"]
+    API["REST API surface<br/>/api/auth /tasks /panels /inventory /items<br/>/user /history /resources /pathway /ai<br/>/stripe /spotify /protected"]
+  end
+
+  subgraph data["Data tier"]
+    MD["Mongoose models"]
+    MG[(MongoDB)]
+  end
+
+  subgraph ext["External integrations"]
+    OAI["OpenAI Chat API"]
+    STR["Stripe payments"]
+    SPOT["Spotify OAuth Web API"]
+  end
+
+  UI --> AC
+  UI -->|"same origin static assets"| ST
+  AC -->|"HTTPS JSON /api"| EX
+  EX --> MW
+  MW --> API
+  API --> MD
+  MD --> MG
+  API --> OAI
+  API --> STR
+  API --> SPOT

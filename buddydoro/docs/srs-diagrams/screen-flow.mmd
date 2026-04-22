@@ -1,0 +1,48 @@
+flowchart TD
+  subgraph Public["Unauthenticated"]
+    SU[signup.html]
+    LG[login.html]
+  end
+
+  subgraph FirstRun["First-time setup"]
+    OB[onboarding.html]
+  end
+
+  subgraph Hub["Main app"]
+    IX[index.html]
+  end
+
+  subgraph Secondary["Full pages"]
+    ST[store.html]
+    HS[history.html]
+    AI[aiplan.html]
+    RS[resources.html]
+    PW[pathway.html]
+    AC[account.html]
+    PR[profile.html]
+  end
+
+  SU --> LG
+  LG -->|token + onboarding flag| IX
+  LG -->|needs onboarding| OB
+  OB --> IX
+
+  IX -->|topbar / links| ST
+  IX -->|topbar| PW
+  IX -->|topbar| RS
+  IX -->|sidebar| HS
+  IX -->|sidebar| AI
+  IX -->|sidebar| AC
+  IX -->|sidebar| PR
+
+  IX -.->|modals on same page: inventory, timer panel, history dialog, music / Spotify return| IX
+
+  HS -->|back / nav| IX
+  AI -->|often returns| IX
+  ST -->|shopping / equip| IX
+  RS --> IX
+  PW --> IX
+  AC --> IX
+  PR --> IX
+
+  LG <-->|signup link| SU

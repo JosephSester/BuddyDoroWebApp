@@ -1,0 +1,77 @@
+classDiagram
+  direction TB
+
+  class User {
+    +email
+    +name
+    +passwordHash
+    +doros
+    +diamonds
+    +life
+    +companionStatuses
+    +settings
+    +hasSeenOnboarding
+    +spotify OAuth fields
+  }
+
+  class Panel {
+    +title
+    +order
+  }
+
+  class Task {
+    +text
+    +completed
+    +panelId
+    +subtasks[]
+  }
+
+  class Note {
+    +body
+    +taskName
+  }
+
+  class Inventory {
+    +items[] sku,count
+  }
+
+  class Item {
+    +sku
+    +name
+    +category
+    +currency
+    +price
+  }
+
+  class FocusSession {
+    +seconds
+    +taskName
+    +subtaskName
+  }
+
+  class SessionRecord {
+    +goalName
+    +pomodorosCompleted
+    +totalSeconds
+    +goalComplete
+  }
+
+  class Resource {
+    +type
+    +title
+    +url
+    +note
+  }
+
+  User "1" --> "*" Panel : owns
+  User "1" --> "*" Task : owns
+  User "1" --> "1" Inventory : has
+  User "1" --> "*" Note : owns
+  User "1" --> "*" FocusSession : logs
+  User "1" --> "*" SessionRecord : logs
+  User "1" --> "*" Resource : saves
+
+  Task "*" --> "0..1" Note : may have
+  Task ".." --> ".." Panel : panelId matches
+
+  Inventory ".." --> ".." Item : sku references

@@ -1,0 +1,18 @@
+flowchart TB
+  U[End user browser]
+
+  subgraph BD["BuddyDoro system"]
+    APP["Node.js Express server<br/>REST API + static web UI<br/>apps/web/public"]
+  end
+
+  DB[(MongoDB<br/>persistent data)]
+
+  OAI[OpenAI API<br/>AI planning]
+  STR[Stripe<br/>diamond purchases]
+  SPF[Spotify<br/>OAuth and playback]
+
+  U <-->|"HTTPS same origin<br/>HTML JS JSON"| APP
+  APP <-->|"Mongoose"| DB
+  APP -->|"Chat completions"| OAI
+  APP -->|"Payment intents"| STR
+  APP -->|"OAuth tokens Web API"| SPF

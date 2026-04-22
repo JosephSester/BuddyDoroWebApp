@@ -4,6 +4,7 @@
 import { state, makeDomId } from './state.js';
 import { closeTodoDialog, isTodoDialogOpen } from './todoDialog.js';
 import { createSubtasksSection, createSubtasksToggle, getSubtasks, setSubtasks, makeSubtaskId, renderList } from '../subtasks.js';
+import { showConfirmDialog } from './confirmDialog.js';
 
 export function initRender({ editors, deleteTask, renderTodoList }) {
     const notifyActiveChange = () => {
@@ -117,9 +118,13 @@ export function initRender({ editors, deleteTask, renderTodoList }) {
       <path d="M6 7h12l-1 13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7zm3-3h6l1 2H8l1-2zm1 6v8m4-8v8"
             fill="none" stroke="#2b2213" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-        del.addEventListener('click', (ev) => {
+        del.addEventListener('click', async (ev) => {
             ev.stopPropagation();
-            if (confirm(`Delete "${task.name}"?`)) deleteTask(task.id);
+            const ok = await showConfirmDialog({
+                title: 'Delete task?',
+                message: `"${task.name}" will be permanently removed.`,
+            });
+            if (ok) deleteTask(task.id);
         });
 
         right.append(bubble, del);

@@ -85,3 +85,5 @@
 {"sessionId":"3a8ea7","timestamp":1776624053299,"hypothesisId":"H-callback","location":"spotify.js:/callback","message":"callback_entry","data":{"hasPending":true,"hasReturnTo":true,"hasSpotifyError":false,"hasCode":true,"pendingExpired":false}}
 {"sessionId":"3a8ea7","timestamp":1776624053532,"hypothesisId":"H-save","location":"spotify.js:/callback","message":"spotify_tokens_saved","data":{"hasRefresh":true}}
 {"sessionId":"3a8ea7","timestamp":1776829634546,"hypothesisId":"H-boot","message":"spotify_routes_loaded","data":{"dbgRel":"spotify-debug-3a8ea7.ndjson"}}
+{"sessionId":"3a8ea7","timestamp":1776829989638,"hypothesisId":"H-boot","message":"spotify_routes_loaded","data":{"dbgRel":"spotify-debug-3a8ea7.ndjson"}}
+{"sessionId":"3a8ea7","timestamp":1776830043858,"hypothesisId":"H-login-req","location":"spotify.js:/login","message":"login_request","data":{"hasBuddyToken":true,"hasReturnTo":false,"envSpotifyOk":true}}

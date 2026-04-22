@@ -130,11 +130,6 @@ export async function initTasks(opts = {}) {
     document.querySelectorAll('.tasks-panel .task-add')
         .forEach(btn => btn.addEventListener('click', onAddTaskClick));
 
-    document.querySelectorAll('.tasks-panel').forEach(panel => {
-        wireHeaderRename(panel);
-        wireHeaderDelete({ panel, updateActiveTaskVisuals: render.updateActiveTaskVisuals, notifyActiveChange: render.notifyActiveChange });
-    });
-
     setupTodoDialog({
         createPanelWithTitle: (args) => createPanelWithTitle({
             ...args,

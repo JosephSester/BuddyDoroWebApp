@@ -9,6 +9,7 @@ import { deleteTaskPanel, deleteTaskSessions } from './storage.js';
 import { deleteTaskSubtasks } from '../subtasks.js';
 import { createPanel as apiCreatePanel, updatePanel as apiUpdatePanel, deletePanel as apiDeletePanel } from '../../api/panelService.js';
 import { deleteTask as apiDeleteTask } from '../../api/taskService.js';
+import { showConfirmDialog } from './confirmDialog.js';
 
 export function getPanelStack() {
     const stack = document.querySelector('#tasksStack');
@@ -145,7 +146,10 @@ export function wireHeaderDelete({ panel, onActiveCleared, updateActiveTaskVisua
         const titleEl = panel.querySelector('.tasks-title');
         const name = (titleEl?.textContent || 'this goal').trim() || 'this goal';
 
-        const ok = confirm(`Are you sure you want to delete "${name}"?`);
+        const ok = await showConfirmDialog({
+            title: 'Delete goal?',
+            message: `"${name}" and all its tasks will be permanently removed.`,
+        });
         if (!ok) return;
 
         const panelId = panel.id || panel.querySelector('.tasks-list')?.dataset.panelId;
@@ -261,7 +265,6 @@ export async function createPanelWithTitle({ title = 'Goal', onAddTaskClick = ()
         onAddTaskClick,
         updateActiveTaskVisuals,
         notifyActiveChange,
-        addTask,
     });
     if (!clone) throw new Error('Unable to create goal panel.');
     console.log(`[Tasks] Created new panel with ID: ${serverPanel.id}`);
@@ -277,9 +280,6 @@ export function mountTasksPanelAdder({ onAddTaskClick, updateActiveTaskVisuals, 
 
     ensureChipRowObserver();
     setupTodoDialog();
-
-    wireHeaderRename(template);
-    wireHeaderDelete({ panel: template, updateActiveTaskVisuals, notifyActiveChange });
 
     function rebindPanelEvents(panel) {
         wireHeaderRename(panel);

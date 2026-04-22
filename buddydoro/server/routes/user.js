@@ -7,6 +7,38 @@ const User = require('../models/User');
 const STATUS_KEYS = ['health', 'happiness', 'thirst', 'hunger'];
 const clampStatus = (n) => Math.max(0, Math.min(14, Number(n) || 0));
 
+function normalizePreferenceValue(value) {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function serializeUserPreferences(user) {
+  return {
+    skinOpen: user?.preferences?.skinOpen || null,
+    skinClosed: user?.preferences?.skinClosed || null,
+    background: user?.preferences?.background || null,
+  };
+}
+
+function applyPreferenceUpdates(user, input = {}) {
+  if (!user.preferences) user.preferences = {};
+
+  const nextSkinOpen = input.skinOpen !== undefined
+    ? normalizePreferenceValue(input.skinOpen)
+    : undefined;
+  const nextSkinClosed = input.skinClosed !== undefined
+    ? normalizePreferenceValue(input.skinClosed)
+    : undefined;
+  const nextBackground = input.background !== undefined
+    ? normalizePreferenceValue(input.background)
+    : undefined;
+
+  if (nextSkinOpen !== undefined) user.preferences.skinOpen = nextSkinOpen;
+  if (nextSkinClosed !== undefined) user.preferences.skinClosed = nextSkinClosed;
+  if (nextBackground !== undefined) user.preferences.background = nextBackground;
+}
+
 router.patch('/doros', authMiddleware, async (req, res) => {
   try {
     const { delta } = req.body;
@@ -104,12 +136,42 @@ router.patch('/onboarding', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    applyPreferenceUpdates(user, req.body || {});
     user.hasSeenOnboarding = true;
     await user.save();
-    res.json({ hasSeenOnboarding: user.hasSeenOnboarding });
+    res.json({
+      hasSeenOnboarding: user.hasSeenOnboarding,
+      preferences: serializeUserPreferences(user),
+    });
   } catch (err) {
     console.error('PATCH /user/onboarding error:', err);
     res.status(500).json({ error: 'Failed to update onboarding status' });
+  }
+});
+
+router.patch('/preferences', authMiddleware, async (req, res) => {
+  try {
+    const { skinOpen, skinClosed, background } = req.body || {};
+    const hasAnyField =
+      skinOpen !== undefined ||
+      skinClosed !== undefined ||
+      background !== undefined;
+
+    if (!hasAnyField) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
+
+    const user = await User.findById(req.user.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    applyPreferenceUpdates(user, { skinOpen, skinClosed, background });
+    await user.save();
+
+    res.json({ preferences: serializeUserPreferences(user) });
+  } catch (err) {
+    console.error('PATCH /user/preferences error:', err);
+    res.status(500).json({ error: 'Failed to update preferences' });
   }
 });
 

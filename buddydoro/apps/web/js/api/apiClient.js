@@ -105,6 +105,31 @@ export async function apiPut(endpoint, data) {
 }
 
 /**
+ * PATCH request (partial update)
+ */
+export async function apiPatch(endpoint, data) {
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            body: JSON.stringify(data)
+        });
+        if (response.status === 401 || response.status === 403) { handleUnauthorized(); return; }
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || `API error: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(`PATCH ${endpoint} failed:`, error);
+        throw error;
+    }
+}
+
+/**
  * DELETE request
  */
 export async function apiDelete(endpoint) {

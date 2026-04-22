@@ -12,27 +12,13 @@
 .dragon {
   left: 50%;
   transform: translateX(-50%);
-  bottom: 16vh; /* default: Forest (background-position: center bottom) */
+  bottom: var(--dragon-bottom, 16vh); /* background-specific anchor, defaults to Forest */
 
   /* Scale with viewport, but cap min/max so it looks good on all screens */
   width: clamp(320px, 32vw, 820px);
 
   filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.35));
   z-index: 1;
-}
-
-/* ---- Per-background vertical position ----
-   Store backgrounds use background-position: center center, which places
-   platforms higher in the viewport than the default Forest (center bottom).
-   [data-bg] is set on #scene by store.js whenever a store background is active. */
-
-#scene[data-bg] .dragon {
-  bottom: 13vh; /* sits character ~25px into the platform surface (centered) */
-}
-
-/* Floating Island has a much higher platform — needs extra lift */
-#scene[data-bg="Floating Island"] .dragon {
-  bottom: 27vh;
 }
 
 .dragon-img {
@@ -89,7 +75,7 @@
 /* ---------- companion dead button ---------- */
 .companion-dead-btn {
   position: absolute;
-  bottom: 13vh;
+  bottom: var(--companion-dead-bottom, 13vh);
   left: 52%;
   transform: translateX(-50%);
   z-index: 5;
@@ -126,7 +112,7 @@
   font-family: inherit;
   font-size: clamp(16px, 2vw, 22px);
   font-weight: 800;
-  color: #2b2213;
+  color: #ffffff;
   text-align: center;
   line-height: 1.3;
   letter-spacing: -0.01em;
@@ -143,7 +129,7 @@
   justify-content: center;
   font-size: 32px;
   font-weight: 900;
-  color: #2b2213;
+  color: #ffffff;
   line-height: 1;
 }
 

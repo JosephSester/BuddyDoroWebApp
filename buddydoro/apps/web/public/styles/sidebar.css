@@ -1,15 +1,15 @@
 /* ===== Sidebar Navigation — Alt_implementation design system ===== */
 
 /* Design tokens (mirrors Alt branch tokens.css)
-   --color-terracotta:   #c0622a
-   --color-ochre:        #c98a2e
-   --color-cream:        #faf4e8
-   --color-brown-dark:   #2b2213
-   --color-brown-medium: #5c4033
-   --color-brown-light:  #8c6b55
-   --glass-bg:           rgba(250, 244, 232, 0.72)
-   --glass-border:       rgba(232, 180, 120, 0.40)
-   --glass-blur:         blur(14px) saturate(160%)
+   --color-terracotta:   #7c5cbf
+   --color-ochre:        #a78fe0
+   --color-cream:        #1a2d5a
+   --color-brown-dark:   #e8d5f5
+   --color-brown-medium: #9db0cc
+   --color-brown-light:  #9db0cc
+   --glass-bg:           rgba(26, 54, 110, 0.72)
+   --glass-border:       rgba(124, 92, 191, 0.40)
+   --glass-blur:         blur(16px) saturate(140%)
 */
 
 #sidebar {
@@ -25,20 +25,20 @@
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
 
   /* Glassmorphism — scene shows through */
-  background: rgba(250, 244, 232, 0.82);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  background: rgba(26, 54, 110, 0.52);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
 
-  border-right: 1px solid rgba(232, 180, 120, 0.40);
+  border-right: 1px solid rgba(124, 92, 191, 0.40);
   box-shadow:
-    6px 0 32px rgba(43, 34, 19, 0.22),
-    2px 0 12px rgba(192, 98, 42, 0.12);
+    6px 0 32px rgba(26, 54, 110, 0.22),
+    2px 0 12px rgba(120, 140, 200, 0.15);
 
   transform: translateX(-100%);
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   scrollbar-width: thin;
-  scrollbar-color: rgba(192, 98, 42, 0.35) transparent;
+  scrollbar-color: rgba(124, 92, 191, 0.35) transparent;
 }
 
 #sidebar.is-open {
@@ -56,8 +56,8 @@
   gap: 10px;
   align-items: center;
 
-  background: rgba(250, 244, 232, 0.45);
-  border-bottom: 1px solid rgba(192, 98, 42, 0.18);
+  background: transparent;
+  border-bottom: 1px solid rgba(120, 140, 200, 0.20);
 }
 
 .sidebar-close-btn {
@@ -65,8 +65,8 @@
   height: 30px;
   border-radius: 50%;
   border: none;
-  background: rgba(192, 98, 42, 0.10);
-  color: #5c4033;
+  background: rgba(124, 92, 191, 0.10);
+  color: #9db0cc;
   font-size: 16px;
   line-height: 1;
   cursor: pointer;
@@ -77,22 +77,22 @@
   flex-shrink: 0;
 }
 
-.sidebar-close-btn:hover  { background: rgba(192, 98, 42, 0.18); }
-.sidebar-close-btn:active { background: rgba(192, 98, 42, 0.28); }
+.sidebar-close-btn:hover  { background: rgba(120, 140, 200, 0.20); }
+.sidebar-close-btn:active { background: rgba(120, 140, 200, 0.28); }
 
 /* Avatar */
 .sidebar-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #e8b557, #c0622a);
-  border: 2px solid rgba(192, 98, 42, 0.30);
+  background: linear-gradient(135deg, #e8b557, #7c5cbf);
+  border: 2px solid rgba(124, 92, 191, 0.30);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   flex-shrink: 0;
-  box-shadow: 0 2px 10px rgba(192, 98, 42, 0.25);
+  box-shadow: 0 2px 10px rgba(120, 140, 200, 0.28);
 }
 
 .sidebar-avatar svg { width: 18px; height: 18px; }
@@ -115,7 +115,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #c0622a;
+  color: #7c5cbf;
   opacity: 0.75;
 }
 
@@ -128,14 +128,14 @@
 .sidebar-greeting {
   font-size: 17px;
   font-weight: 800;
-  color: #2b2213;
+  color: #ffffff;
   letter-spacing: -0.01em;
 }
 
 .sidebar-username {
   font-size: 17px;
   font-weight: 800;
-  color: #2b2213;
+  color: #ffffff;
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
@@ -154,14 +154,14 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: #8c6b55;
+  color: #9db0cc;
   cursor: pointer;
   text-decoration: none;
   transition: color 0.14s;
 }
 
 .sidebar-user-action-btn:hover {
-  color: #2b2213;
+  color: #ffffff;
 }
 
 .sidebar-currencies {
@@ -175,17 +175,17 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  background: rgba(250, 244, 232, 0.55);
+  background: rgba(26, 54, 110, 0.55);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1.5px solid rgba(232, 180, 120, 0.40);
+  border: 1.5px solid rgba(124, 92, 191, 0.40);
   border-radius: 999px;
   padding: 4px 11px 4px 8px;
   font-size: 12px;
   font-weight: 700;
-  color: #2b2213;
+  color: #ffffff;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(43, 34, 19, 0.08);
+  box-shadow: 0 2px 8px rgba(26, 54, 110, 0.08);
 }
 
 .sidebar-currency-pill img {
@@ -197,7 +197,7 @@
 /* ---- Sections ---- */
 .sidebar-section {
   padding: 14px 12px 10px;
-  border-bottom: 1px solid rgba(192, 98, 42, 0.10);
+  border-bottom: 1px solid rgba(124, 92, 191, 0.10);
 }
 
 .sidebar-section:last-child { border-bottom: none; }
@@ -207,7 +207,7 @@
   font-weight: 700;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: #8c6b55;
+  color: #9db0cc;
   padding: 0 10px 8px;
 }
 
@@ -221,7 +221,7 @@
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: #2b2213;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -231,23 +231,23 @@
 }
 
 .sidebar-nav-btn:hover {
-  background: rgba(192, 98, 42, 0.08);
-  color: #2b2213;
+  background: rgba(124, 92, 191, 0.08);
+  color: #ffffff;
 }
 
 .sidebar-nav-btn:active {
-  background: rgba(192, 98, 42, 0.14);
+  background: rgba(124, 92, 191, 0.14);
 }
 
 .sidebar-nav-btn:focus-visible {
-  outline: 2px solid rgba(192, 98, 42, 0.40);
+  outline: 2px solid rgba(124, 92, 191, 0.40);
   outline-offset: -2px;
 }
 
 .sidebar-nav-btn .nav-icon {
   width: 20px;
   height: 20px;
-  color: #c0622a;
+  color: #7c5cbf;
   opacity: 0.80;
   flex-shrink: 0;
 }
@@ -297,7 +297,7 @@
   font-weight: 700;
   letter-spacing: 0.10em;
   text-transform: uppercase;
-  color: #8c6b55;
+  color: #9db0cc;
 }
 
 .sidebar-add-goal-btn {
@@ -305,21 +305,21 @@
   align-items: center;
   gap: 5px;
   padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(232, 180, 120, 0.40);
+  background: rgba(120, 150, 220, 0.12);
+  border: 1px solid rgba(124, 92, 191, 0.40);
   border-radius: 999px;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
   font-size: 11px;
   font-weight: 700;
-  color: #5c4033;
+  color: #9db0cc;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .sidebar-add-goal-btn:hover {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(192, 98, 42, 0.35);
-  color: #2b2213;
+  background: rgba(120, 150, 220, 0.22);
+  border-color: rgba(124, 92, 191, 0.35);
+  color: #ffffff;
 }
 
 .sidebar-goals-container {
@@ -340,19 +340,19 @@
 
 /* Goal panel — glass accordion card */
 #sidebar .tasks-panel {
-  background: rgba(250, 244, 232, 0.60) !important;
+  background: rgba(26, 54, 110, 0.60) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(232, 180, 120, 0.40) !important;
+  border: 1px solid rgba(124, 92, 191, 0.40) !important;
   border-radius: 14px !important;
-  box-shadow: 0 2px 8px rgba(43, 34, 19, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(26, 54, 110, 0.08) !important;
   padding: 0 !important;
   overflow: hidden !important;
   transition: box-shadow 0.15s !important;
 }
 
 #sidebar .tasks-panel:hover {
-  box-shadow: 0 4px 14px rgba(43, 34, 19, 0.12) !important;
+  box-shadow: 0 4px 14px rgba(26, 54, 110, 0.12) !important;
 }
 
 /* Goal header — clickable accordion trigger */
@@ -370,7 +370,7 @@
 }
 
 #sidebar .tasks-header:hover {
-  background: rgba(255, 255, 255, 0.35) !important;
+  background: rgba(120, 150, 220, 0.10) !important;
 }
 
 /* CSS chevron — rotates when expanded */
@@ -379,8 +379,8 @@
   display: inline-block !important;
   width: 7px !important;
   height: 7px !important;
-  border-right: 2px solid #8c6b55 !important;
-  border-bottom: 2px solid #8c6b55 !important;
+  border-right: 2px solid #9db0cc !important;
+  border-bottom: 2px solid #9db0cc !important;
   border-radius: 1px !important;
   transform: rotate(45deg) !important;
   flex-shrink: 0 !important;
@@ -397,7 +397,7 @@
 #sidebar .tasks-title {
   font-size: 13.5px !important;
   font-weight: 700 !important;
-  color: #2b2213 !important;
+  color: #ffffff !important;
   letter-spacing: -0.01em !important;
   display: block !important;
   flex: 1 !important;
@@ -430,14 +430,14 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  color: #8c6b55 !important;
+  color: #9db0cc !important;
   padding: 0 !important;
   transition: background 0.12s, color 0.12s !important;
 }
 
 #sidebar .task-title-edit:hover {
-  background: rgba(192, 98, 42, 0.10) !important;
-  color: #5c4033 !important;
+  background: rgba(124, 92, 191, 0.10) !important;
+  color: #9db0cc !important;
 }
 
 #sidebar .task-title-delete:hover {
@@ -473,7 +473,7 @@
   flex-direction: column !important;
   align-items: stretch !important;
   position: relative !important;
-  background: rgba(255, 255, 255, 0.35) !important;
+  background: rgba(120, 150, 220, 0.10) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: 1px solid transparent !important;
@@ -487,9 +487,9 @@
 
 #sidebar .task-card.is-hover,
 #sidebar .task-card:hover {
-  background: rgba(255, 255, 255, 0.50) !important;
-  border-color: rgba(110, 140, 112, 0.45) !important;
-  box-shadow: 0 0 0 1.5px rgba(110, 140, 112, 0.30) !important;
+  background: rgba(120, 150, 220, 0.18) !important;
+  border-color: rgba(62, 207, 178, 0.45) !important;
+  box-shadow: 0 0 0 1.5px rgba(62, 207, 178, 0.30) !important;
   transform: none !important;
 }
 
@@ -499,9 +499,9 @@
 }
 
 #sidebar .task-card.is-active {
-  background: rgba(255, 255, 255, 0.65) !important;
-  border-color: #6e8c70 !important;
-  box-shadow: 0 0 0 2px #6e8c70, 0 4px 12px rgba(110, 140, 112, 0.18) !important;
+  background: rgba(26, 54, 110, 0.70) !important;
+  border-color: #3ecfb2 !important;
+  box-shadow: 0 0 0 2px #3ecfb2, 0 4px 12px rgba(62, 207, 178, 0.18) !important;
 }
 
 /* Task name row */
@@ -524,7 +524,7 @@
   min-width: 0 !important;
   font-size: 13px !important;
   font-weight: 500 !important;
-  color: #2b2213 !important;
+  color: #ffffff !important;
   line-height: 1.4 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
@@ -533,11 +533,11 @@
 
 #sidebar .task-card.is-active .task-name {
   font-weight: 700 !important;
-  color: #6e8c70 !important;
+  color: #3ecfb2 !important;
 }
 
 #sidebar .task-card.is-active .subtasks-list {
-  border-left-color: #6e8c70 !important;
+  border-left-color: #3ecfb2 !important;
 }
 
 /* Delete button — absolute top-right, appears on hover */
@@ -567,7 +567,7 @@
   justify-content: center !important;
   font-size: 15px !important;
   font-weight: 600 !important;
-  color: #8c6b55 !important;
+  color: #9db0cc !important;
   opacity: 0 !important;
   padding: 0 !important;
   flex-shrink: 0 !important;
@@ -582,8 +582,8 @@
 
 #sidebar .subtask-toggle:hover {
   opacity: 1 !important;
-  background: rgba(192, 98, 42, 0.10) !important;
-  color: #5c4033 !important;
+  background: rgba(124, 92, 191, 0.10) !important;
+  color: #9db0cc !important;
 }
 
 #sidebar .task-del {
@@ -631,7 +631,7 @@
   flex-direction: column !important;
   gap: 2px !important;
   padding: 4px 0 0 10px !important;
-  border-left: 2px solid rgba(192, 98, 42, 0.18) !important;
+  border-left: 2px solid rgba(120, 140, 200, 0.20) !important;
   margin-top: 4px !important;
   width: auto !important;
 }
@@ -654,7 +654,7 @@
 }
 
 #sidebar .subtask-row:hover {
-  background: rgba(192, 98, 42, 0.05) !important;
+  background: rgba(124, 92, 191, 0.05) !important;
 }
 
 #sidebar .subtask-left {
@@ -669,7 +669,7 @@
   width: 12px !important;
   height: 12px !important;
   flex-shrink: 0 !important;
-  accent-color: #6e8c70 !important;
+  accent-color: #3ecfb2 !important;
   cursor: pointer !important;
 }
 
@@ -679,7 +679,7 @@
   min-width: 0 !important;
   font-size: 12px !important;
   font-weight: 500 !important;
-  color: #5c4033 !important;
+  color: #9db0cc !important;
   text-align: left !important;
   white-space: nowrap !important;
   overflow: hidden !important;
@@ -732,8 +732,8 @@
   flex-direction: column !important;
   gap: 6px !important;
   padding: 6px 8px !important;
-  background: rgba(250, 244, 232, 0.80) !important;
-  border: 1px solid rgba(192, 98, 42, 0.25) !important;
+  background: rgba(26, 54, 110, 0.80) !important;
+  border: 1px solid rgba(120, 140, 200, 0.28) !important;
   border-radius: 8px !important;
   margin-bottom: 4px !important;
 }
@@ -749,16 +749,16 @@
   font-weight: 700 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.08em !important;
-  color: #8c6b55 !important;
+  color: #9db0cc !important;
 }
 
 #sidebar .task-create-input.task-create-name {
   font-size: 12px !important;
   padding: 5px 8px !important;
   border-radius: 6px !important;
-  border: 1px solid rgba(192, 98, 42, 0.28) !important;
-  background: rgba(255, 255, 255, 0.90) !important;
-  color: #2b2213 !important;
+  border: 1px solid rgba(120, 140, 200, 0.28) !important;
+  background: rgba(26, 54, 110, 0.90) !important;
+  color: #ffffff !important;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
   width: 100% !important;
 }
@@ -771,7 +771,7 @@
 #sidebar .task-create-save {
   flex: 1 !important;
   padding: 5px 8px !important;
-  background: linear-gradient(135deg, #c0622a, #b84f1e) !important;
+  background: linear-gradient(135deg, #7c5cbf, #b84f1e) !important;
   border: none !important;
   border-radius: 6px !important;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
@@ -789,19 +789,19 @@
 
 #sidebar .task-create-cancel {
   padding: 5px 8px !important;
-  background: rgba(255, 255, 255, 0.50) !important;
-  border: 1px solid rgba(192, 98, 42, 0.22) !important;
+  background: rgba(120, 150, 220, 0.12) !important;
+  border: 1px solid rgba(120, 140, 200, 0.28) !important;
   border-radius: 6px !important;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
   font-size: 11px !important;
   font-weight: 600 !important;
-  color: #5c4033 !important;
+  color: #9db0cc !important;
   cursor: pointer !important;
   transition: background 0.12s !important;
 }
 
 #sidebar .task-create-cancel:hover {
-  background: rgba(255, 255, 255, 0.75) !important;
+  background: rgba(120, 150, 220, 0.22) !important;
 }
 
 /* "Add task" — dashed button (Alt branch style) */
@@ -810,9 +810,9 @@
   align-items: center !important;
   justify-content: center !important;
   background: transparent !important;
-  border: 1.5px dashed rgba(192, 98, 42, 0.28) !important;
+  border: 1.5px dashed rgba(120, 140, 200, 0.28) !important;
   border-radius: 8px !important;
-  color: #8c6b55 !important;
+  color: #9db0cc !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   padding: 8px !important;
@@ -825,8 +825,8 @@
 }
 
 #sidebar .task-add:hover {
-  border-color: #c0622a !important;
-  color: #c0622a !important;
+  border-color: #7c5cbf !important;
+  color: #7c5cbf !important;
   background: transparent !important;
 }
 
@@ -843,8 +843,8 @@
   font-weight: 700 !important;
   border-radius: 6px !important;
   padding: 3px 8px !important;
-  background: rgba(250, 244, 232, 0.90) !important;
-  border: 1.5px solid rgba(192, 98, 42, 0.35) !important;
+  background: rgba(26, 54, 110, 0.90) !important;
+  border: 1.5px solid rgba(124, 92, 191, 0.35) !important;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
 }
 
@@ -858,19 +858,19 @@
   font-size: 13px !important;
   padding: 5px 8px !important;
   border-radius: 7px !important;
-  background: rgba(250, 244, 232, 0.90) !important;
+  background: rgba(26, 54, 110, 0.90) !important;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif !important;
 }
 
 /* ---- Session-completed task cards (green + checkmark) ---- */
 #sidebar .task-card.is-session-done {
-  border-color: rgba(110, 140, 112, 0.55) !important;
-  background: rgba(110, 140, 112, 0.08) !important;
-  box-shadow: 0 0 0 1.5px rgba(110, 140, 112, 0.25) !important;
+  border-color: rgba(62, 207, 178, 0.55) !important;
+  background: rgba(62, 207, 178, 0.08) !important;
+  box-shadow: 0 0 0 1.5px rgba(62, 207, 178, 0.25) !important;
 }
 
 #sidebar .task-card.is-session-done .task-name {
-  color: #6e8c70 !important;
+  color: #3ecfb2 !important;
   font-weight: 700 !important;
 }
 
@@ -879,7 +879,7 @@
   content: '✓' !important;
   display: inline-flex !important;
   align-items: center !important;
-  color: #6e8c70 !important;
+  color: #3ecfb2 !important;
   font-weight: 800 !important;
   font-size: 11px !important;
   flex-shrink: 0 !important;

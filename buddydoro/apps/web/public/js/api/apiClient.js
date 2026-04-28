@@ -6,8 +6,6 @@
 // Note: This runs IN THE BROWSER, not on the server
 // ============================================================
 
-// In production (Vercel), use relative /api so requests hit the serverless function.
-// In local dev, use the local Express server on port 3000.
 export const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3000/api'
     : '/api';
@@ -88,6 +86,31 @@ export async function apiPut(endpoint, data) {
         return await response.json();
     } catch (error) {
         console.error(`PUT ${endpoint} failed:`, error);
+        throw error;
+    }
+}
+
+/**
+ * PATCH request (partial update)
+ */
+export async function apiPatch(endpoint, data) {
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${getAuthToken()}`
+            },
+            body: JSON.stringify(data)
+        });
+        if (response.status === 401 || response.status === 403) { handleUnauthorized(); return; }
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || `API error: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(`PATCH ${endpoint} failed:`, error);
         throw error;
     }
 }

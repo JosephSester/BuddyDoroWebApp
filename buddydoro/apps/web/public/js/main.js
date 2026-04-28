@@ -1,6 +1,6 @@
 // apps/web/js/main.js
 
-import { initScene, setBackground } from './features/scene.js';
+import { initScene } from './features/scene.js';
 import { initDragon } from './features/dragon.js';
 import { initTopbar } from './features/topbar.js';
 import { initTimer } from './features/timerFeature/index.js';
@@ -17,34 +17,68 @@ import { API_BASE } from './api/apiClient.js';
 import { saveSession } from './features/historyStorage.js';
 import { initAppTour } from './features/appTour.js';
 import { initSession, applySessionDoneVisuals } from './features/session.js';
+import {
+  getStoredPreferences,
+  hydratePreferencesFromUser,
+  saveUserPreferences,
+} from './utils/preferences.js';
 
 // ---- Auth guard -------------------------------------------------
 const authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
 if (!authToken) {
-  window.location.href = 'login.html';
+  window.location.replace('login.html');
   throw new Error('Not authenticated');
 }
 
 // ---- Onboarding guard -------------------------------------------
 if (localStorage.getItem('hasSeenOnboarding') !== 'true') {
-  window.location.href = 'onboarding.html';
+  window.location.replace('onboarding.html');
   throw new Error('Onboarding not complete');
+}
+
+async function fetchCurrentUser() {
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    headers: { Authorization: 'Bearer ' + authToken },
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('hasSeenOnboarding');
+    window.location.replace('login.html');
+    throw new Error('Unauthorized');
+  }
+  if (!res.ok) throw new Error(`Auth lookup failed: ${res.status}`);
+
+  return res.json();
+}
+
+let currentUser = null;
+try {
+  currentUser = await fetchCurrentUser();
+} catch (err) {
+  console.error('User fetch failed:', err);
+}
+
+if (currentUser?.name) {
+  localStorage.setItem('userName', currentUser.name);
+}
+
+const { shouldBackfill } = hydratePreferencesFromUser(currentUser || {});
+const bootPreferences = getStoredPreferences();
+
+if (shouldBackfill) {
+  saveUserPreferences(bootPreferences).catch(err => {
+    console.warn('Preference backfill failed:', err);
+  });
 }
 
 // UI features
 
 // ----- 1) Background & dragon -------------------------------------------------
-// ---- Scene ------------------------------------------------------
 initScene({
-  background: 'BackgroundDay.jpg',
-  preloadExtra: ['Dragon.png'],
+  background: bootPreferences.background,
+  preloadExtra: [bootPreferences.skinOpen],
 });
-
-// Seed the default background so the store shows it as equipped on first visit.
-// backgroundnight.js owns the actual display — it reads this key and applies day/night.
-if (!localStorage.getItem('buddydoro.background')) {
-  localStorage.setItem('buddydoro.background', 'Backgrounds/BackgroundDay.jpg');
-}
 
 initDragon?.();
 
@@ -94,28 +128,9 @@ const manualPomodoro = initManualPomodoroLogic({
   timer,
 });
 
-
 // ---- Topbar + EarnDoros -----------------------------------------------------
-async function initUserTopbarAndEarnDoros() {
+function initUserTopbarAndEarnDoros(user) {
   try {
-    const res = await fetch(`${API_BASE}/auth/me`, {
-      headers: { Authorization: 'Bearer ' + authToken },
-    });
-
-    if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('hasSeenOnboarding');
-      window.location.href = 'login.html';
-      throw new Error('Unauthorized');
-    }
-    if (!res.ok) throw new Error(`Auth lookup failed: ${res.status}`);
-
-    const user = await res.json();
-
-    if (user?.name) {
-      localStorage.setItem('userName', user.name);
-    }
-
     // Apply saved timer settings
     if (user?.settings) {
       const { focusMinutes, breakMinutes } = user.settings;
@@ -162,7 +177,7 @@ async function initUserTopbarAndEarnDoros() {
 
     return { topbar, earnDoros };
   } catch (err) {
-    console.error('User fetch failed:', err);
+    console.error('Topbar init failed:', err);
 
     const topbar = initTopbar({ userName: 'Player', startingDoros: 0 });
     const earnDoros = initEarnDoros(timer, topbar);
@@ -172,7 +187,7 @@ async function initUserTopbarAndEarnDoros() {
   }
 }
 
-const { topbar, earnDoros } = await initUserTopbarAndEarnDoros();
+const { topbar, earnDoros } = initUserTopbarAndEarnDoros(currentUser);
 
 // Dedicated inventory modal (separate from store purchase flow).
 initInventory();
@@ -183,9 +198,7 @@ initMusic({ timer });
 // ----- Diamond Store ----------------------------------------------------------
 initDiamondStore();
 
-
 // ----- 5) Tasks ---------------------------------------------------------------
-// ---- Tasks ------------------------------------------------------
 await initTasks({
   onActiveTaskChange: async () => {
     const task = getActiveTask();
@@ -211,8 +224,5 @@ initCompanionThoughts({
   getActiveTask: () => getActiveTask()
 });
 
-// ---- AI Plan ----------------------------------------------------
-
 // ---- First-visit app tour ---------------------------------------
 initAppTour();
-

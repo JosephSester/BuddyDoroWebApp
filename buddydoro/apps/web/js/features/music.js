@@ -1,4 +1,9 @@
-import { AMBIENT_AUDIO, AMBIENT_MODES, BUDDYDORO_TRACKS } from './musicCatalog.js';
+import {
+  AMBIENT_AUDIO,
+  AMBIENT_MODES,
+  BUDDYDORO_TRACKS,
+  RAIN_SCENE_AUDIO,
+} from './musicCatalog.js';
 import { showNotification } from '../utils/notifications.js';
 import { API_BASE } from '../api/apiClient.js';
 
@@ -11,6 +16,8 @@ export function initMusic(options = {}) {
   const panel = document.getElementById('musicMiniPanel');
   const enableToggle = document.getElementById('musicEnabledToggle');
   const enableToggleText = panel.querySelector('.music-toggle-text');
+  const trackListLabelEl = document.getElementById('musicTrackListLabel');
+  const ambientSectionEl = document.getElementById('musicAmbientSection');
   const prevBtn = document.getElementById('musicPrevBtn');
   const playPauseBtn = document.getElementById('musicPlayPauseBtn');
   const nextBtn = document.getElementById('musicNextBtn');
@@ -26,14 +33,31 @@ export function initMusic(options = {}) {
   const sourceDefault = document.getElementById('musicSourceDefault');
   const sourceSpotify = document.getElementById('musicSourceSpotify');
   const ambientRoot = document.getElementById('musicAmbientList');
+  const volumeSettingsBtn = document.getElementById('musicVolumeSettingsBtn');
+  const volumePanel = document.getElementById('musicVolumePanel');
+  const volumePanelClose = document.getElementById('musicVolumePanelClose');
+  const musicVolSlider = document.getElementById('musicVolumeSlider');
+  const ambientVolSlider = document.getElementById('musicAmbientVolumeSlider');
+  const musicVolValueEl = document.getElementById('musicVolumeValue');
+  const ambientVolValueEl = document.getElementById('musicAmbientVolumeValue');
 
   if (
     !chip || !panel || !enableToggle || !prevBtn || !playPauseBtn || !nextBtn
     || !playerTitleEl || !playerSubtitleEl || !progressSectionEl || !progressTrackEl
     || !progressFillEl || !timeElapsedEl || !timeDurationEl
     || !tracksRoot || !sourceDefault || !sourceSpotify || !ambientRoot
+    || !volumeSettingsBtn || !volumePanel || !volumePanelClose
+    || !musicVolSlider || !ambientVolSlider || !musicVolValueEl || !ambientVolValueEl
   ) {
     return;
+  }
+
+  let volumePanelOpen = false;
+
+  function clamp01(n) {
+    const x = Number(n);
+    if (!Number.isFinite(x)) return 0;
+    return Math.max(0, Math.min(1, x));
   }
 
   function formatTime(seconds) {
@@ -57,12 +81,20 @@ export function initMusic(options = {}) {
   // Primary music track audio instance (default source).
   const trackAudio = new Audio();
   trackAudio.loop = false;
-  trackAudio.volume = 0.6;
 
-  // Separate ambient layer so nature sounds can run independently from tracks.
+  // Nature ambience (Forest / River / Cricket) — one at a time, independent from focus tracks.
   const ambientAudio = new Audio();
   ambientAudio.loop = true;
-  ambientAudio.volume = 0.45;
+
+  // Extra rain SFX when the scene overlay is active and the user did not pick Rain ambient (avoids doubling).
+  const rainAudio = new Audio();
+  rainAudio.loop = true;
+
+  /** Relative loudness of scene rain vs nature ambient at the same “Ambient” slider level (legacy mix). */
+  const SCENE_RAIN_GAIN = 0.32 / 0.45;
+
+  /** Driven by rain.js (CustomEvent); not persisted. */
+  let sceneRainActive = false;
 
   // Unified playlist: tracks first, then ambient modes.
   const UNIFIED_PLAYLIST = [
@@ -75,12 +107,27 @@ export function initMusic(options = {}) {
     enabled: true,
     source: 'default',       // 'default' | 'spotify'
     currentTrackIndex: 0,
-    unifiedIndex: 0,         // position in UNIFIED_PLAYLIST
+    unifiedIndex: 0,         // focus track index in UNIFIED_PLAYLIST (ambient is separate; never an ambient slot for UI)
     isPlaying: false,
     ambientMode: null,
     spotifyConnected: false,
     panelOpen: false,
+    /** 0–1: BuddyDoro focus tracks + Spotify Web Playback */
+    musicVolume: 0.6,
+    /** 0–1: nature ambient + (scaled) scene rain layer */
+    ambientVolume: 0.45,
   };
+
+  function applyAudioVolumes() {
+    state.musicVolume = clamp01(state.musicVolume);
+    state.ambientVolume = clamp01(state.ambientVolume);
+    trackAudio.volume = state.musicVolume;
+    ambientAudio.volume = state.ambientVolume;
+    rainAudio.volume = Math.min(1, state.ambientVolume * SCENE_RAIN_GAIN);
+    if (spotifyPlayer && typeof spotifyPlayer.setVolume === 'function') {
+      spotifyPlayer.setVolume(state.musicVolume).catch(() => {});
+    }
+  }
 
   // Spotify Web Playback SDK references (populated after successful connect).
   let spotifyPlayer = null;   // Spotify.Player instance
@@ -89,21 +136,6 @@ export function initMusic(options = {}) {
 
   /** Prevents renderSpotifyPlaylists() from re-fetching on every render(); reset on disconnect / OAuth. */
   let _playlistsRendered = false;
-
-  // Day/night detection used by forest ambience to pick correct variant.
-  function isNightNow() {
-    const scene = document.getElementById('scene');
-    const body = document.body;
-
-    const hasNightClass =
-      body.classList.contains('is-night') ||
-      body.classList.contains('night') ||
-      (scene && (scene.classList.contains('is-night') || scene.classList.contains('night')));
-    if (hasNightClass) return true;
-
-    const h = new Date().getHours();
-    return h >= 19 || h < 6;
-  }
 
   function saveState() {
     const persistable = {
@@ -114,6 +146,8 @@ export function initMusic(options = {}) {
       isPlaying: state.isPlaying,
       ambientMode: state.ambientMode,
       spotifyConnected: state.spotifyConnected,
+      musicVolume: state.musicVolume,
+      ambientVolume: state.ambientVolume,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(persistable));
   }
@@ -130,13 +164,15 @@ export function initMusic(options = {}) {
       state.isPlaying = Boolean(parsed.isPlaying);
       state.ambientMode = AMBIENT_AUDIO[parsed.ambientMode] ? parsed.ambientMode : null;
       state.spotifyConnected = Boolean(parsed.spotifyConnected);
-      // Restore unifiedIndex, deriving it from track/ambient state if not saved
+      if (Number.isFinite(parsed.musicVolume)) state.musicVolume = clamp01(parsed.musicVolume);
+      if (Number.isFinite(parsed.ambientVolume)) state.ambientVolume = clamp01(parsed.ambientVolume);
+      // unifiedIndex always tracks the focus track slot (ambient never owns the now-playing row).
       if (Number.isInteger(parsed.unifiedIndex) && parsed.unifiedIndex >= 0 && parsed.unifiedIndex < UNIFIED_PLAYLIST.length) {
         state.unifiedIndex = parsed.unifiedIndex;
-      } else if (state.ambientMode) {
-        const aIdx = AMBIENT_MODES.findIndex(m => m.id === state.ambientMode);
-        state.unifiedIndex = aIdx >= 0 ? BUDDYDORO_TRACKS.length + aIdx : 0;
       } else {
+        state.unifiedIndex = state.currentTrackIndex;
+      }
+      if (UNIFIED_PLAYLIST[state.unifiedIndex]?.type === 'ambient') {
         state.unifiedIndex = state.currentTrackIndex;
       }
     } catch {
@@ -157,26 +193,6 @@ export function initMusic(options = {}) {
     trackAudio.src = track.src;
   }
 
-  // Play the item at the given position in UNIFIED_PLAYLIST.
-  async function playByUnifiedIndex(idx) {
-    const item = UNIFIED_PLAYLIST[idx];
-    if (!item) return;
-    state.unifiedIndex = idx;
-    if (item.type === 'track') {
-      ambientAudio.pause();
-      state.ambientMode = null;
-      state.currentTrackIndex = item.index;
-      setTrack(item.index);
-      state.isPlaying = true;
-      await playCurrentDefaultTrack();
-    } else {
-      trackAudio.pause();
-      state.ambientMode = item.id;
-      state.isPlaying = true;
-      await syncAmbientPlayback();
-    }
-  }
-
   // Browser-safe play wrapper (avoids uncaught autoplay errors).
   async function safePlay(audio) {
     try {
@@ -190,6 +206,7 @@ export function initMusic(options = {}) {
   function pauseAllAudio() {
     trackAudio.pause();
     ambientAudio.pause();
+    rainAudio.pause();
     state.isPlaying = false;
     if (spotifyPlayer) {
       spotifyPlayer.pause().catch(() => {});
@@ -201,14 +218,16 @@ export function initMusic(options = {}) {
     state.isPlaying = false;
   }
 
-  // Sync ambient loop to current mode + day/night variant.
-  // Respects master sound toggle: when off, ambience stays paused (src still updates if mode changes).
+  // Sync user-selected ambient (same asset day or night — never overridden by time or background).
   async function syncAmbientPlayback() {
     const mode = state.ambientMode;
     const config = AMBIENT_AUDIO[mode];
-    if (!config) return;
+    if (!config) {
+      ambientAudio.pause();
+      return;
+    }
 
-    const src = isNightNow() ? (config.night || config.day) : config.day;
+    const src = config.day || config.night;
     if (ambientAudio.src !== new URL(src, window.location.href).href) {
       ambientAudio.src = src;
     }
@@ -219,6 +238,25 @@ export function initMusic(options = {}) {
     }
 
     await safePlay(ambientAudio);
+  }
+
+  /** Extra rain layer when the canvas rain overlay runs; skipped if user already chose Rain ambient (one stream). */
+  async function syncRainFromScene() {
+    const src = RAIN_SCENE_AUDIO.src;
+    const href = new URL(src, window.location.href).href;
+    if (rainAudio.src !== href) rainAudio.src = src;
+
+    if (
+      !state.enabled
+      || state.source !== 'default'
+      || !sceneRainActive
+      || state.ambientMode === 'rain'
+    ) {
+      rainAudio.pause();
+      return;
+    }
+
+    await safePlay(rainAudio);
   }
 
   // Start or resume currently selected default track.
@@ -246,6 +284,8 @@ export function initMusic(options = {}) {
   async function applySourceBehavior() {
     if (state.source === 'spotify') {
       stopCurrentTrack();
+      ambientAudio.pause();
+      rainAudio.pause();
       // If Spotify is connected, make sure the SDK player is initialized.
       if (state.spotifyConnected && !spotifyPlayer) {
         await bootSpotifyPlayer();
@@ -255,6 +295,8 @@ export function initMusic(options = {}) {
       if (spotifyPlayer) {
         try { await spotifyPlayer.pause(); } catch { /* ignore */ }
       }
+      if (state.ambientMode) await syncAmbientPlayback();
+      await syncRainFromScene();
       if (state.enabled && state.isPlaying) {
         await playCurrentDefaultTrack();
       }
@@ -331,7 +373,7 @@ export function initMusic(options = {}) {
           cb('');
         }
       },
-      volume: 0.6,
+      volume: state.musicVolume,
     });
 
     // Fires when the SDK has registered this tab as a Spotify Connect device (device_id is stable for this session).
@@ -340,6 +382,7 @@ export function initMusic(options = {}) {
       spotifyDeviceId = device_id;
       void (async () => {
         await transferPlaybackHere();
+        applyAudioVolumes();
         showNotification('Spotify connected! Select a playlist or press Play.', 'success');
         render();
       })();
@@ -364,13 +407,15 @@ export function initMusic(options = {}) {
 
     spotifyPlayer.addListener('initialization_error', ({ message }) => {
       showNotification(`Spotify init error: ${message}`, 'error');
-      cleanupSpotifyPlayer();
+      cleanupSpotifyPlayer({ preserveAccountLink: true });
     });
 
     const connected = await spotifyPlayer.connect();
     if (!connected) {
       showNotification('Could not connect to Spotify. Try again.', 'error');
-      cleanupSpotifyPlayer();
+      cleanupSpotifyPlayer({ preserveAccountLink: true });
+    } else {
+      applyAudioVolumes();
     }
   }
 
@@ -408,8 +453,13 @@ export function initMusic(options = {}) {
     }
   }
 
-  /** Tear down the SDK player and reset Spotify-specific state. */
-  function cleanupSpotifyPlayer() {
+  /**
+   * Tear down the Web Playback SDK instance.
+   * @param {{ preserveAccountLink?: boolean }} [opts] — If true, keep `state.spotifyConnected` so
+   *   playlist API calls still work after a failed SDK connect (tokens remain on the server).
+   */
+  function cleanupSpotifyPlayer(opts = {}) {
+    const preserveAccountLink = Boolean(opts.preserveAccountLink);
     if (spotifyPlayer) {
       spotifyPlayer.disconnect();
       spotifyPlayer = null;
@@ -417,7 +467,9 @@ export function initMusic(options = {}) {
     spotifyDeviceId = null;
     spotifyToken = null;
     _playlistsRendered = false;
-    state.spotifyConnected = false;
+    if (!preserveAccountLink) {
+      state.spotifyConnected = false;
+    }
     render();
     saveState();
   }
@@ -430,7 +482,7 @@ export function initMusic(options = {}) {
   async function renderSpotifyPlaylists() {
     if (_playlistsRendered) return;
     _playlistsRendered = true;
-    tracksRoot.className = 'music-playlist-browse';
+    tracksRoot.className = 'music-track-list music-playlist-browse';
     tracksRoot.innerHTML = '<div class="music-empty">Loading playlists…</div>';
     try {
       const authToken = localStorage.getItem('authToken');
@@ -522,7 +574,7 @@ export function initMusic(options = {}) {
 
   // Compact track picker (horizontal) — main “now playing” is the player card above.
   function renderTrackList() {
-    tracksRoot.className = 'music-track-strip';
+    tracksRoot.className = 'music-track-list music-track-strip';
     tracksRoot.innerHTML = '';
     if (!BUDDYDORO_TRACKS.length) {
       tracksRoot.innerHTML = '<div class="music-empty">No default tracks yet.</div>';
@@ -538,14 +590,10 @@ export function initMusic(options = {}) {
       pill.textContent = track.title;
       pill.title = track.title;
       pill.addEventListener('click', () => {
-        // Select track — stop audio, do not auto-play (use play button)
-        trackAudio.pause();
-        ambientAudio.pause();
-        state.isPlaying = false;
-        state.ambientMode = null;
         state.currentTrackIndex = idx;
-        state.unifiedIndex = idx; // tracks are first in UNIFIED_PLAYLIST
+        state.unifiedIndex = idx;
         setTrack(idx);
+        if (state.isPlaying) void playCurrentDefaultTrack();
         render();
         saveState();
       });
@@ -554,33 +602,43 @@ export function initMusic(options = {}) {
     tracksRoot.appendChild(row);
   }
 
-  // Renders ambient mode controls as pills (matches track pills for unified list).
+  // Renders ambient mode controls as pills (explicit None = no ambient layer).
   function renderAmbientOptions() {
     ambientRoot.innerHTML = '';
-    ambientRoot.className = 'music-track-strip-tracks';
+    ambientRoot.className = 'music-ambient-list music-track-strip-tracks';
+
+    const noneBtn = document.createElement('button');
+    noneBtn.type = 'button';
+    noneBtn.className = `music-track-pill music-track-pill--none${state.ambientMode === null ? ' is-active' : ''}`;
+    noneBtn.textContent = 'None';
+    noneBtn.title = 'No ambient background';
+    noneBtn.setAttribute('aria-pressed', state.ambientMode === null ? 'true' : 'false');
+    noneBtn.addEventListener('click', () => {
+      ambientAudio.pause();
+      state.ambientMode = null;
+      state.unifiedIndex = state.currentTrackIndex;
+      void syncRainFromScene();
+      render();
+      saveState();
+    });
+    ambientRoot.appendChild(noneBtn);
+
     AMBIENT_MODES.forEach((mode) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = `music-track-pill${state.ambientMode === mode.id ? ' is-active' : ''}`;
       btn.textContent = mode.label;
       btn.title = mode.label;
-      btn.addEventListener('click', () => {
-        const ambientUnifiedIdx = BUDDYDORO_TRACKS.length + AMBIENT_MODES.findIndex(m => m.id === mode.id);
-        // Toggle off if already selected
-        if (state.ambientMode === mode.id) {
-          ambientAudio.pause();
-          state.ambientMode = null;
-          state.isPlaying = false;
-          render();
-          saveState();
-          return;
-        }
-        // Select ambient — stop all audio, do not auto-play (use play button)
-        trackAudio.pause();
-        ambientAudio.pause();
-        state.isPlaying = false;
+      btn.setAttribute('aria-pressed', state.ambientMode === mode.id ? 'true' : 'false');
+      btn.addEventListener('click', async () => {
         state.ambientMode = mode.id;
-        state.unifiedIndex = ambientUnifiedIdx;
+        state.unifiedIndex = state.currentTrackIndex;
+        if (!state.enabled) {
+          state.enabled = true;
+          enableToggle.checked = true;
+        }
+        await syncAmbientPlayback();
+        await syncRainFromScene();
         render();
         saveState();
       });
@@ -591,15 +649,38 @@ export function initMusic(options = {}) {
   // Single render pass keeps UI controls in sync with state.
   function render() {
     chip.setAttribute('aria-expanded', state.panelOpen ? 'true' : 'false');
+    chip.setAttribute('aria-label', state.panelOpen ? 'Close music panel' : 'Open music panel');
     panel.hidden = !state.panelOpen;
 
+    volumePanel.hidden = !volumePanelOpen;
+    volumeSettingsBtn.setAttribute('aria-expanded', volumePanelOpen ? 'true' : 'false');
+    const musicPct = Math.round(state.musicVolume * 100);
+    const ambientPct = Math.round(state.ambientVolume * 100);
+    musicVolSlider.value = String(musicPct);
+    ambientVolSlider.value = String(ambientPct);
+    musicVolValueEl.textContent = `${musicPct}%`;
+    ambientVolValueEl.textContent = `${ambientPct}%`;
+    musicVolSlider.setAttribute('aria-valuenow', String(musicPct));
+    ambientVolSlider.setAttribute('aria-valuenow', String(ambientPct));
+
     enableToggle.checked = state.enabled;
-    if (enableToggleText) enableToggleText.textContent = state.enabled ? 'Sound on' : 'Sound off';
+    if (enableToggleText) enableToggleText.textContent = state.enabled ? 'On' : 'Off';
     sourceDefault.checked = state.source === 'default';
     sourceSpotify.checked = state.source === 'spotify';
 
     const defaultActive = state.source === 'default';
     const spotifyReady = state.spotifyConnected && spotifyDeviceId;
+    const natureLive = defaultActive && Boolean(state.ambientMode && state.enabled && !ambientAudio.paused);
+    const rainLive = defaultActive && Boolean(
+      sceneRainActive && state.ambientMode !== 'rain' && state.enabled && !rainAudio.paused,
+    );
+    const ambientLive = natureLive || rainLive;
+    const ambientHintParts = [];
+    if (defaultActive && state.ambientMode) ambientHintParts.push('Ambient (None to stop)');
+    if (defaultActive && sceneRainActive && state.ambientMode !== 'rain') {
+      ambientHintParts.push('Scene rain layered on');
+    }
+    const ambientHint = ambientHintParts.length ? ` · ${ambientHintParts.join(' · ')}` : '';
 
     // MP3-style “now playing” title + subtitle
     if (state.source === 'spotify') {
@@ -612,48 +693,70 @@ export function initMusic(options = {}) {
         playerSubtitleEl.textContent = 'Not connected';
       }
     } else {
-      const currentItem = UNIFIED_PLAYLIST[state.unifiedIndex];
-      if (currentItem?.type === 'ambient') {
-        const mode = AMBIENT_MODES.find(m => m.id === currentItem.id);
+      const currentTrack = getCurrentTrack();
+      if (currentTrack) {
+        playerTitleEl.textContent = currentTrack.title;
+        const stateLabel = !state.enabled ? 'Music off' : state.isPlaying ? 'Playing' : 'Paused';
+        playerSubtitleEl.textContent = `BuddyDoro · ${stateLabel}${ambientHint}`;
+      } else if (state.ambientMode) {
+        const mode = AMBIENT_MODES.find(m => m.id === state.ambientMode);
         playerTitleEl.textContent = mode ? mode.label : 'Ambient';
-        playerSubtitleEl.textContent = `BuddyDoro · ${state.isPlaying ? 'Playing' : 'Paused'}`;
-      } else {
-        const currentTrack = getCurrentTrack();
-        if (!currentTrack) {
-          playerTitleEl.textContent = 'No tracks';
-          playerSubtitleEl.textContent = 'Add audio in music catalog';
+        if (!state.enabled) {
+          playerSubtitleEl.textContent = 'Sound off';
+        } else if (ambientLive) {
+          playerSubtitleEl.textContent = natureLive && rainLive
+            ? 'Ambient + scene rain · select None to stop ambient'
+            : natureLive
+              ? 'Playing · select None to turn off'
+              : 'Scene rain · pick ambient or None';
         } else {
-          playerTitleEl.textContent = currentTrack.title;
-          const stateLabel = !state.enabled ? 'Music off' : state.isPlaying ? 'Playing' : 'Paused';
-          playerSubtitleEl.textContent = `BuddyDoro · ${stateLabel}`;
+          playerSubtitleEl.textContent = 'Starting… interact with the page if it does not play';
         }
+      } else {
+        playerTitleEl.textContent = 'No tracks';
+        playerSubtitleEl.textContent = 'Add audio in music catalog';
       }
     }
 
-    const currentItem = UNIFIED_PLAYLIST[state.unifiedIndex];
-    const isAmbientSelected = currentItem?.type === 'ambient';
-    progressSectionEl.hidden = state.source !== 'default' || isAmbientSelected;
-    if (state.source === 'default' && !isAmbientSelected) {
+    const showTrackProgress = state.source === 'default' && Boolean(getCurrentTrack());
+    progressSectionEl.hidden = !showTrackProgress;
+    if (showTrackProgress) {
       updateProgressUI();
     }
 
+    const deckPlaying = state.source === 'spotify' ? state.isPlaying : (state.isPlaying || ambientLive);
     if (playerCardEl) {
-      playerCardEl.dataset.playing = state.isPlaying ? 'true' : 'false';
+      playerCardEl.dataset.playing = deckPlaying ? 'true' : 'false';
     }
     const boombox = document.getElementById('musicBoombox');
-    if (boombox) boombox.dataset.playing = state.isPlaying ? 'true' : 'false';
+    if (boombox) boombox.dataset.playing = deckPlaying ? 'true' : 'false';
 
-    // Transport controls: enabled for default tracks OR a connected Spotify device.
+    // Transport: BuddyDoro prev/next/play only affect focus tracks, not ambient.
     if (defaultActive) {
-      prevBtn.disabled = !state.enabled || !UNIFIED_PLAYLIST.length;
-      playPauseBtn.disabled = !UNIFIED_PLAYLIST.length;
-      nextBtn.disabled = !state.enabled || !UNIFIED_PLAYLIST.length;
+      const noTracks = !BUDDYDORO_TRACKS.length;
+      prevBtn.disabled = noTracks;
+      playPauseBtn.disabled = noTracks;
+      nextBtn.disabled = noTracks;
     } else {
       prevBtn.disabled = !spotifyReady;
       playPauseBtn.disabled = !spotifyReady;
       nextBtn.disabled = !spotifyReady;
     }
     playPauseBtn.textContent = state.isPlaying ? '⏸' : '▶';
+    playPauseBtn.setAttribute('aria-label', state.isPlaying ? 'Pause focus track' : 'Play focus track');
+
+    if (trackListLabelEl) {
+      if (defaultActive) {
+        trackListLabelEl.hidden = false;
+        trackListLabelEl.textContent = 'Focus tracks';
+      } else if (state.spotifyConnected) {
+        trackListLabelEl.hidden = false;
+        trackListLabelEl.textContent = 'Your playlists';
+      } else {
+        trackListLabelEl.hidden = true;
+      }
+    }
+    if (ambientSectionEl) ambientSectionEl.hidden = !defaultActive;
 
     // Show default track list or Spotify playlists depending on source.
     tracksRoot.hidden = false;
@@ -669,18 +772,57 @@ export function initMusic(options = {}) {
       ambientRoot.style.display = 'none';
       ambientRoot.hidden = true;
     } else {
-      // Spotify selected but not connected — show connect button here
-      tracksRoot.className = 'music-playlist-browse';
+      tracksRoot.className = 'music-track-list music-playlist-browse music-spotify-connect-wrap';
       tracksRoot.innerHTML = '';
+
+      const intro = document.createElement('div');
+      intro.className = 'music-spotify-intro';
+      const lead = document.createElement('p');
+      lead.className = 'music-spotify-intro-lead';
+      lead.textContent = 'Play your own playlists inside BuddyDoro after a quick, secure login.';
+      const note = document.createElement('p');
+      note.className = 'music-spotify-intro-note';
+      note.innerHTML = 'Spotify <strong>Premium</strong> is required for in-browser playback.';
+      intro.appendChild(lead);
+      intro.appendChild(note);
+      tracksRoot.appendChild(intro);
+
       const connectBtn = document.createElement('button');
       connectBtn.type = 'button';
       connectBtn.className = 'music-spotify-btn';
-      connectBtn.textContent = 'Connect Spotify';
+      connectBtn.textContent = 'Connect Spotify account';
       connectBtn.addEventListener('click', () => {
         const token = localStorage.getItem('authToken');
-        window.location.href = `${API_BASE}/spotify/login?token=${encodeURIComponent(token)}`;
+        if (!token) {
+          showNotification('Log in to BuddyDoro first, then connect Spotify.', 'error');
+          return;
+        }
+        // Return to this exact origin/path so OAuth does not land on 127.0.0.1 while the app
+        // was opened on localhost (or vice versa) — localStorage is per-origin and Buddy JWT would be missing.
+        const returnTo = `${window.location.origin}${window.location.pathname}`;
+        const q = new URLSearchParams({
+          token,
+          return_to: returnTo,
+        });
+        window.location.href = `${API_BASE}/spotify/login?${q.toString()}`;
       });
       tracksRoot.appendChild(connectBtn);
+
+      const backBtn = document.createElement('button');
+      backBtn.type = 'button';
+      backBtn.className = 'music-text-btn';
+      backBtn.textContent = 'Use BuddyDoro tracks instead';
+      backBtn.addEventListener('click', () => {
+        sourceDefault.checked = true;
+        state.source = 'default';
+        _playlistsRendered = false;
+        void applySourceBehavior().then(() => {
+          render();
+          saveState();
+        });
+      });
+      tracksRoot.appendChild(backBtn);
+
       ambientRoot.innerHTML = '';
       ambientRoot.style.display = 'none';
       ambientRoot.hidden = true;
@@ -691,30 +833,8 @@ export function initMusic(options = {}) {
   chip.addEventListener('click', (e) => {
     e.stopPropagation();
     state.panelOpen = !state.panelOpen;
+    if (!state.panelOpen) volumePanelOpen = false;
     render();
-  });
-
-  // Settings gear toggle.
-  const settingsBtn = document.getElementById('musicSettingsBtn');
-  const settingsPanel = document.getElementById('musicSettingsPanel');
-  const settingsClose = document.getElementById('musicSettingsClose');
-
-  function openSettings() {
-    settingsPanel.hidden = false;
-    settingsBtn.setAttribute('aria-expanded', 'true');
-  }
-  function closeSettings() {
-    settingsPanel.hidden = true;
-    settingsBtn.setAttribute('aria-expanded', 'false');
-  }
-
-  settingsBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    settingsPanel.hidden ? openSettings() : closeSettings();
-  });
-  settingsClose?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    closeSettings();
   });
 
   // Close panel when clicking outside (use closest() so clicks on chip children still count as chip).
@@ -723,25 +843,63 @@ export function initMusic(options = {}) {
     const t = event.target;
     if (t.closest?.('#musicChip') || t.closest?.('#musicMiniPanel')) return;
     state.panelOpen = false;
+    volumePanelOpen = false;
     render();
   }, true);
 
-  // Accessibility: close panel on Escape.
+  // Accessibility: close volume sheet first, then panel on Escape.
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && state.panelOpen) {
+      if (volumePanelOpen) {
+        volumePanelOpen = false;
+        render();
+        volumeSettingsBtn.focus();
+        return;
+      }
       state.panelOpen = false;
       render();
       chip.focus();
     }
   });
 
-  // Master toggle: all audio (focus tracks, Spotify, and ambient nature sounds).
+  volumeSettingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    volumePanelOpen = !volumePanelOpen;
+    render();
+    if (volumePanelOpen) musicVolSlider.focus();
+  });
+
+  volumePanelClose.addEventListener('click', (e) => {
+    e.stopPropagation();
+    volumePanelOpen = false;
+    render();
+    volumeSettingsBtn.focus();
+  });
+
+  musicVolSlider.addEventListener('input', () => {
+    state.musicVolume = clamp01(Number(musicVolSlider.value) / 100);
+    applyAudioVolumes();
+    musicVolValueEl.textContent = `${musicVolSlider.value}%`;
+    musicVolSlider.setAttribute('aria-valuenow', musicVolSlider.value);
+    saveState();
+  });
+
+  ambientVolSlider.addEventListener('input', () => {
+    state.ambientVolume = clamp01(Number(ambientVolSlider.value) / 100);
+    applyAudioVolumes();
+    ambientVolValueEl.textContent = `${ambientVolSlider.value}%`;
+    ambientVolSlider.setAttribute('aria-valuenow', ambientVolSlider.value);
+    saveState();
+  });
+
+  // Master toggle: all audio (focus tracks, Spotify, ambient + optional scene rain layer).
   enableToggle.addEventListener('change', async () => {
     state.enabled = enableToggle.checked;
     if (!state.enabled) {
       pauseAllAudio();
     } else {
       await syncAmbientPlayback();
+      await syncRainFromScene();
       if (state.source === 'default' && state.isPlaying) {
         await playCurrentDefaultTrack();
       }
@@ -772,55 +930,39 @@ export function initMusic(options = {}) {
 
   // Disconnect Spotify is handled via a button rendered inside tracksRoot when connected.
 
-  // Transport: Previous — cycle backward through all unified items, auto-play if currently playing.
+  // Transport: Previous — focus tracks only (ambient unchanged).
   prevBtn.addEventListener('click', async () => {
     if (state.source === 'spotify' && spotifyPlayer) {
       await spotifyPlayer.previousTrack();
-    } else {
-      const newIdx = (state.unifiedIndex - 1 + UNIFIED_PLAYLIST.length) % UNIFIED_PLAYLIST.length;
-      if (state.isPlaying) {
-        await playByUnifiedIndex(newIdx);
-      } else {
-        state.unifiedIndex = newIdx;
-        const item = UNIFIED_PLAYLIST[newIdx];
-        if (item.type === 'track') {
-          state.currentTrackIndex = item.index;
-          state.ambientMode = null;
-          setTrack(item.index);
-        } else {
-          state.ambientMode = item.id;
-        }
-      }
+    } else if (state.source === 'default') {
+      const n = BUDDYDORO_TRACKS.length;
+      if (!n) return;
+      state.currentTrackIndex = (state.currentTrackIndex - 1 + n) % n;
+      state.unifiedIndex = state.currentTrackIndex;
+      setTrack(state.currentTrackIndex);
+      if (state.isPlaying) await playCurrentDefaultTrack();
     }
     render();
     saveState();
   });
 
-  // Transport: Next — cycle forward through all unified items, auto-play if currently playing.
+  // Transport: Next — focus tracks only (ambient unchanged).
   nextBtn.addEventListener('click', async () => {
     if (state.source === 'spotify' && spotifyPlayer) {
       await spotifyPlayer.nextTrack();
-    } else {
-      const newIdx = (state.unifiedIndex + 1) % UNIFIED_PLAYLIST.length;
-      if (state.isPlaying) {
-        await playByUnifiedIndex(newIdx);
-      } else {
-        state.unifiedIndex = newIdx;
-        const item = UNIFIED_PLAYLIST[newIdx];
-        if (item.type === 'track') {
-          state.currentTrackIndex = item.index;
-          state.ambientMode = null;
-          setTrack(item.index);
-        } else {
-          state.ambientMode = item.id;
-        }
-      }
+    } else if (state.source === 'default') {
+      const n = BUDDYDORO_TRACKS.length;
+      if (!n) return;
+      state.currentTrackIndex = (state.currentTrackIndex + 1) % n;
+      state.unifiedIndex = state.currentTrackIndex;
+      setTrack(state.currentTrackIndex);
+      if (state.isPlaying) await playCurrentDefaultTrack();
     }
     render();
     saveState();
   });
 
-  // Transport: Play/Pause — play current unified item or pause all audio.
+  // Transport: Play/Pause — BuddyDoro focus track only (ambient: None or pill only).
   playPauseBtn.addEventListener('click', async () => {
     if (state.source === 'spotify' && spotifyPlayer) {
       await spotifyPlayer.togglePlay();
@@ -834,34 +976,28 @@ export function initMusic(options = {}) {
         state.enabled = true;
         enableToggle.checked = true;
       }
-      await playByUnifiedIndex(state.unifiedIndex);
+      if (UNIFIED_PLAYLIST[state.unifiedIndex]?.type === 'ambient') {
+        state.unifiedIndex = state.currentTrackIndex;
+      }
+      await playCurrentDefaultTrack();
     } else {
       trackAudio.pause();
-      ambientAudio.pause();
       state.isPlaying = false;
     }
     render();
     saveState();
   });
 
-  // Auto-advance to next item in the unified playlist when a track ends.
+  // Auto-advance to next focus track when a track ends (ambient keeps running).
   trackAudio.addEventListener('ended', async () => {
-    const nextIdx = (state.unifiedIndex + 1) % UNIFIED_PLAYLIST.length;
-    if (state.source === 'default' && state.enabled && state.isPlaying) {
-      await playByUnifiedIndex(nextIdx);
-      render();
-      saveState();
-    } else {
-      state.unifiedIndex = nextIdx;
-      const item = UNIFIED_PLAYLIST[nextIdx];
-      if (item.type === 'track') {
-        state.currentTrackIndex = item.index;
-        state.ambientMode = null;
-        setTrack(item.index);
-      } else {
-        state.ambientMode = item.id;
-      }
-    }
+    const n = BUDDYDORO_TRACKS.length;
+    if (state.source !== 'default' || !state.enabled || !state.isPlaying || n === 0) return;
+    state.currentTrackIndex = (state.currentTrackIndex + 1) % n;
+    state.unifiedIndex = state.currentTrackIndex;
+    setTrack(state.currentTrackIndex);
+    await playCurrentDefaultTrack();
+    render();
+    saveState();
   });
 
   trackAudio.addEventListener('timeupdate', () => {
@@ -883,6 +1019,7 @@ export function initMusic(options = {}) {
   // Restore persisted music UI (source, spotifyConnected, etc.) before reading OAuth query params,
   // otherwise loadState() would overwrite a fresh ?spotifyConnected=true redirect from the backend.
   loadState();
+  applyAudioVolumes();
 
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('spotifyConnected') === 'true') {
@@ -911,9 +1048,21 @@ export function initMusic(options = {}) {
   trackAudio.pause();
 
   setTrack(state.currentTrackIndex);
-  if (state.ambientMode) syncAmbientPlayback();
+  if (state.ambientMode) void syncAmbientPlayback();
+  void syncRainFromScene();
   render();
   saveState();
+
+  window.addEventListener('buddydoro:sceneRain', (e) => {
+    sceneRainActive = Boolean(e.detail?.active);
+    void syncRainFromScene();
+    render();
+  });
+
+  if (typeof window.Rain?.isActive === 'function' && window.Rain.isActive()) {
+    sceneRainActive = true;
+    void syncRainFromScene();
+  }
 
   function bindTimerMusic() {
     if (!timer?.onStart) return;
@@ -927,7 +1076,10 @@ export function initMusic(options = {}) {
 
     timer.onStart(({ mode }) => {
       if (mode !== 'focus' || state.source !== 'default' || !state.enabled) return;
-      playByUnifiedIndex(state.unifiedIndex).then(() => {
+      if (UNIFIED_PLAYLIST[state.unifiedIndex]?.type === 'ambient') {
+        state.unifiedIndex = state.currentTrackIndex;
+      }
+      playCurrentDefaultTrack().then(() => {
         render();
         saveState();
       });
@@ -952,20 +1104,15 @@ export function initMusic(options = {}) {
   }
 
   // Retry ambient playback after first user interaction (only if a mode was explicitly chosen).
-  const resumeAmbient = () => { if (state.ambientMode) syncAmbientPlayback(); };
+  const resumeAmbient = () => {
+    if (state.ambientMode) void syncAmbientPlayback();
+    void syncRainFromScene();
+  };
   window.addEventListener('pointerdown', resumeAmbient, { once: true });
   window.addEventListener('keydown', resumeAmbient, { once: true });
 
-  window.addEventListener('load', () => { if (state.ambientMode) syncAmbientPlayback(); });
-  window.addEventListener('pageshow', () => { if (state.ambientMode) syncAmbientPlayback(); });
-
-  // Keep forest ambience synced when day/night context changes over time.
-  setInterval(() => {
-    if (state.ambientMode === 'forest' && state.enabled) {
-      syncAmbientPlayback();
-    }
-  }, 60 * 1000);
-
+  window.addEventListener('load', resumeAmbient);
+  window.addEventListener('pageshow', resumeAmbient);
 
   return {
     stop() {

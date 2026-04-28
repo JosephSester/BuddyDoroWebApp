@@ -7,10 +7,18 @@
  *   Rain.setIntensity(0..1.5)
  *   Rain.setWind(-1..+1)
  *   Rain.enableRandomDaily({ timesPerDay?:10, durationMs?:5*60*1000, checkEveryMs?:15000, activeHours?:[0,24] })
+ *   Rain.isActive() -> boolean
+ * Dispatches window event `buddydoro:sceneRain` with detail `{ active }` when rain starts/stops.
  */
 
 (function () {
   let canvas, ctx, running = false, drops = [];
+
+  function emitSceneRain(active) {
+    try {
+      window.dispatchEvent(new CustomEvent('buddydoro:sceneRain', { detail: { active: Boolean(active) } }));
+    } catch { /* ignore */ }
+  }
   let density = 0.65;   // 0..1.5 (more = more drops)
   let baseSpeed = 1.0;  // overall speed multiplier
   let wind = 0.6;       // -1..+1, negative = blow left
@@ -115,11 +123,18 @@
       running = true;
       lastT = performance.now();
       requestAnimationFrame(loop);
+      emitSceneRain(true);
     },
 
     stop() {
       running = false;
       if (ctx) ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+      emitSceneRain(false);
+    },
+
+    /** Whether the rain animation loop is running (canvas visible). */
+    isActive() {
+      return running;
     },
 
     setIntensity(v) {

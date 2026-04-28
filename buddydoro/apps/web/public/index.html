@@ -5,6 +5,33 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BuddyDoro</title>
+  <script>
+    (function () {
+      const authToken = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+
+      if (!authToken) {
+        window.location.replace('login.html');
+        return;
+      }
+
+      if (hasSeenOnboarding !== 'true') {
+        window.location.replace('onboarding.html');
+        return;
+      }
+
+      document.documentElement.setAttribute('data-auth-gate', 'ready');
+    })();
+  </script>
+  <style>
+    html:not([data-auth-gate="ready"]) body {
+      visibility: hidden;
+    }
+
+    #dragon:not([data-booted="true"]) {
+      visibility: hidden;
+    }
+  </style>
 
   <!-- Preload artwork (paths are relative to the web root served from /apps/web/public) -->
   <link rel="preload" as="image" href="/assets/artwork/BackgroundDay.jpg" />
@@ -77,13 +104,42 @@
   <link rel="stylesheet" href="../styles/sessionPanel.css" />
 </head>
 
-<body>
+<body style="background: #1c3566;">
   <!-- Background scene -->
   <div id="scene" class="scene" role="img" aria-label="Sunny forest clearing with a tree stump">
+    <script>
+      (function(){
+        var ASSET = './assets/artwork/';
+        var stored = localStorage.getItem('buddydoro.background');
+        var h = new Date().getHours();
+        var night = h >= 20 || h < 7;
+        var bg;
+        if (stored) {
+          if (night && stored.includes('BackgroundDay.jpg')) bg = stored.replace('BackgroundDay.jpg', 'BackgroundNight.png');
+          else if (night && stored.includes('Day.png')) bg = stored.replace('Day.png', 'Night.png');
+          else bg = stored;
+        } else {
+          bg = night ? 'BackgroundNight.png' : 'BackgroundDay.jpg';
+        }
+        document.getElementById('scene').style.cssText += ';background-image:url("' + ASSET + bg + '");background-size:cover;background-position:center bottom;background-repeat:no-repeat;';
+      })();
+    </script>
     <div id="dragon" class="sprite dragon">
       <img src="./assets/artwork/Dragon.png" alt="Friendly dragon" class="dragon-img" />
       <img src="./assets/artwork/Tombstone/Tombstone.png" alt="Tombstone" class="tombstone-img" hidden />
     </div>
+    <script>
+      (function () {
+        const dragonEl = document.getElementById('dragon');
+        const dragonImg = dragonEl?.querySelector('.dragon-img');
+        if (!dragonEl || !dragonImg) return;
+
+        const savedSkin = localStorage.getItem('buddydoro.skin.open') || 'Dragon.png';
+        dragonImg.src = `./assets/artwork/${savedSkin}`;
+        dragonImg.alt = 'Friendly companion';
+        dragonEl.setAttribute('data-booted', 'true');
+      })();
+    </script>
     <button id="companionDeadBtn" class="companion-dead-btn" hidden>
       <span class="companion-dead-text">Your companion has died.<br>Continue here.</span>
       <span class="companion-dead-arrow">&#8250;</span>
@@ -145,7 +201,7 @@
         </a>
       </div>
 
-      <!-- Center: timer -->
+      <!-- Center: timer + music -->
       <nav class="topbar-center" aria-label="Main actions">
         <button id="timerChip" class="topbar-action-btn" type="button" title="Timer"
           aria-haspopup="dialog" aria-controls="timerLaunchMenu">
@@ -156,6 +212,161 @@
           </svg>
           Timer
         </button>
+        <div class="music-fab-wrap">
+          <button id="musicChip" class="topbar-action-btn" type="button" aria-label="Open music" aria-expanded="false">
+            <svg class="topbar-action-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13"/>
+              <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+            </svg>
+            Music
+          </button>
+          <section id="musicMiniPanel" class="music-mini-panel" hidden>
+
+            <!-- Settings gear (top-left) -->
+            <button id="musicSettingsBtn" class="music-gear-btn" type="button" aria-label="Music settings" aria-expanded="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </button>
+
+            <!-- Settings overlay -->
+            <div id="musicSettingsPanel" class="music-settings-panel" hidden>
+              <div class="music-settings-header">
+                <button id="musicSettingsClose" class="music-settings-back" type="button" aria-label="Close settings">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                </button>
+                <span class="music-settings-title">Settings</span>
+              </div>
+              <div class="music-settings-body">
+                <!-- hidden toggle kept for JS — not shown in UI -->
+                <input id="musicEnabledToggle" type="checkbox" checked style="display:none" aria-hidden="true"/>
+                <div class="music-settings-section">
+                  <div class="music-source-row" role="group" aria-label="Music source">
+                    <label class="music-source-pill">
+                      <input type="radio" name="music-source" id="musicSourceDefault" value="default" checked />
+                      Default
+                    </label>
+                    <label class="music-source-pill">
+                      <input type="radio" name="music-source" id="musicSourceSpotify" value="spotify" />
+                      Spotify
+                    </label>
+                  </div>
+                </div>
+                <div class="music-settings-section">
+                  <div class="music-settings-label">Playlist</div>
+                  <div id="musicTrackList" class="music-track-list" aria-label="Tracks or playlists"></div>
+                  <div id="musicAmbientList" class="music-ambient-list"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Boombox hero -->
+            <div class="music-boombox-wrap">
+              <svg id="musicBoombox" class="music-boombox" viewBox="0 0 200 110" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                  <linearGradient id="bbBody" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#2f5490"/>
+                    <stop offset="100%" stop-color="#1c3566"/>
+                  </linearGradient>
+                  <linearGradient id="bbAccent" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#3ecfb2"/>
+                    <stop offset="100%" stop-color="#7c5cbf"/>
+                  </linearGradient>
+                  <radialGradient id="bbSpeaker" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#1c3566"/>
+                    <stop offset="100%" stop-color="#0e1f45"/>
+                  </radialGradient>
+                  <filter id="bbGlow">
+                    <feGaussianBlur stdDeviation="2" result="blur"/>
+                    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                </defs>
+                <!-- Body -->
+                <rect x="8" y="28" width="184" height="68" rx="12" fill="url(#bbBody)" stroke="rgba(167,143,224,0.35)" stroke-width="1.5"/>
+                <!-- Top handle -->
+                <path d="M72 28 Q100 10 128 28" stroke="url(#bbAccent)" stroke-width="3" stroke-linecap="round" fill="none"/>
+                <!-- Accent bar -->
+                <rect x="8" y="28" width="184" height="6" rx="4" fill="url(#bbAccent)" opacity="0.7"/>
+                <!-- Left speaker -->
+                <circle cx="44" cy="65" r="22" fill="url(#bbSpeaker)" stroke="rgba(167,143,224,0.25)" stroke-width="1.5"/>
+                <circle cx="44" cy="65" r="16" fill="none" stroke="rgba(62,207,178,0.20)" stroke-width="1"/>
+                <circle cx="44" cy="65" r="10" fill="none" stroke="rgba(62,207,178,0.30)" stroke-width="1"/>
+                <circle cx="44" cy="65" r="4" fill="url(#bbAccent)" opacity="0.8"/>
+                <!-- Left speaker dots -->
+                <circle class="boombox-speaker-dot" cx="44" cy="48" r="1.5" fill="rgba(62,207,178,0.55)"/>
+                <circle class="boombox-speaker-dot" cx="61" cy="65" r="1.5" fill="rgba(62,207,178,0.55)" style="animation-delay:0.15s"/>
+                <circle class="boombox-speaker-dot" cx="44" cy="82" r="1.5" fill="rgba(62,207,178,0.55)" style="animation-delay:0.3s"/>
+                <circle class="boombox-speaker-dot" cx="27" cy="65" r="1.5" fill="rgba(62,207,178,0.55)" style="animation-delay:0.45s"/>
+                <!-- Right speaker -->
+                <circle cx="156" cy="65" r="22" fill="url(#bbSpeaker)" stroke="rgba(167,143,224,0.25)" stroke-width="1.5"/>
+                <circle cx="156" cy="65" r="16" fill="none" stroke="rgba(62,207,178,0.20)" stroke-width="1"/>
+                <circle cx="156" cy="65" r="10" fill="none" stroke="rgba(62,207,178,0.30)" stroke-width="1"/>
+                <circle cx="156" cy="65" r="4" fill="url(#bbAccent)" opacity="0.8"/>
+                <!-- Right speaker dots -->
+                <circle class="boombox-speaker-dot" cx="156" cy="48" r="1.5" fill="rgba(62,207,178,0.55)" style="animation-delay:0.6s"/>
+                <circle class="boombox-speaker-dot" cx="173" cy="65" r="1.5" fill="rgba(62,207,178,0.55)" style="animation-delay:0.75s"/>
+                <circle class="boombox-speaker-dot" cx="156" cy="82" r="1.5" fill="rgba(62,207,178,0.55)" style="animation-delay:0.9s"/>
+                <circle class="boombox-speaker-dot" cx="139" cy="65" r="1.5" fill="rgba(62,207,178,0.55)" style="animation-delay:1.05s"/>
+                <!-- Center panel -->
+                <rect x="74" y="40" width="52" height="42" rx="7" fill="rgba(14,31,69,0.85)" stroke="rgba(167,143,224,0.22)" stroke-width="1"/>
+                <!-- Left cassette reel -->
+                <circle class="boombox-reel-l" cx="88" cy="61" r="9" fill="none" stroke="rgba(124,92,191,0.60)" stroke-width="1.5"/>
+                <circle class="boombox-reel-l" cx="88" cy="61" r="4" fill="rgba(62,207,178,0.35)"/>
+                <line class="boombox-reel-l" x1="88" y1="52" x2="88" y2="56" stroke="rgba(124,92,191,0.55)" stroke-width="1.5" stroke-linecap="round"/>
+                <line class="boombox-reel-l" x1="95" y1="66" x2="92" y2="63" stroke="rgba(124,92,191,0.55)" stroke-width="1.5" stroke-linecap="round"/>
+                <line class="boombox-reel-l" x1="81" y1="66" x2="84" y2="63" stroke="rgba(124,92,191,0.55)" stroke-width="1.5" stroke-linecap="round"/>
+                <!-- Right cassette reel -->
+                <circle class="boombox-reel-r" cx="112" cy="61" r="9" fill="none" stroke="rgba(124,92,191,0.60)" stroke-width="1.5"/>
+                <circle class="boombox-reel-r" cx="112" cy="61" r="4" fill="rgba(62,207,178,0.35)"/>
+                <line class="boombox-reel-r" x1="112" y1="52" x2="112" y2="56" stroke="rgba(124,92,191,0.55)" stroke-width="1.5" stroke-linecap="round"/>
+                <line class="boombox-reel-r" x1="119" y1="66" x2="116" y2="63" stroke="rgba(124,92,191,0.55)" stroke-width="1.5" stroke-linecap="round"/>
+                <line class="boombox-reel-r" x1="105" y1="66" x2="108" y2="63" stroke="rgba(124,92,191,0.55)" stroke-width="1.5" stroke-linecap="round"/>
+                <!-- Tape window line -->
+                <line x1="97" y1="61" x2="103" y2="61" stroke="rgba(62,207,178,0.50)" stroke-width="1" stroke-dasharray="2 1"/>
+                <!-- Buttons row -->
+                <rect x="76" y="76" width="6" height="4" rx="1" fill="rgba(62,207,178,0.55)"/>
+                <rect x="85" y="76" width="6" height="4" rx="1" fill="rgba(124,92,191,0.55)"/>
+                <rect x="94" y="76" width="6" height="4" rx="1" fill="rgba(62,207,178,0.55)"/>
+                <rect x="103" y="76" width="6" height="4" rx="1" fill="rgba(124,92,191,0.55)"/>
+                <rect x="112" y="76" width="6" height="4" rx="1" fill="rgba(62,207,178,0.55)"/>
+                <!-- Antenna -->
+                <line x1="172" y1="28" x2="184" y2="8" stroke="rgba(167,143,224,0.50)" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="184" cy="7" r="2.5" fill="url(#bbAccent)" filter="url(#bbGlow)" opacity="0.9"/>
+                <!-- Feet -->
+                <rect x="18" y="93" width="12" height="5" rx="2.5" fill="rgba(124,92,191,0.45)"/>
+                <rect x="170" y="93" width="12" height="5" rx="2.5" fill="rgba(124,92,191,0.45)"/>
+              </svg>
+            </div>
+
+            <!-- Now playing -->
+            <div class="music-now-playing" id="musicPlayerCard" aria-live="polite">
+              <div id="musicPlayerTitle" class="music-player-title">—</div>
+              <div id="musicPlayerSubtitle" class="music-player-subtitle"></div>
+            </div>
+
+            <!-- Progress -->
+            <div id="musicProgressSection" class="music-progress-section">
+              <div class="music-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+                aria-label="Track progress" id="musicProgressTrack">
+                <div id="musicProgressFill" class="music-progress-fill"></div>
+              </div>
+              <div class="music-progress-times">
+                <span id="musicTimeElapsed">0:00</span>
+                <span id="musicTimeDuration">0:00</span>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="music-controls">
+              <button type="button" id="musicPrevBtn" class="music-control-btn music-control-round" aria-label="Previous track">⏮</button>
+              <button type="button" id="musicPlayPauseBtn" class="music-control-btn music-control-main" aria-label="Play or pause">▶</button>
+              <button type="button" id="musicNextBtn" class="music-control-btn music-control-round" aria-label="Next track">⏭</button>
+            </div>
+
+
+          </section>
+        </div>
       </nav>
 
       <!-- Right: currency + store -->
@@ -176,7 +387,7 @@
             </defs>
             <circle cx="32" cy="32" r="29" fill="url(#ring)"/>
             <circle cx="32" cy="32" r="25" fill="url(#gemGlow)" stroke="#b98627" stroke-width="2"/>
-            <text x="32" y="39" text-anchor="middle" font-family="Arial" font-weight="700" font-size="24" fill="#2b2213">D</text>
+            <text x="32" y="39" text-anchor="middle" font-family="Arial" font-weight="700" font-size="24" fill="#e8d5f5">D</text>
           </svg>
           <span id="dorosAmount">1,250</span>
         </button>
@@ -215,14 +426,14 @@
             <div class="tasks-header-actions">
               <button class="task-title-edit" type="button" aria-label="Rename goal">
                 <svg class="task-title-edit-icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M4 14.5V19h4.5L18 9.5l-4.5-4.5L4 14.5zm11-11 4.5 4.5" fill="none" stroke="#2b2213"
+                  <path d="M4 14.5V19h4.5L18 9.5l-4.5-4.5L4 14.5zm11-11 4.5 4.5" fill="none" stroke="#e8d5f5"
                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </button>
               <button class="task-title-delete" type="button" aria-label="Delete goal">
                 <svg class="task-title-delete-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M6 7h12l-1 13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7zm3-3h6l1 2H8l1-2zm1 6v8m4-8v8" fill="none"
-                    stroke="#2b2213" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    stroke="#e8d5f5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </button>
             </div>
@@ -493,78 +704,6 @@
     </div>
   </section>
 
-  <!-- Phase 1 music mini-player (local/default source + Spotify placeholder) -->
-  <div class="music-fab-wrap">
-    <button id="musicChip" class="music-fab" type="button" aria-label="Open music" aria-expanded="false">♫</button>
-    <section id="musicMiniPanel" class="music-mini-panel" hidden>
-      <div class="music-panel-header">
-        <h3>Music</h3>
-        <label class="music-toggle" for="musicEnabledToggle">
-          <input id="musicEnabledToggle" type="checkbox" checked />
-          <span class="music-toggle-ui" aria-hidden="true"></span>
-          <span class="music-toggle-text">On</span>
-        </label>
-      </div>
-      <div class="music-source-row" role="group" aria-label="Music source">
-        <label class="music-source-pill">
-          <input type="radio" name="music-source" id="musicSourceDefault" value="default" checked />
-          Default
-        </label>
-        <label class="music-source-pill">
-          <input type="radio" name="music-source" id="musicSourceSpotify" value="spotify" />
-          Spotify
-        </label>
-      </div>
-
-      <div id="musicPlayerCard" class="music-player-card music-cassette" aria-live="polite">
-        <div class="music-cassette-screw music-cassette-screw--tl" aria-hidden="true"></div>
-        <div class="music-cassette-screw music-cassette-screw--tr" aria-hidden="true"></div>
-        <div class="music-cassette-screw music-cassette-screw--bl" aria-hidden="true"></div>
-        <div class="music-cassette-screw music-cassette-screw--br" aria-hidden="true"></div>
-        <div class="music-cassette-inner">
-          <div class="music-cassette-window">
-            <div class="music-cassette-reel-wrap" aria-hidden="true">
-              <span class="music-cassette-reel"></span>
-            </div>
-            <div class="music-cassette-label">
-              <div id="musicPlayerTitle" class="music-player-title">—</div>
-              <div id="musicPlayerSubtitle" class="music-player-subtitle"></div>
-            </div>
-            <div class="music-cassette-reel-wrap" aria-hidden="true">
-              <span class="music-cassette-reel"></span>
-            </div>
-          </div>
-          <div class="music-cassette-teeth" aria-hidden="true"></div>
-        </div>
-      </div>
-
-      <div id="musicProgressSection" class="music-progress-section">
-        <div class="music-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
-          aria-label="Track progress" id="musicProgressTrack">
-          <div id="musicProgressFill" class="music-progress-fill"></div>
-        </div>
-        <div class="music-progress-times">
-          <span id="musicTimeElapsed">0:00</span>
-          <span id="musicTimeDuration">0:00</span>
-        </div>
-      </div>
-
-      <p id="musicSpotifyHint" class="music-spotify-hint" hidden>
-        Connect Spotify Premium to play in the browser.
-      </p>
-      <div class="music-controls">
-        <button type="button" id="musicPrevBtn" class="music-control-btn music-control-round" aria-label="Previous track">⏮</button>
-        <button type="button" id="musicPlayPauseBtn" class="music-control-btn is-primary music-control-main" aria-label="Play or pause">Play</button>
-        <button type="button" id="musicNextBtn" class="music-control-btn music-control-round" aria-label="Next track">⏭</button>
-      </div>
-      <button type="button" id="musicSpotifyConnectBtn" class="music-spotify-btn" hidden>Connect Spotify</button>
-      <div id="musicTrackList" class="music-track-list" aria-label="Tracks or playlists"></div>
-      <div class="music-ambient">
-        <div class="music-ambient-title">Ambient</div>
-        <div id="musicAmbientList" class="music-ambient-list"></div>
-      </div>
-    </section>
-  </div>
 
   <!-- Life Circle logic disabled; companionStatus.js is now used -->
   <!--

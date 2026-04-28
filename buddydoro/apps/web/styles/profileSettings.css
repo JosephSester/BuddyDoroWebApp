@@ -1,14 +1,13 @@
 /* =========================================================
-   Profile Settings — Light theme with gradient accents
-   Matches accountSettings.css aesthetic
+   Profile Settings — Dark night theme
    ========================================================= */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   min-height: 100vh;
-  background: #faf6f0;
-  color: #2b1f10;
+  background: #1c3566;
+  color: #e8d5f5;
   font-family: 'Barlow', system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.5;
@@ -26,18 +25,18 @@ body {
 .pr-orb-1 {
   width: 560px; height: 560px;
   top: -180px; right: -140px;
-  background: radial-gradient(circle, rgba(192,98,42,0.35) 0%, rgba(168,80,31,0.18) 55%, transparent 100%);
+  background: radial-gradient(circle, rgba(124,92,191,0.35) 0%, rgba(62,207,178,0.12) 55%, transparent 100%);
 }
 .pr-orb-2 {
   width: 420px; height: 420px;
   bottom: -100px; left: -120px;
-  background: radial-gradient(circle, rgba(167,139,250,0.22) 0%, rgba(124,58,237,0.1) 60%, transparent 100%);
+  background: radial-gradient(circle, rgba(167,139,250,0.22) 0%, rgba(62,207,178,0.10) 60%, transparent 100%);
 }
 .pr-orb-3 {
   width: 320px; height: 320px;
   top: 42%; left: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(192,98,42,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(124,92,191,0.12) 0%, transparent 70%);
 }
 
 /* ── Outer wrapper ────────────────────────────────────── */
@@ -63,9 +62,9 @@ body {
   gap: 6px;
   padding: 8px 16px 8px 12px;
   border-radius: 100px;
-  border: 1.5px solid rgba(192,98,42,0.35);
-  background: rgba(192,98,42,0.1);
-  color: #a8501f;
+  border: 1.5px solid rgba(124,92,191,0.35);
+  background: rgba(124,92,191,0.12);
+  color: #a78fe0;
   text-decoration: none;
   font-size: 13px;
   font-weight: 700;
@@ -76,11 +75,11 @@ body {
 }
 .pr-back svg { width: 16px; height: 16px; }
 .pr-back:hover {
-  background: rgba(192,98,42,0.2);
-  border-color: rgba(192,98,42,0.6);
+  background: rgba(124,92,191,0.22);
+  border-color: rgba(124,92,191,0.60);
 }
 .pr-back:focus-visible {
-  outline: 2px solid #c0622a;
+  outline: 2px solid #7c5cbf;
   outline-offset: 2px;
 }
 
@@ -89,7 +88,7 @@ body {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: linear-gradient(120deg, #c0622a 0%, #a8501f 45%, #7c3aed 100%);
+  background: linear-gradient(120deg, #a78fe0 0%, #7c5cbf 45%, #3ecfb2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -99,7 +98,7 @@ body {
 .pr-page-sub {
   margin-top: 5px;
   font-size: 13.5px;
-  color: rgba(43,31,16,0.5);
+  color: #9db0cc;
   font-weight: 500;
 }
 
@@ -108,19 +107,20 @@ body {
 
 /* ── Cards ────────────────────────────────────────────── */
 .pr-card {
-  background: #ffffff;
-  border: 1px solid rgba(200,160,60,0.2);
+  background: rgba(26, 54, 110, 0.55);
+  border: 1px solid rgba(120, 140, 200, 0.28);
   border-radius: 20px;
   padding: 24px;
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.9) inset,
-    0 4px 6px rgba(180,120,20,0.06),
-    0 12px 32px rgba(100,60,10,0.07);
+    0 4px 6px rgba(26, 54, 110, 0.18),
+    0 12px 32px rgba(26, 54, 110, 0.22);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
 
 .pr-card-link {
-  border-color: rgba(167,139,250,0.2);
-  background: #fdfcff;
+  border-color: rgba(124, 92, 191, 0.22);
+  background: rgba(26, 54, 110, 0.60);
   padding: 18px 24px;
 }
 
@@ -139,30 +139,30 @@ body {
 .pr-card-icon {
   width: 38px; height: 38px;
   border-radius: 10px;
-  background: rgba(192,98,42,0.12);
-  border: 1px solid rgba(192,98,42,0.2);
+  background: rgba(124,92,191,0.16);
+  border: 1px solid rgba(124,92,191,0.28);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  color: #c0622a;
+  color: #a78fe0;
 }
 .pr-card-icon svg { width: 18px; height: 18px; }
 
 .pr-card-icon-alt {
-  background: rgba(167,139,250,0.1);
-  border-color: rgba(124,58,237,0.18);
-  color: #7c3aed;
+  background: rgba(167,139,250,0.12);
+  border-color: rgba(124,92,191,0.22);
+  color: #a78fe0;
 }
 
 .pr-card-title {
   font-size: 16px;
   font-weight: 800;
-  color: #1e1408;
+  color: #ffffff;
   letter-spacing: 0.1px;
 }
 
 .pr-card-sub {
   font-size: 12.5px;
-  color: rgba(43,31,16,0.45);
+  color: #9db0cc;
   margin-top: 3px;
   font-weight: 500;
 }
@@ -184,34 +184,34 @@ body {
   font-weight: 700;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  color: rgba(43,31,16,0.45);
+  color: #9db0cc;
 }
 
 .pr-input {
   height: 46px;
   border-radius: 12px;
   padding: 0 14px;
-  background: #faf7f2;
-  border: 1.5px solid rgba(43,31,16,0.12);
-  color: #1e1408;
+  background: rgba(26, 54, 110, 0.70);
+  border: 1.5px solid rgba(120, 140, 200, 0.28);
+  color: #ffffff;
   font-family: 'Barlow', system-ui, sans-serif;
   font-size: 14.5px;
   font-weight: 600;
   outline: none;
   transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
-.pr-input::placeholder { color: rgba(43,31,16,0.3); }
+.pr-input::placeholder { color: rgba(157, 176, 204, 0.40); }
 .pr-input:focus {
-  border-color: rgba(192,98,42,0.55);
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(192,98,42,0.15);
+  border-color: rgba(124,92,191,0.65);
+  background: rgba(26, 54, 110, 0.85);
+  box-shadow: 0 0 0 3px rgba(124,92,191,0.15);
 }
 .pr-input:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .pr-hint {
   font-size: 12px;
   font-weight: 500;
-  color: rgba(43,31,16,0.4);
+  color: #9db0cc;
 }
 
 /* ── Save row ─────────────────────────────────────────── */
@@ -226,10 +226,10 @@ body {
   font-size: 13px;
   font-weight: 600;
   min-height: 18px;
-  color: rgba(43,31,16,0.6);
+  color: #9db0cc;
 }
-.pr-msg.is-success { color: #1a7a3c; }
-.pr-msg.is-error   { color: #c0392b; }
+.pr-msg.is-success { color: #3ecfb2; }
+.pr-msg.is-error   { color: #f87171; }
 
 /* ── Buttons ──────────────────────────────────────────── */
 .pr-btn {
@@ -246,36 +246,36 @@ body {
   cursor: pointer;
   border: none;
   text-decoration: none;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
   white-space: nowrap;
 }
 .pr-btn:active { transform: translateY(1px); }
-.pr-btn:focus-visible { outline: 2px solid #c0622a; outline-offset: 2px; }
+.pr-btn:focus-visible { outline: 2px solid #7c5cbf; outline-offset: 2px; }
 .pr-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
 
 .pr-btn-primary {
-  background: linear-gradient(135deg, #c0622a 0%, #a8501f 100%);
-  color: #3a1f00;
-  box-shadow: 0 4px 14px rgba(192,98,42,0.35);
+  background: linear-gradient(135deg, #7c5cbf 0%, #6448a8 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(124,92,191,0.35);
 }
-.pr-btn-primary:hover { box-shadow: 0 6px 20px rgba(192,98,42,0.5); }
+.pr-btn-primary:hover { box-shadow: 0 6px 20px rgba(124,92,191,0.50); filter: brightness(1.06); }
 
 .pr-btn-ghost {
-  background: rgba(43,31,16,0.06);
-  border: 1.5px solid rgba(43,31,16,0.12);
-  color: rgba(43,31,16,0.65);
+  background: rgba(120, 140, 200, 0.08);
+  border: 1.5px solid rgba(120, 140, 200, 0.22);
+  color: #9db0cc;
 }
-.pr-btn-ghost:hover { background: rgba(43,31,16,0.1); }
+.pr-btn-ghost:hover { background: rgba(120, 140, 200, 0.14); }
 
 .pr-btn-outline {
   background: transparent;
-  border: 1.5px solid rgba(124,58,237,0.3);
-  color: #6d28d9;
+  border: 1.5px solid rgba(124,92,191,0.35);
+  color: #a78fe0;
   margin-left: auto;
 }
 .pr-btn-outline:hover {
-  background: rgba(124,58,237,0.06);
-  border-color: rgba(124,58,237,0.5);
+  background: rgba(124,92,191,0.10);
+  border-color: rgba(124,92,191,0.55);
 }
 
 .pr-btn-sm { height: 36px; padding: 0 14px; font-size: 13px; }

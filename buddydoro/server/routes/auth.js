@@ -5,6 +5,14 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const inventory = require('../models/Inventory');
 
+function serializeUserPreferences(user) {
+  return {
+    skinOpen: user?.preferences?.skinOpen || null,
+    skinClosed: user?.preferences?.skinClosed || null,
+    background: user?.preferences?.background || null,
+  };
+}
+
 // Ensure JWT_SECRET is set
 if (!process.env.JWT_SECRET) {
   console.warn("JWT_SECRET is not set! Authentication will fail.");
@@ -79,6 +87,7 @@ router.post('/login', async (req, res) => {
       diamonds: user.diamonds,
       companionStatuses: user.companionStatuses,
       hasSeenOnboarding: user.hasSeenOnboarding,
+      preferences: serializeUserPreferences(user),
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -115,6 +124,7 @@ router.get('/me', async (req, res) => {
       lastSessionEnd: user.lastSessionEnd,
       hasSeenOnboarding: user.hasSeenOnboarding,
       settings: user.settings,
+      preferences: serializeUserPreferences(user),
     });
 
   } catch (err) {

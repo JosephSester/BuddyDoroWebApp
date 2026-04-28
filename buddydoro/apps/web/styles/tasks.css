@@ -49,15 +49,15 @@
   width: min(90vw, 560px);
   padding: 26px 28px 24px;
   background:
-    radial-gradient(150px circle at 50% 42%, rgba(255, 255, 255, .4), rgba(245, 240, 230, .15) 70%),
-    linear-gradient(135deg, rgba(222, 196, 160, .45) 0%, rgba(194, 178, 140, .35) 100%);
+    radial-gradient(150px circle at 50% 42%, rgba(26, 54, 110, 0.45), rgba(245, 240, 230, .15) 70%),
+    linear-gradient(135deg, rgba(222, 196, 160, .45) 0%, rgba(124, 92, 191, .35) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border: 2px solid rgba(194, 178, 140, .4);
+  border: 2px solid rgba(124, 92, 191, .4);
   box-shadow:
     0 18px 36px rgba(0, 0, 0, .24),
     inset 0 0 0 1px rgba(245, 240, 230, .25),
-    0 0 20px rgba(194, 178, 140, .2);
+    0 0 20px rgba(124, 92, 191, .2);
   opacity: 1;
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
@@ -75,7 +75,7 @@
 .todo-description {
   font-size: 16px;
   font-weight: 700;
-  color: #2b2213;
+  color: #ffffff;
 }
 
 .todo-goal-container {
@@ -99,7 +99,7 @@
 .todo-task-item {
   padding: 10px 14px;
   border-radius: 16px;
-  border: 2px solid rgba(194, 178, 140, .35);
+  border: 2px solid rgba(124, 92, 191, .35);
   background: rgba(245, 240, 230, .3);
   backdrop-filter: blur(8px) saturate(130%);
   -webkit-backdrop-filter: blur(8px) saturate(130%);
@@ -107,7 +107,7 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  color: #2b2213;
+  color: #ffffff;
   transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease, backdrop-filter 0.2s ease;
   cursor: pointer;
 }
@@ -117,18 +117,18 @@
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(194, 178, 140, .25);
+  box-shadow: 0 4px 12px rgba(124, 92, 191, .25);
 }
 
 .todo-task-meta {
   font-weight: 700;
-  color: rgba(43, 34, 19, .7);
+  color: rgba(26, 54, 110, .7);
 }
 
 .todo-empty {
   font-size: 14px;
   font-weight: 700;
-  color: rgba(43, 34, 19, .8);
+  color: rgba(26, 54, 110, .8);
 }
 
 .todo-actions {
@@ -155,17 +155,17 @@
   width: 100%;
   padding: 14px 14px 16px;
   border-radius: 28px;
-  color: #2b2213;
+  color: #ffffff;
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .45), rgba(255, 255, 255, .1) 70%),
-    linear-gradient(135deg, rgba(201, 138, 46, .35) 0%, rgba(192, 98, 42, .25) 100%);
+    radial-gradient(150px circle at 30% 20%, rgba(124, 92, 191, 0.15), rgba(255, 255, 255, .1) 70%),
+    linear-gradient(135deg, rgba(167, 143, 224, .35) 0%, rgba(124, 92, 191, .25) 100%);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 2px solid rgba(201, 138, 46, .40);
+  border: 2px solid rgba(167, 143, 224, .40);
   box-shadow:
     0 10px 24px rgba(0, 0, 0, .25),
     inset 0 0 0 1px rgba(255, 255, 255, .2),
-    0 0 20px rgba(201, 138, 46, .25);
+    0 0 20px rgba(167, 143, 224, .25);
   z-index: 10;
   pointer-events: auto;
   opacity: 1;
@@ -187,10 +187,10 @@
   gap: 12px;
   padding: 10px 14px;
   border-radius: 18px;
-  border: 2px solid rgba(201, 138, 46, .20);
+  border: 2px solid rgba(167, 143, 224, .20);
   background:
-    radial-gradient(120px circle at 50% 42%, rgba(255, 255, 255, .4), rgba(255, 255, 255, .1) 70%),
-    linear-gradient(135deg, rgba(250, 244, 232, .45) 0%, rgba(222, 196, 160, .35) 100%);
+    radial-gradient(120px circle at 50% 42%, rgba(26, 54, 110, 0.45), rgba(255, 255, 255, .1) 70%),
+    linear-gradient(135deg, rgba(26, 54, 110, .45) 0%, rgba(222, 196, 160, .35) 100%);
   backdrop-filter: blur(8px) saturate(150%);
   -webkit-backdrop-filter: blur(8px) saturate(150%);
   box-shadow: 0 6px 14px rgba(0, 0, 0, .12);
@@ -218,14 +218,14 @@
 }
 
 .task-card:focus-visible {
-  outline: 3px solid rgba(43, 34, 19, .7);
+  outline: 3px solid rgba(26, 54, 110, .7);
   outline-offset: 2px;
 }
 
 .task-card.is-hover {
   background:
-    radial-gradient(120px circle at 50% 42%, rgba(255, 255, 255, .45), rgba(255, 255, 255, .15) 70%),
-    linear-gradient(135deg, rgba(250, 244, 232, .55) 0%, rgba(222, 196, 160, .45) 100%);
+    radial-gradient(120px circle at 50% 42%, rgba(124, 92, 191, 0.15), rgba(255, 255, 255, .15) 70%),
+    linear-gradient(135deg, rgba(26, 54, 110, .55) 0%, rgba(222, 196, 160, .45) 100%);
   backdrop-filter: blur(10px) saturate(160%);
   -webkit-backdrop-filter: blur(10px) saturate(160%);
   transform: translateY(-1px);
@@ -233,31 +233,31 @@
 }
 
 .task-card.is-active .task-name {
-  color: #6e8c70;
+  color: #3ecfb2;
 }
 
 .task-card.is-active .subtasks-list {
-  border-left-color: #6e8c70;
+  border-left-color: #3ecfb2;
 }
 
 .task-card.is-active {
-  border-color: #6e8c70;
+  border-color: #3ecfb2;
   background:
-    radial-gradient(120px circle at 50% 42%, rgba(255, 255, 255, .5), rgba(255, 255, 255, .18) 70%),
-    linear-gradient(135deg, rgba(250, 244, 232, .6) 0%, rgba(222, 196, 160, .5) 100%);
+    radial-gradient(120px circle at 50% 42%, rgba(26, 54, 110, 0.55), rgba(255, 255, 255, .18) 70%),
+    linear-gradient(135deg, rgba(26, 54, 110, .6) 0%, rgba(222, 196, 160, .5) 100%);
   backdrop-filter: blur(12px) saturate(170%);
   -webkit-backdrop-filter: blur(12px) saturate(170%);
-  box-shadow: 0 0 0 2px #6e8c70, 0 8px 20px rgba(110, 140, 112, 0.20);
+  box-shadow: 0 0 0 2px #3ecfb2, 0 8px 20px rgba(62, 207, 178, 0.20);
 }
 
 /* Session-completed tasks: green tint, not deleted */
 .task-card.is-session-done {
-  border-color: rgba(110, 140, 112, 0.50);
-  background: rgba(110, 140, 112, 0.06);
+  border-color: rgba(62, 207, 178, 0.50);
+  background: rgba(62, 207, 178, 0.06);
 }
 
 .task-card.is-session-done .task-name {
-  color: #6e8c70;
+  color: #3ecfb2;
 }
 
 .task-title-inline {
@@ -269,7 +269,7 @@
 
 .task-title-input {
   appearance: none;
-  border: 1px solid rgba(43, 34, 19, .35);
+  border: 1px solid rgba(26, 54, 110, .35);
   border-radius: 10px;
   padding: 6px 10px;
   font-weight: 700;
@@ -280,8 +280,8 @@
 
 .task-title-input:focus {
   outline: none;
-  border-color: rgba(224, 162, 51, .7);
-  box-shadow: 0 0 0 2px rgba(201, 138, 46, 0.25);
+  border-color: rgba(124, 92, 191, .7);
+  box-shadow: 0 0 0 2px rgba(167, 143, 224, 0.25);
 }
 
 .task-title-save,
@@ -291,7 +291,7 @@
   padding: 6px 12px;
   font-weight: 700;
   cursor: pointer;
-  border: 1px solid rgba(43, 34, 19, .35);
+  border: 1px solid rgba(26, 54, 110, .35);
   background: rgba(255, 255, 255, .8);
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
@@ -309,10 +309,10 @@
 }
 
 .task-title-save {
-  border: 2px solid rgba(255, 255, 255, .6);
+  border: 2px solid rgba(124, 92, 191, 0.15);
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
-    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(26, 54, 110, 0.45) 70%),
+    linear-gradient(135deg, rgba(124, 92, 191, 0.15) 0%, rgba(240, 240, 240, .5) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
 }
@@ -322,10 +322,10 @@
   font-weight: 800;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, .6);
+  border: 2px solid rgba(124, 92, 191, 0.15);
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
-    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(26, 54, 110, 0.45) 70%),
+    linear-gradient(135deg, rgba(124, 92, 191, 0.15) 0%, rgba(240, 240, 240, .5) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   min-width: 64px;
@@ -340,7 +340,7 @@
 }
 
 .session-bubble:focus-visible {
-  outline: 3px solid rgba(43, 34, 19, .7);
+  outline: 3px solid rgba(26, 54, 110, .7);
   outline-offset: 2px;
 }
 
@@ -351,8 +351,8 @@
   flex-wrap: wrap;
   gap: 12px;
   padding: 8px 12px;
-  background: rgba(250, 244, 232, .92);
-  border-color: #c98a2e;
+  background: rgba(26, 54, 110, .92);
+  border-color: #a78fe0;
   box-shadow: 0 8px 16px rgba(0, 0, 0, .12);
   min-width: auto;
 }
@@ -362,7 +362,7 @@
   flex-direction: column;
   gap: 4px;
   font-size: 12px;
-  color: #2b2213;
+  color: #ffffff;
   align-items: flex-start;
 }
 
@@ -375,7 +375,7 @@
   min-width: 6ch;
   padding: 6px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(43, 34, 19, .35);
+  border: 1px solid rgba(26, 54, 110, .35);
   background: rgba(255, 255, 255, .9);
   font-weight: 700;
   text-align: center;
@@ -392,7 +392,7 @@
 }
 
 .session-input:focus-visible {
-  outline: 2px solid #c98a2e;
+  outline: 2px solid #a78fe0;
   outline-offset: 1px;
 }
 
@@ -400,7 +400,7 @@
   margin-top: 4px;
   font-size: 12px;
   font-weight: 600;
-  color: #b22f1e;
+  color: #f87171;
 }
 
 .session-error {
@@ -408,7 +408,7 @@
   margin-left: 0;
   font-size: 12px;
   font-weight: 600;
-  color: #b22f1e;
+  color: #f87171;
 }
 
 .sr-only {
@@ -448,7 +448,7 @@
   align-items: flex-start;
   font-size: 12px;
   font-weight: 700;
-  color: #2b2213;
+  color: #ffffff;
 }
 
 .task-create-label {
@@ -459,18 +459,18 @@
 
 .task-create-input {
   appearance: none;
-  border: 1px solid rgba(43, 34, 19, .35);
+  border: 1px solid rgba(26, 54, 110, .35);
   border-radius: 12px;
   padding: 8px 10px;
   background: rgba(255, 255, 255, .9);
   font-weight: 700;
   font-size: 14px;
-  color: #2b2213;
+  color: #ffffff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, .12) inset;
 }
 
 .task-create-input:focus-visible {
-  outline: 2px solid #c98a2e;
+  outline: 2px solid #a78fe0;
   outline-offset: 2px;
 }
 
@@ -513,13 +513,13 @@
 }
 
 .task-create-save {
-  border: 2px solid rgba(255, 255, 255, .6);
+  border: 2px solid rgba(124, 92, 191, 0.15);
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
-    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(26, 54, 110, 0.45) 70%),
+    linear-gradient(135deg, rgba(124, 92, 191, 0.15) 0%, rgba(240, 240, 240, .5) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
-  color: #2b2213;
+  color: #ffffff;
   box-shadow: 0 6px 14px rgba(0, 0, 0, .16);
 }
 
@@ -540,9 +540,9 @@
 }
 
 .task-create-cancel {
-  border: 2px solid rgba(43, 34, 19, .35);
+  border: 2px solid rgba(26, 54, 110, .35);
   background: rgba(255, 255, 255, .75);
-  color: #2b2213;
+  color: #ffffff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, .12);
 }
 
@@ -556,7 +556,7 @@
 
 .task-create-save:focus-visible,
 .task-create-cancel:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }
 
@@ -570,13 +570,13 @@
   display: grid;
   place-items: center;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, .6);
+  border: 2px solid rgba(124, 92, 191, 0.15);
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
-    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(26, 54, 110, 0.45) 70%),
+    linear-gradient(135deg, rgba(124, 92, 191, 0.15) 0%, rgba(240, 240, 240, .5) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
-  color: #2b2213;
+  color: #ffffff;
   box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
   cursor: pointer;
   line-height: 1;
@@ -591,7 +591,7 @@
 }
 
 .task-del:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }
 
@@ -609,13 +609,13 @@ button.task-add {
   width: 100%;
   padding: 12px 18px;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, .6);
+  border: 2px solid rgba(124, 92, 191, 0.15);
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
-    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(26, 54, 110, 0.45) 70%),
+    linear-gradient(135deg, rgba(124, 92, 191, 0.15) 0%, rgba(240, 240, 240, .5) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
-  color: #2b2213;
+  color: #ffffff;
   font-weight: 800;
   font-size: 18px;
   line-height: 1;
@@ -645,7 +645,7 @@ button.task-add:active {
 
 .tasks-panel .task-add:focus-visible,
 button.task-add:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }
 
@@ -685,13 +685,13 @@ button.task-add:disabled {
   height: 36px;
   min-width: 36px;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, .6);
+  border: 2px solid rgba(124, 92, 191, 0.15);
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
-    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(26, 54, 110, 0.45) 70%),
+    linear-gradient(135deg, rgba(124, 92, 191, 0.15) 0%, rgba(240, 240, 240, .5) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
-  color: #2b2213;
+  color: #ffffff;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -708,7 +708,7 @@ button.task-add:disabled {
 }
 
 .task-title-edit:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }
 
@@ -736,13 +736,13 @@ button.task-add:disabled {
   border-radius: 999px;
   display: grid;
   place-items: center;
-  border: 2px solid rgba(255, 255, 255, .6);
+  border: 2px solid rgba(124, 92, 191, 0.15);
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
-    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(26, 54, 110, 0.45) 70%),
+    linear-gradient(135deg, rgba(124, 92, 191, 0.15) 0%, rgba(240, 240, 240, .5) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
-  color: #2b2213;
+  color: #ffffff;
   box-shadow: 0 8px 18px rgba(0, 0, 0, .18);
   cursor: pointer;
   line-height: 1;
@@ -758,7 +758,7 @@ button.task-add:disabled {
 }
 
 .task-title-delete:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }
 
@@ -788,12 +788,12 @@ button.task-add:disabled {
   -webkit-appearance: none;
   appearance: none;
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
-    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(26, 54, 110, 0.45) 70%),
+    linear-gradient(135deg, rgba(124, 92, 191, 0.15) 0%, rgba(240, 240, 240, .5) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
-  color: #2b2213;
-  border: 2px solid rgba(255, 255, 255, .6);
+  color: #ffffff;
+  border: 2px solid rgba(124, 92, 191, 0.15);
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -809,7 +809,7 @@ button.task-add:disabled {
 
 .subtask-toggle:hover {
   filter: brightness(0.98);
-  border-color: rgba(224, 162, 51, 1);
+  border-color: rgba(124, 92, 191, 1);
 }
 
 .subtask-toggle:active {
@@ -817,7 +817,7 @@ button.task-add:disabled {
 }
 
 .subtask-toggle:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }
 
@@ -826,9 +826,9 @@ button.task-add:disabled {
   margin-top: 10px;
   padding: 10px 12px;
   border-radius: 14px;
-  border: 1px solid rgba(224, 162, 51, .6);
-  background: rgba(250, 244, 232, .45);
-  box-shadow: inset 0 0 0 2px rgba(201, 138, 46, .16);
+  border: 1px solid rgba(124, 92, 191, .6);
+  background: rgba(26, 54, 110, .45);
+  box-shadow: inset 0 0 0 2px rgba(167, 143, 224, .16);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -843,20 +843,20 @@ button.task-add:disabled {
 
 .subtasks-title {
   font-weight: 700;
-  color: #2b2213;
+  color: #ffffff;
   letter-spacing: 0.2px;
 }
 
 .subtask-add {
   -webkit-appearance: none;
   appearance: none;
-  border: 2px solid rgba(255, 255, 255, .6);
+  border: 2px solid rgba(124, 92, 191, 0.15);
   background:
-    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(255, 255, 255, .4) 70%),
-    linear-gradient(135deg, rgba(255, 255, 255, .6) 0%, rgba(240, 240, 240, .5) 100%);
+    radial-gradient(150px circle at 30% 20%, rgba(255, 255, 255, .9), rgba(26, 54, 110, 0.45) 70%),
+    linear-gradient(135deg, rgba(124, 92, 191, 0.15) 0%, rgba(240, 240, 240, .5) 100%);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
-  color: #2b2213;
+  color: #ffffff;
   border-radius: 10px;
   padding: 6px 10px;
   font-weight: 700;
@@ -873,7 +873,7 @@ button.task-add:disabled {
 }
 
 .subtask-add:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }
 
@@ -883,7 +883,7 @@ button.task-add:disabled {
   gap: 6px;
   width: 100%;
   padding-left: 10px;
-  border-left: 2px solid rgba(224, 162, 51, .3);
+  border-left: 2px solid rgba(124, 92, 191, .3);
 }
 
 .subtasks-container {
@@ -910,7 +910,7 @@ button.task-add:disabled {
   padding: 8px 10px;
   border-radius: 12px;
   background: rgba(255, 255, 255, .7);
-  border: 1px solid rgba(224, 162, 51, .35);
+  border: 1px solid rgba(124, 92, 191, .35);
 }
 
 .subtask-left {
@@ -923,7 +923,7 @@ button.task-add:disabled {
 .subtask-title {
   border: none;
   background: none;
-  color: #2b2213;
+  color: #ffffff;
   font-weight: 700;
   text-align: left;
   padding: 0;
@@ -936,7 +936,7 @@ button.task-add:disabled {
 }
 
 .subtask-title:focus-visible {
-  outline: 3px solid #2b2213;
+  outline: 3px solid #e8d5f5;
   outline-offset: 2px;
 }
 
@@ -951,8 +951,8 @@ button.task-add:disabled {
 .subtask-estimate {
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(224, 162, 51, .18);
-  border: 1px solid rgba(224, 162, 51, .4);
+  background: rgba(124, 92, 191, .18);
+  border: 1px solid rgba(124, 92, 191, .4);
   font-size: 12px;
 }
 
@@ -965,7 +965,7 @@ button.task-add:disabled {
 .subtask-del {
   border: none;
   background: rgba(0, 0, 0, .06);
-  color: #2b2213;
+  color: #ffffff;
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -985,6 +985,6 @@ button.task-add:disabled {
 }
 
 .subtask-del:focus-visible {
-  outline: 2px solid #2b2213;
+  outline: 2px solid #e8d5f5;
   outline-offset: 2px;
 }

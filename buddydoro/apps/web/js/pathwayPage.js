@@ -81,8 +81,10 @@ async function handleFile(file) {
         uploadZone.classList.add('is-loaded');
         uploadZone.querySelector('.pw-dropzone-title').textContent = `✓ ${file.name}`;
         uploadZone.querySelector('.pw-dropzone-sub').textContent = 'File loaded — click Parse to continue';
-    } catch {
-        showError('Could not read the file. Try pasting the text directly below.');
+    } catch (err) {
+        console.error('[Pathway] File read failed:', err);
+        const msg = err?.message ? `Could not read the file: ${err.message}` : 'Could not read the file. Try pasting the text directly below.';
+        showError(msg);
     } finally {
         setUploadLoading(false);
     }
@@ -98,11 +100,12 @@ function readTextFile(file) {
 }
 
 async function extractPdfText(file) {
-    const pdfjsLib = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.mjs');
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-        'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.mjs';
+    const lib = window.pdfjsLib;
+    if (!lib) throw new Error('PDF library not loaded. Please paste your degree plan text directly.');
+    lib.GlobalWorkerOptions.workerSrc =
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pdf = await lib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
     let text = '';
     for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
         const page    = await pdf.getPage(i);

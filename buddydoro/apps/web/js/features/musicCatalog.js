@@ -7,10 +7,10 @@ export const BUDDYDORO_TRACKS = [
 
 // Ambient mode options shown as icon-style radio cards in the mini player.
 export const AMBIENT_MODES = [
-  { id: 'forest', label: 'Forest', icon: '🌲' },
-  { id: 'river', label: 'River', icon: '🌊' },
-  { id: 'rain', label: 'Rain', icon: '🌧️' },
-  { id: 'cricket', label: 'Cricket', icon: '🦗' },
+  { id: 'forest', label: 'Forest' },
+  { id: 'river', label: 'River' },
+  { id: 'rain', label: 'Rain' },
+  { id: 'cricket', label: 'Cricket' },
 ];
 
 // Ambient audio source mapping.

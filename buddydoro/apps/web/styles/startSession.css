@@ -9,7 +9,7 @@
   width: calc(100% - 24px);
   margin: 12px 12px 4px;
   padding: 13px 16px;
-  background: linear-gradient(135deg, #c0622a 0%, #b84f1e 100%);
+  background: linear-gradient(135deg, #7c5cbf 0%, #b84f1e 100%);
   border: none;
   border-radius: 12px;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
@@ -18,22 +18,22 @@
   color: #fff;
   letter-spacing: 0.01em;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(192, 98, 42, 0.38);
+  box-shadow: 0 4px 16px rgba(124, 92, 191, 0.38);
   transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
 }
 
 .start-session-btn:hover {
   background: linear-gradient(135deg, #b84f1e 0%, #a84018 100%);
-  box-shadow: 0 6px 22px rgba(192, 98, 42, 0.52);
+  box-shadow: 0 6px 22px rgba(124, 92, 191, 0.52);
 }
 
 .start-session-btn:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 10px rgba(192, 98, 42, 0.30);
+  box-shadow: 0 2px 10px rgba(124, 92, 191, 0.30);
 }
 
 .start-session-btn:focus-visible {
-  outline: 3px solid rgba(192, 98, 42, 0.50);
+  outline: 3px solid rgba(124, 92, 191, 0.50);
   outline-offset: 2px;
 }
 
@@ -52,12 +52,12 @@
   top: 50%;
   transform: translate(-50%, -50%);
   width: clamp(300px, 88vw, 400px);
-  background: #faf4e8;
-  border: 1px solid rgba(232, 180, 120, 0.45);
+  background: #1c3566;
+  border: 1px solid rgba(124, 92, 191, 0.45);
   border-radius: 22px;
   box-shadow:
-    0 24px 64px rgba(43, 34, 19, 0.28),
-    0 4px 16px rgba(43, 34, 19, 0.12);
+    0 24px 64px rgba(26, 54, 110, 0.28),
+    0 4px 16px rgba(26, 54, 110, 0.12);
   z-index: 2001;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
   overflow: hidden;
@@ -79,7 +79,7 @@
 .ss-title {
   font-size: 17px;
   font-weight: 800;
-  color: #2b2213;
+  color: #ffffff;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -89,8 +89,8 @@
   height: 28px;
   border-radius: 50%;
   border: none;
-  background: rgba(192, 98, 42, 0.10);
-  color: #5c4033;
+  background: rgba(124, 92, 191, 0.10);
+  color: #9db0cc;
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
@@ -101,15 +101,15 @@
   flex-shrink: 0;
 }
 
-.ss-close-btn:hover  { background: rgba(192, 98, 42, 0.20); }
-.ss-close-btn:active { background: rgba(192, 98, 42, 0.30); }
+.ss-close-btn:hover  { background: rgba(120, 140, 200, 0.22); }
+.ss-close-btn:active { background: rgba(124, 92, 191, 0.30); }
 
 /* ---- Back button ---- */
 .ss-back-btn {
   background: none;
   border: none;
   padding: 0;
-  color: #c0622a;
+  color: #7c5cbf;
   font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
   font-size: 13px;
   font-weight: 700;
@@ -123,7 +123,7 @@
 .ss-subtitle {
   font-size: 11px;
   font-weight: 700;
-  color: #8c6b55;
+  color: #9db0cc;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin: 0 0 10px;
@@ -132,7 +132,7 @@
 .ss-goal-label {
   font-size: 16px;
   font-weight: 800;
-  color: #2b2213;
+  color: #ffffff;
   margin: 0 0 2px;
   letter-spacing: -0.01em;
 }
@@ -148,7 +148,7 @@
   max-height: 260px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(192, 98, 42, 0.18) transparent;
+  scrollbar-color: rgba(120, 140, 200, 0.20) transparent;
 }
 
 /* ---- Goal / task items ---- */
@@ -158,7 +158,7 @@
   justify-content: space-between;
   padding: 11px 14px;
   border-radius: 12px;
-  border: 1.5px solid rgba(232, 180, 120, 0.30);
+  border: 1.5px solid rgba(124, 92, 191, 0.30);
   background: rgba(255, 255, 255, 0.55);
   cursor: pointer;
   transition: background 0.12s ease, border-color 0.12s ease;
@@ -166,19 +166,19 @@
 }
 
 .ss-item:hover {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(192, 98, 42, 0.28);
+  background: rgba(26, 54, 110, 0.85);
+  border-color: rgba(120, 140, 200, 0.28);
 }
 
 .ss-item.is-selected {
-  background: rgba(192, 98, 42, 0.09);
-  border-color: #c0622a;
+  background: rgba(124, 92, 191, 0.09);
+  border-color: #7c5cbf;
 }
 
 .ss-item-name {
   font-size: 14px;
   font-weight: 600;
-  color: #2b2213;
+  color: #ffffff;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -188,7 +188,7 @@
 .ss-item-meta {
   font-size: 11px;
   font-weight: 600;
-  color: #8c6b55;
+  color: #9db0cc;
   flex-shrink: 0;
   margin-left: 8px;
 }
@@ -197,12 +197,12 @@
 .ss-item.is-done {
   cursor: default;
   pointer-events: none;
-  background: rgba(110, 140, 112, 0.08);
-  border-color: rgba(110, 140, 112, 0.40);
+  background: rgba(62, 207, 178, 0.08);
+  border-color: rgba(62, 207, 178, 0.40);
 }
 
 .ss-item.is-done .ss-item-name {
-  color: #6e8c70;
+  color: #3ecfb2;
   text-decoration: line-through;
   font-weight: 700;
 }
@@ -211,7 +211,7 @@
 .ss-empty {
   font-size: 13px;
   font-weight: 600;
-  color: #8c6b55;
+  color: #9db0cc;
   text-align: center;
   padding: 24px 12px;
 }

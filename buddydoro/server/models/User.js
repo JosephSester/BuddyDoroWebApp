@@ -68,6 +68,21 @@ const userSchema = new mongoose.Schema({
     }
   },
 
+  preferences: {
+    skinOpen: {
+      type: String,
+      default: null
+    },
+    skinClosed: {
+      type: String,
+      default: null
+    },
+    background: {
+      type: String,
+      default: null
+    }
+  },
+
   hasSeenOnboarding: {
     type: Boolean,
     default: false

@@ -3,6 +3,11 @@ import { apiGet } from './api/apiClient.js';
 import { fetchInventory, purchaseItem, inventoryToMap } from './api/inventoryService.js';
 import { fetchCatalog } from './api/storeService.js';
 import { showNotification } from './utils/notifications.js';
+import {
+  applyPreferencesToStorage,
+  getStoredPreferences,
+  saveUserPreferences,
+} from './utils/preferences.js';
 
 // ── Auth guard ────────────────────────────────────────────────
 if (!localStorage.getItem('authToken')) {
@@ -25,10 +30,6 @@ let diamonds        = 0;
 const inventory     = new Map();
 
 // ── localStorage keys (must match dragon.js + main.js) ───────
-const SKIN_OPEN_KEY   = 'buddydoro.skin.open';    // e.g. 'Skins/Alien.png'
-const SKIN_CLOSED_KEY = 'buddydoro.skin.closed';
-const BG_STORAGE_KEY  = 'buddydoro.background';   // e.g. 'Backgrounds/AfricanBackgroundDay.png'
-
 // ── Load page data ────────────────────────────────────────────
 async function init() {
   try {
@@ -164,7 +165,7 @@ function renderSkins() {
     return;
   }
 
-  const equippedPath = localStorage.getItem(SKIN_OPEN_KEY);
+  const equippedPath = getStoredPreferences().skinOpen;
 
   items.forEach(it => {
     const owned    = (inventory.get(it.sku) || 0) > 0;
@@ -191,8 +192,13 @@ function renderSkins() {
 
     if (owned) {
       card.querySelector('.equip-btn').addEventListener('click', btn => {
-        localStorage.setItem(SKIN_OPEN_KEY,   it.imageUrl);
-        localStorage.setItem(SKIN_CLOSED_KEY, it.imageUrl);
+        const preferences = applyPreferencesToStorage({
+          skinOpen: it.imageUrl,
+          skinClosed: it.imageUrl,
+        }, { preserveExisting: true });
+        saveUserPreferences(preferences).catch(error => {
+          console.warn('Skin preference sync failed:', error);
+        });
         grid.querySelectorAll('.equip-btn').forEach(b => b.textContent = 'Equip');
         btn.currentTarget.textContent = 'Equipped';
         showNotification(`${it.name} skin equipped! 🐉✨`, 'success');
@@ -240,7 +246,7 @@ function renderBackgrounds() {
     return;
   }
 
-  const equippedPath = localStorage.getItem(BG_STORAGE_KEY);
+  const equippedPath = getStoredPreferences().background;
 
   items.forEach(it => {
     const owned    = (inventory.get(it.sku) || 0) > 0;
@@ -267,7 +273,12 @@ function renderBackgrounds() {
 
     if (owned) {
       card.querySelector('.equip-btn').addEventListener('click', btn => {
-        localStorage.setItem(BG_STORAGE_KEY, it.imageUrl);
+        const preferences = applyPreferencesToStorage({
+          background: it.imageUrl,
+        }, { preserveExisting: true });
+        saveUserPreferences(preferences).catch(error => {
+          console.warn('Background preference sync failed:', error);
+        });
         grid.querySelectorAll('.equip-btn').forEach(b => b.textContent = 'Equip');
         btn.currentTarget.textContent = 'Equipped';
         showNotification(`${it.name} background equipped! 🌄✨`, 'success');

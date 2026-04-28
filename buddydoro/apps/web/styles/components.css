@@ -17,8 +17,8 @@
   user-select: none;
 
   /* gold look consistent with other chips */
-  background: linear-gradient(180deg, #d4753a 0%, #c0622a 60%, #a8501f 100%);
-  color: #2b2213;
+  background: linear-gradient(180deg, #d4753a 0%, #7c5cbf 60%, #6448a8 100%);
+  color: #ffffff;
   border: 2px solid rgba(0, 0, 0, .12);
   box-shadow: 0 6px 18px rgba(0, 0, 0, .18), inset 0 2px 0 rgba(255, 255, 255, .35);
   transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
@@ -34,7 +34,7 @@
 }
 
 .add-chip:focus-visible {
-  outline: 3px solid rgba(192, 98, 42, 0.40);
+  outline: 3px solid rgba(124, 92, 191, 0.40);
   outline-offset: 2px;
 }
 

@@ -23,8 +23,8 @@ async function fetchFromApiWithFallback(path, options = {}) {
     try {
       const response = await fetch(url, options);
 
-      // If frontend static server is on current origin, /api may 404 there. Try next base.
-      if (response.status === 404 && typeof window !== 'undefined' && base === window.location.origin) {
+      // If frontend static server is on current origin, /api may return 404/405 there. Try next base.
+      if ((response.status === 404 || response.status === 405) && typeof window !== 'undefined' && base === window.location.origin) {
         continue;
       }
 
@@ -116,16 +116,17 @@ export function initDiamondStore() {
     }
 
     const hosts = [
-      { id: '#stripe-card-number', placeholder: '1234 1234 1234 1234', inputMode: 'numeric', maxLength: 19 },
-      { id: '#stripe-card-expiry', placeholder: 'MM / YY', inputMode: 'numeric', maxLength: 7 },
-      { id: '#stripe-card-cvc', placeholder: 'CVC', inputMode: 'numeric', maxLength: 4 },
+      { id: '#stripe-card-number', inputId: 'stripe-card-number-input', placeholder: '1234 1234 1234 1234', inputMode: 'numeric', maxLength: 19 },
+      { id: '#stripe-card-expiry', inputId: 'stripe-card-expiry-input', placeholder: 'MM / YY', inputMode: 'numeric', maxLength: 7 },
+      { id: '#stripe-card-cvc', inputId: 'stripe-card-cvc-input', placeholder: 'CVC', inputMode: 'numeric', maxLength: 4 },
     ];
 
-    hosts.forEach(({ id, placeholder, inputMode, maxLength }) => {
+    hosts.forEach(({ id, inputId, placeholder, inputMode, maxLength }) => {
       const host = list.querySelector(id);
       if (!host) return;
       host.innerHTML = `
         <input
+          id="${inputId}"
           class="stripe-fallback-input"
           type="text"
           inputmode="${inputMode}"
@@ -135,6 +136,22 @@ export function initDiamondStore() {
         />
       `;
     });
+
+    const expiryInput = list.querySelector('#stripe-card-expiry .stripe-fallback-input');
+    if (expiryInput) {
+      expiryInput.addEventListener('input', (event) => {
+        const input = event.target;
+        if (!(input instanceof HTMLInputElement)) return;
+
+        const digits = input.value.replace(/\D/g, '').slice(0, 4);
+        if (digits.length <= 2) {
+          input.value = digits;
+          return;
+        }
+
+        input.value = `${digits.slice(0, 2)} / ${digits.slice(2)}`;
+      });
+    }
   }
 
   async function getStripePublishableKey() {
@@ -484,6 +501,20 @@ export function initDiamondStore() {
         // Mount Stripe split elements
         const stripeInstance = window.Stripe(publishableKey);
         const elements = stripeInstance.elements();
+        const cardNumberHost = list.querySelector('#stripe-card-number');
+        const cardExpiryHost = list.querySelector('#stripe-card-expiry');
+        const cardCvcHost = list.querySelector('#stripe-card-cvc');
+
+        if (!cardNumberHost || !cardExpiryHost || !cardCvcHost) {
+          mountManualCardFallback('Secure card field containers were not found.');
+          secureForm.onsubmit = (e) => {
+            e.preventDefault();
+            const errorEl = list.querySelector('#stripe-card-errors');
+            if (errorEl) errorEl.textContent = 'Secure card fields are unavailable. Please refresh and try again.';
+          };
+          return;
+        }
+
         const stripeStyle = {
           base: {
             fontSize: '16px',
@@ -493,14 +524,27 @@ export function initDiamondStore() {
           },
           invalid: { color: '#e53e3e' },
         };
-        const cardNumber = elements.create('cardNumber', { style: stripeStyle, placeholder: '1234 1234 1234 1234' });
-        const cardExpiry = elements.create('cardExpiry', { style: stripeStyle });
-        const cardCvc   = elements.create('cardCvc',    { style: stripeStyle });
-        cardNumber.mount('#stripe-card-number');
-        cardExpiry.mount('#stripe-card-expiry');
-        cardCvc.mount('#stripe-card-cvc');
+        let cardNumber;
+        let cardExpiry;
+        let cardCvc;
+        try {
+          cardNumber = elements.create('cardNumber', { style: stripeStyle, placeholder: '1234 1234 1234 1234' });
+          cardExpiry = elements.create('cardExpiry', { style: stripeStyle });
+          cardCvc = elements.create('cardCvc', { style: stripeStyle });
+          cardNumber.mount(cardNumberHost);
+          cardExpiry.mount(cardExpiryHost);
+          cardCvc.mount(cardCvcHost);
+        } catch (err) {
+          mountManualCardFallback(err.message || 'Unable to initialize secure card fields.');
+          secureForm.onsubmit = (e) => {
+            e.preventDefault();
+            const errorEl = list.querySelector('#stripe-card-errors');
+            if (errorEl) errorEl.textContent = 'Secure card fields are unavailable. Please refresh and try again.';
+          };
+          return;
+        }
 
-        [cardNumber, cardExpiry, cardCvc].forEach(el => {
+        [cardNumber, cardExpiry, cardCvc].forEach((el) => {
           el.on('change', (event) => {
             const errorEl = list.querySelector('#stripe-card-errors');
             if (errorEl) errorEl.textContent = event.error ? event.error.message : '';

@@ -697,15 +697,22 @@
   border-radius: 8px;
   padding: 10px 12px;
   min-height: 40px;
-  display: flex;
-  align-items: center;
+  display: block;
   cursor: text;
   margin-bottom: 6px;
   transition: border-color 0.2s;
 }
 
+.stripe-card-element-wrap .StripeElement,
+.stripe-card-element-wrap .__PrivateStripeElement {
+  width: 100%;
+  min-height: 20px;
+}
+
 .stripe-card-element-wrap iframe {
   width: 100% !important;
+  min-height: 20px !important;
+  pointer-events: auto !important;
 }
 
 .stripe-fallback-input {
